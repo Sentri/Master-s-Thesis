@@ -186,8 +186,8 @@ Espoo, y.y.2017
 \thesistableofcontents
 
 
-%% Symbols and abbreviations
-\mysection{Symbols and abbreviations placeholder}
+%% Symbols and abbreviations (Abbreviations and definitions?)
+\mysection{Symbols and Abbreviations placeholder}
 
 \subsection*{Symbols}
 
@@ -313,6 +313,10 @@ I carried our research and development at Microsoft to answer the following rese
 This thesis is divided in ... chapters. Chapter x explains ... and after that ... 
 \emph{(TBD)}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% In a thesis, every section starts a new page, hence \clearpage
 \clearpage
 \section{Background}
@@ -325,6 +329,10 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 \item[--]..?
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Related work
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \clearpage
 \section{Related work}
 \label{sec:relatedwork}
@@ -332,8 +340,12 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 Petri nets from event logs \cite{van2013discovering}.
 Anomaly detection \cite{bezerra2009anomaly}.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Problem statement
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \clearpage
-\section{Problem statement}
+\section{Problem Statement}
 \label{sec:problem}
 
 % description about workflows
@@ -341,6 +353,8 @@ Anomaly detection \cite{bezerra2009anomaly}.
 %  multiple concurrent flows
 %  different but unknown forks and parallelized steps
 %  durations unknown
+
+% describe: workflow, trace (submission), product (bigid), publisher, event
 
 % real time events from different sources
 % listeners interpreting events
@@ -357,15 +371,45 @@ Anomaly detection \cite{bezerra2009anomaly}.
 %  aggregate for past data
 %  real-time info about current processes
 
-%  different users concerned about different workflow steps or different entities
+% different users concerned about different workflow steps or different entities
+%  customizable/tailored views
+%  ui level, user-level, no engineering effort
+%  MBI, confidentiality
+
+% integration with an existing system
+%  user interface
+%  query language
+%  authentication
+
+% Key goals/values
+%  dynamic adaptation
+%  customization (queries)
+%  simplicity (speed)
+%  decoupling (as little hardcoding for specific details as possible)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Methods
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
-\section{Research material and methods}
+\section{Research Material and Methods}
 \label{sec:methods}
 
 %T\"ass\"a osassa kuvataan k\"aytetty tutkimusaineisto ja
 %tutkimuksen metodologiset valinnat, sek\"a
 %kerrotaan tutkimuksen toteutustapa ja k\"aytetyt menetelm\"at. 
+
+% specific description of events and how they are stored
+
+% methods explaining splitting traces
+
+% constructing graphs
+
+% collecting statistics
+
+% ML section
+
+% real time functions (overlays, timelines, estimates)
 
 \begin{itemize}
 \item[--]Data source/description
@@ -373,17 +417,25 @@ Anomaly detection \cite{bezerra2009anomaly}.
 \item[--]ML models and methods
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Implementation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \clearpage
-\section{Implementation details}
+\section{Implementation Details}
 
 \begin{itemize}
 \item[--]Setup, DB, caching
 \item[--]Graph construction
 \item[--]Timeline construction
 \item[--]Prediction
-\item[--]ML
+\item[--]ML experiments
 \item[--]Anomalies/health detection
 \end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Results
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
 \section{Results}
@@ -400,7 +452,7 @@ Anomaly detection \cite{bezerra2009anomaly}.
 \end{itemize}
 
 \clearpage
-\section{Evaluation}
+\subsection{Evaluation}
 \label{sec:evaluation}
 
 %Tutkimustuloksien merkityst\"a on aina syyt\"a arvioida ja tarkastella
@@ -413,8 +465,12 @@ Anomaly detection \cite{bezerra2009anomaly}.
 %Jos tutkimustulosten merkityst\"a arvioidaan >>Tarkastelu>>-osassa,
 %voi luotettavuuden arviointi olla my\"os siell\"a. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Conclusions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \clearpage
-\section{Conclusions and future work} 
+\section{Conclusions and Future Work} 
 \label{sec:conclusions}
 
 \begin{itemize}
