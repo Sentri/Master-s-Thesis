@@ -9,7 +9,7 @@
 
 %% Use this if you write hard core mathematics, these are usually needed
 \usepackage{amsfonts,amssymb,amsbsy}
-
+\usepackage{tabularx}
 \usepackage{csquotes}
 \usepackage{biblatex}
 \addbibresource{bibliography.bib}
@@ -23,12 +23,16 @@
 
 %% Use this if you want to get links and nice output. Works well with pdflatex.
 \usepackage{hyperref}
+\PackageWarning{NYI}{Remember to edit this}
 \hypersetup{pdfpagemode=UseNone, pdfstartview=FitH,
   colorlinks=true,urlcolor=red,linkcolor=blue,citecolor=black,
-  pdftitle={Default Title, Modify},pdfauthor={Your Name},
+  pdftitle={Default Title, Modify},pdfauthor={Teemu Vartiainen},
   pdfkeywords={Modify keywords}}
 
-\PackageWarning{aaltothesis}{Remember to edit hypersetup tag}
+% custom command for edit comments
+\definecolor{nyitext}{rgb}{0.2, 0.2, 0.2}
+\definecolor{nyibg}{rgb}{1.0, 1.0, 0.6}
+\newcommand{\nyi}[1]{\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}\PackageWarning{NYI}{#1}}
 
 %% All that is printed on paper starts here
 \begin{document}
@@ -205,6 +209,7 @@ $A \cup B$    & union of sets $A$ and $B$ \\
 
 \begin{tabular}{ll}
 SLA         & service level agreement \\
+SQL         & structured query language
 \end{tabular}
 
 
@@ -233,7 +238,7 @@ SLA         & service level agreement \\
 
 \subsection{Motivation}
 %       Importance of accurate real time data
-\emph{Still somewhat placeholder-y} \\
+\nyi{Still somewhat placeholder-y} \\
 
 Having diagnostics and real-time data is important in the modern software operations.
 Dashboards, visualizations, and interactive logging is becoming more and more important
@@ -271,11 +276,22 @@ Distributed systems process data and generate log entries concurrently in the nu
 No single person can monitor all the logs from even a single system without the help of automated
 graphs, alerts, and notifications.  
 
+% relate this into the store
+One of these systems is the Microsoft Windows store. The store contains hundreds of thousands of products
+such as apps and games. Publishers such as software companies and individual developers submit thousands of 
+new products in the store each day. Before the products reach the public retail store, they need to be processed
+through a pipeline multiple of multiple steps. These steps can include data collection, integrity validation, and
+other automated and manual checks to make sure the product is something that should be allowed in the store.
+Each product submission produces log entries to document what is happening and what has happened in the past.
+
 %        many different users need different kinds of information
 %        third party developers and customers want to know what is going on
 These system log entries are collected as they happen and stored. Different stakeholders from engineers to third-party developers to retail users may benefit from this data. However, the needs for each of them are
-different with regards to detail and types of information \emph{(elaborate?)}. Furthermore, issues of privacy and 
+different with regards to detail and types of information \nyi{elaborate?}. Furthermore, issues of privacy and 
 confidentiality further complicate this issue.
+For example, engineers investigating errors need detailed information for all parts of the system, whereas a 
+publisher may only want high level information for the products that they own.
+This information is business-critical when Microsoft is dealing with high profile publishers such as big game companies.
 
 %            we need to be able to answer and provide a good service
 When an issue arises, engineers and managers need to have tools to investigate what is happening. 
@@ -289,16 +305,20 @@ provide good service to third parties or customers.
 %            automation, prioritization, customization
 In addition, when a company such as Microsoft is providing a service, they have to adhere to contracts such as
 service level agreements (SLA). These contracts determine maximum response times and durations for various processes.
+For example, there is an SLA for how long a submission can take from the beginning to when it is available in the store.
 Prioritizing tasks and alerting about faults as early as possible allows for good service. Furthermore, these
-notifications should be highly customizable so they go to the right people at the right time.
+notifications should be highly customizable so they go to the right people at the right time.\\
+
+\nyi{wrap-up?}
 
 \subsection{Research goals}
 %		Questions and elaboration
 %       Scope and main concepts of research
-In this thesis I investigate methods of monitoring concurrent and distributed systems which are running independent workflows with distinct steps. These workflows are triggered based on real world events. They start and stop at undetermined times and their running times depend on the task at hand and the system load. 
-The thesis investigates analyzing these workflows in real time and how to provide useful information to different users with different needs. 
+In this thesis I investigated methods of monitoring the product submission workflows in the Microsoft Windows store.
+These workflows are triggered based on real world events, often by developers submitting applications and games to the store.
+The thesis investigates analyzing these workflows in real time and providing useful information to different users with different needs. 
 
-I carried our research and development at Microsoft to answer the following research questions:
+I carried out research and development at Microsoft to answer the following research questions:
 
 \begin{enumerate}
     \item How can a real-time event log from multiple sources and multiple concurrent workflows be dynamically transformed into a directed graph that describes the process? 
@@ -306,12 +326,16 @@ I carried our research and development at Microsoft to answer the following rese
     \item How can the predictions be used to detect anomalies in new events (or lack thereof)?
 \end{enumerate}
 
-\emph{(Elaborate scope further)}
+A further goal for the solution developed in this thesis was that it should not be tightly coupled to the 
+specific submission workflows in the store. The solution should not depend on the specific activities so
+it requires less maintenance and could be reused in other systems.
+
+\nyi{Elaborate scope further}
 
 \subsection{Structure of the Thesis}
 %   d. Structure of thesis
 This thesis is divided in ... chapters. Chapter x explains ... and after that ... 
-\emph{(TBD)}
+\nyi{(TBD)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Background
@@ -348,44 +372,124 @@ Anomaly detection \cite{bezerra2009anomaly}.
 \section{Problem Statement}
 \label{sec:problem}
 
+% the store application ingestion
+The system under inspection in this thesis is the Microsoft universal store. 
+The workflows consist of applications, games, and other products being ingested to the store backend and published to the store catalog.
+The workflow starts when a real-world event (e.g. a developer submitting a new application) triggers it.
+For the many of the users of the system (such as the application developer), the workflow works 
+like a "black box" system. The workflow starts when it is triggered, and ends after some unknown time has passed.
+The users have no way of getting more information than that the workflow is in progress and will finish some time 
+in the future. This leaves the user in the dark. This is the problem this thesis is aiming to solve. \nyi{rephrase}
+
 % description about workflows
 %  how they are similar but also different
 %  multiple concurrent flows
 %  different but unknown forks and parallelized steps
 %  durations unknown
+The submission workflow can be seen as a pipeline with a chain of multiple activities that depends on each other and have a sequence. 
+Some activities within the workflow do not depend on each other so they can run in parallel.
+Furthermore, multiple workflows run in parallel in the system.
+They start and stop at undetermined times and their running times depend on the task at hand and the system load.\\
+
+\nyi{Insert graph displaying a workflow with sequential and concurrent steps}\\
+
+A workflow is triggered by a real-world event, usually by a user.
+The user triggering a workflow is called the \emph{publisher}.
+The workflow consists of \emph{activities} processing and validating a specific \emph{product} that the publisher owns.
+The trigger happens when the publisher submits a product into the workflow.
+The system executes the activities on physical workflow \emph{processors}.
+Thus, a publisher can own multiple products and a product can go through a workflow multiple times.
+In this thesis such instances of a single workflow process \emph{(submission)} are called a \emph{trace}.
+
+In other words, a workflow describes the generic pipeline "shape" with all the activities and their dependencies.
+A trace is an instance of a triggered workflow that is tied to a specific product from a specific publisher.
+Furthermore, a trace contains more information related to the actual activities, such as a start time and an end time.
+Such log entry of an execution of an activity is called an \emph{event}. Table \ref{tab:termdefinitions} lists all these terms that are used in this thesis.\\
+
+\nyi{Insert graph describing the difference between workflow/activity and trace/event}\\
+
+\nyi{Clarification}: A workflow is an abstract description of the thole pipeline consisting of a number of sequential and parallel activities. A publisher submits a product into the system, which triggers a new trace where activities are executes on processors. These executions are logged into the trace as events with timestamp and status information.
+\nyi{embed this into the main text somehow}
 
 % describe: workflow, trace (submission), product (bigid), publisher, event
+\begin{table}[htb]
+\begin{center}
+\begin{tabularx}{\linewidth}{r | X}
+Product   & A single real-world entity being processed in the pipeline. \\
+Publisher & An agent such as a user who owns a product or multiple. \\
+Activity  & A single step where some part of the product is processed or validated. \\
+Processor & A part of the system receiving a product or its information that executes a specific activity. \\
+Workflow  & A description of the whole set of activities and their dependencies. \\ 
+Submission & A single triggered execution of the workflow for a single product.\\
+Event     & A log entry documenting when a specific execution of an activity has finished or changes status. \\
+Trace     & A single set of events describing current or past submission. 
+            A trace is tied to a specific product from a specific publisher and has information about all 
+            the activities and their execution times. \\
+\end{tabularx}
+\end{center}
+\caption{Terms used in this thesis \nyi{Needs formatting and further clarification}}
+\label{tab:termdefinitions}
+\end{table}
 
 % real time events from different sources
 % listeners interpreting events
 % master log containing everything
 % log entries can be queried from this master log
 % order unknown, somewhat accurate timestamps
+At the time of writing the system produced on average 15~000 activity events per hour with peak times averaging in the 30~000 range. The events are created on workflow processors running on multiple systems. These events are collected and written to a relational database. 
+The order of the arrival of events is not guaranteed to be the same as the order of the events really happening.
+To combat this, each event contains its associated timestamp for when it was created. However, the different systems are
+subject to clock skew, meaning the clocks of the systems may not be fully synchronized. 
+The clocks may differ in the range of seconds to minutes.
+After the events are received and written to the database, they can be queried.
 
 % user needs
 %  visualize processes without supervision or configuration
-%  unknown parallelism involved
 %  must adapt to changes in workflow
-
-% two sides of the information
-%  aggregate for past data
-%  real-time info about current processes
-
 % different users concerned about different workflow steps or different entities
 %  customizable/tailored views
 %  ui level, user-level, no engineering effort
 %  MBI, confidentiality
+The user needs for the system include: \nyi{format}
+\begin{itemize}
+\item[--]visualize processes without supervision or configuration
+\item[--]must adapt to changes in workflow
+\item[--]different users concerned about different workflow steps or different products
+\item[--]confidentiality concerns (MBI)
+\end{itemize}
+
+%  unknown parallelism involved
+The solution developed needed to dynamically (unsupervised) generate a workflow description in the form of a directed graph
+from the past log data. The log data consists of the event database. The database contains all the 
+past and current traces. The traces are unorganized and interleaved in an random fashion. This is because many several
+workflows can run in parallel and the delivery of events to the database is best-effort. Furthermore, since some parts of the workflow are concurrent instead of sequential, the order of events within a single trace can change. 
+The solution should detect this parallelism automatically.
+
+% two sides of the information
+%  aggregate for past data
+%  real-time info about current processes
+The solution has to provide two types of information, the aggregate and the real-time. 
+The aggregate information should contain statistics and the workflow graph generated from many days of event data.
+The real-time data should reflect the current state of all the submissions in progress in the system.
 
 % integration with an existing system
 %  user interface
 %  query language
 %  authentication
+The solution was to be integrated to an existing store management interface called Jury. 
+Jury supports multiple users with various permission levels. Jury provides a query language to refine the information
+that the user wants to see. The solution should integrate with the query language to allow users to customize 
+what they see.
 
 % Key goals/values
 %  dynamic adaptation
 %  customization (queries)
 %  simplicity (speed)
 %  decoupling (as little hardcoding for specific details as possible)
+
+To recap, the key goals and values for the solution are the ability to dynamically adapt to changes in the workflow,
+the ability for the user to customize the information they need, an decoupling the solution from the specific 
+workflow steps of the store.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Methods
@@ -401,7 +505,7 @@ Anomaly detection \cite{bezerra2009anomaly}.
 
 % specific description of events and how they are stored
 
-% methods explaining splitting traces
+% methods explaining splitting and grouping of ;traces
 
 % constructing graphs
 
@@ -432,6 +536,17 @@ Anomaly detection \cite{bezerra2009anomaly}.
 \item[--]ML experiments
 \item[--]Anomalies/health detection
 \end{itemize}
+
+% mention difficulties (or write them down somewhere at least)
+% you'll want these for the presentation
+%  parallelism
+%  clock skew
+%  changes in workflow
+%  bugs manifesting in graphs (is this really a bad thing?)
+%  dealing with rare events (manual review)
+%   ask tao whether event types and such are confidential
+
+% vis js, asp.net mvc, etc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Results
