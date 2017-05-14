@@ -35,7 +35,9 @@
 % custom command for edit comments
 \definecolor{nyitext}{rgb}{0.2, 0.2, 0.2}
 \definecolor{nyibg}{rgb}{1.0, 1.0, 0.6}
-\newcommand{\nyi}[1]{\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}\PackageWarning{NYI}{#1}}
+\newcommand{\nyi}[1]{\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}}
+
+%\PackageWarning{NYI}{#1}
 
 %% All that is printed on paper starts here
 \begin{document}
@@ -391,12 +393,65 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 \section{Background}
 \label{sec:background}
 
-\begin{itemize}
-\item[--]Process mining
-\item[--]Machine learning
-\item[--]Anomaly detection
-\item[--]..?
-\end{itemize}
+\subsection{Machine learning}
+
+\nyi{Broad intro to machine learning}
+
+Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
+
+In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
+$$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
+Here $d$ is the dimension of vectors $\mathbf{x}^t$ and $N$ is the number of samples in the training set.
+The two classes are $C_0$ and $C_1$. $r^t = 1$ when $\mathbf{x}^t$ belongs to class $C_1$, $r^t = 0$ otherwise. \cite{alpaydin}
+In \emph{regression} tasks the training data is very similar, with the exception of each desired value $r^t$ being a real number \cite{alpaydin}.
+$$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \mathbb{R}$$
+In both cases the algorithms implement a function $g(\mathbf{x})$ which estimates the output parameter $r$ for a new vector $\mathbf{x}$. 
+In classification $g(\mathbf{x}) = c$ where $c \in \{0, 1\}$. 
+In regression $g(\mathbf{x}) = r$ where $r \in \mathbb{R}$.
+The learners are evaluated over a separate test set.
+$$\mathcal{D}_{test} = \{ (\mathbf{x}_*^t , r_*^t) \}_{t=1}^{N_{test}}$$
+A metric such as the \emph{mean square error} (MSE) can be used as a score to evaluate the learner. \cite{alpaydin}
+$$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - g(\mathbf{x}_*^t))^2$$
+
+\subsubsection{Regression}
+
+\nyi{Regression theory}
+
+% regression, theory overall (maybe move math stuff from above)
+
+\subsubsection{Boosted decision trees}
+
+% introduce the concept
+
+% introduce mathematics
+
+% talk about practical usage, limitations, etc
+
+\subsubsection{Poisson regression}
+
+% introduction 
+
+% mathematics
+
+% practical usage, limitations
+
+\subsection{Process mining}
+
+% intro to process mining as a whole
+
+Process mining is a way of observing recorded events and extracting information from the underlying processes.
+In this thesis I focus mostly on \emph{process discovery} which consists of finding the underlying process model for a list of events. 
+This model can be expressed as a directed graph, which describes the process generating the event logs. 
+The discovery is an exercise of dealing with log incompleteness and noise.
+Incompleteness means the recorded events may not describe the full graph, especially when some 
+sequences of event are more likely than others. 
+The events also contain noise and inaccuracy. \cite{van2013discovering}
+
+% talk about process discovery
+
+
+% - Anomaly detection ??
+% - something else?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Related work
@@ -406,8 +461,9 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 \section{Related work}
 \label{sec:relatedwork}
 
-Petri nets from event logs \cite{van2013discovering}.
 Anomaly detection \cite{bezerra2009anomaly}.
+
+What else...?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Problem statement
