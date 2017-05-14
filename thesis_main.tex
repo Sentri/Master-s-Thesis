@@ -449,6 +449,7 @@ The events also contain noise and inaccuracy. \cite{van2013discovering}
 
 % talk about process discovery
 
+% talk about other methods for processes
 
 % - Anomaly detection ??
 % - something else?
@@ -472,6 +473,37 @@ What else...?
 \clearpage
 \section{Problem Statement}
 \label{sec:problem}
+
+%% description of the store
+
+%% ingestion system
+%% workflows, processors, parallelism
+%% description of the terms used
+%% logging
+
+%% description of users
+% engineers, developers, working on ingestion
+% first party and third party publisher release managers
+% managers, PMs
+
+%% description of initial user needs
+% which?
+
+%% description that user needs were not fully known so they need engineering
+
+%% business requirements
+%% need to integrate with an existing system
+%% confidentiality, integrity
+%% working with partners
+
+%% challenges
+%%  user needs not fully understood
+%%  unknown parallelism
+%%  unsupervised learning and adaptation
+%%  both real time and statistical data are needed
+
+%% needs discovered at meetings?
+
 
 \nyi{Needs a better intro paragraph}
 
@@ -608,23 +640,56 @@ workflow steps of the store.
 %tutkimuksen metodologiset valinnat, sek\"a
 %kerrotaan tutkimuksen toteutustapa ja k\"aytetyt menetelm\"at. 
 
+\subsection{Project timeline}
+% description of research timeline
+
+% - first iteration: supporting work, backend, graphing, initial UI
+%   - explorative prototypes
+%   - two UI proposals, graph and timeline
+% - user meetings (brownbag, 3pp)
+% - second iteration: user interface work, features to fit needs
+%   - machine learning exploration
+%   - graphing accuracy exploration (alt graph)
+
+\subsection{Data}
+% description of event hub
+
 % specific description of events and how they are stored
 
-% methods explaining splitting and grouping of ;traces
+% methods explaining splitting and grouping of traces
 
+\subsection{Graph construction}
 % constructing graphs
+% these all on theoretical level
+% - dealing with noise, possible sources
+% - alpha algorithm
+% - simplified petri-net
+% - option/support for forced graph shape
 
 % collecting statistics
+% - as graph is being generated
+% - with a predetermined shape
 
-% ML section
+\subsection{Real-time functionality}
+% overlaying real-time data
+% timeline generation
 
-% real time functions (overlays, timelines, estimates)
+\subsection{Estimating the future}
+% estimating future
+% - - statistical approach TP75 etc
 
-\begin{itemize}
-\item[--]Data source/description
-\item[--]Process mining methods
-\item[--]ML models and methods
-\end{itemize}
+\subsection{Machine learning}
+% ML approach
+% explain models used (poisson, bdt) and reasoning why these
+
+% explain training dataset
+
+\subsubsection{Azure ML}
+% explain briefly what azure ML is
+
+\subsection{Notifications}
+% describe how the estimates could be used for notifications
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Implementation
@@ -641,6 +706,35 @@ workflow steps of the store.
 \item[--]ML experiments
 \item[--]Anomalies/health detection
 \end{itemize}
+
+% some introduction
+
+% integration with the existing system
+
+% sql queries, c# linq to sql, combined with text query
+% talk about customized views
+% everything based on user-made queries, even templates
+
+% details about the simple footprint generation
+% include tables from observed noise
+
+% turning the footprint into a graph
+
+% maybe: talk about implementing the alternative graph
+
+% option, read graph from definition file
+
+% storing the graph, caching
+
+% overlaying real-time data with the model
+
+% estimate based on collected statistics
+% statistics
+% machine learning models
+
+% constructing timeline from the graph
+
+% user interface
 
 % mention difficulties (or write them down somewhere at least)
 % you'll want these for the presentation
@@ -671,6 +765,16 @@ workflow steps of the store.
 \item[--]ML scores (numbers, graphs)
 \end{itemize}
 
+% graph generation
+
+% maybe: alternative graph failure because of noise and large variation
+
+% statistics and their accuracy (run stats on the same dataset)
+
+% ML models and their scores
+
+% user satisfaction
+
 \subsection{Evaluation}
 \label{sec:evaluation}
 
@@ -683,6 +787,17 @@ workflow steps of the store.
 %T\"ass\"a osassa on syyt\"a my\"os arvioida tutkimustulosten luotettavuutta.
 %Jos tutkimustulosten merkityst\"a arvioidaan >>Tarkastelu>>-osassa,
 %voi luotettavuuden arviointi olla my\"os siell\"a. 
+
+% talk about success with graph generation
+%  maybe talk about alt graph?
+% finding bugs in system or faults based on graphs
+% good feedback from users
+
+% talk about negatives with machine learning models
+% reason why they would turn out so bad
+
+% talk about how the system went immediately into production
+% talk about the success of notifications built on top of the system
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Conclusions
