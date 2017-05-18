@@ -399,6 +399,8 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 
 Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
 
+% insert graph for traditional vs machine learning
+
 In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
 Here $d$ is the dimension of vectors $\mathbf{x}^t$ and $N$ is the number of samples in the training set.
@@ -418,6 +420,8 @@ $$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - 
 \nyi{Regression theory}
 
 % regression, theory overall (maybe move math stuff from above)
+
+% list different models briefly
 
 \subsubsection{Boosted decision trees}
 
@@ -448,6 +452,10 @@ sequences of event are more likely than others.
 The events also contain noise and inaccuracy. \cite{van2013discovering}
 
 % talk about process discovery
+
+% petri nets
+
+% alpha algorithm
 
 % talk about other methods for processes
 
@@ -503,6 +511,8 @@ What else...?
 %%  both real time and statistical data are needed
 
 %% needs discovered at meetings?
+
+%% conclusion, key goals
 
 
 \nyi{Needs a better intro paragraph}
@@ -665,6 +675,7 @@ workflow steps of the store.
 % - alpha algorithm
 % - simplified petri-net
 % - option/support for forced graph shape
+% - mention queries and customization
 
 % collecting statistics
 % - as graph is being generated
@@ -683,6 +694,11 @@ workflow steps of the store.
 % explain models used (poisson, bdt) and reasoning why these
 
 % explain training dataset
+
+% tests with different features
+%  identical posting
+%  posting that needed human interventiondcxfkkkkkkkkkkkkkkkkkkm
+%                                       a cat did this ^ 
 
 \subsubsection{Azure ML}
 % explain briefly what azure ML is
