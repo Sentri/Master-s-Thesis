@@ -213,8 +213,11 @@ $A \cup B$    & union of sets $A$ and $B$ \\
 \subsection*{Abbreviations}
 
 \begin{tabular}{ll}
+MBI         & medium business intelligence \\
+MSE         & mean square error \\
+PII         & personally identifiable information \\
 SLA         & service level agreement \\
-SQL         & structured query language
+SQL         & structured query language \\
 \end{tabular}
 
 
@@ -400,6 +403,7 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
 
 % insert graph for traditional vs machine learning
+\nyi{Insert the figure here}
 
 In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
@@ -482,27 +486,141 @@ What else...?
 \section{Problem Statement}
 \label{sec:problem}
 
-%% description of the store
+%% intro
+In this section I will describe the system examined in this thesis and elaborate on the 
+problems that I was solving. I will also describe the users of the system and what the needs for
+each of them were. \nyi{...}
 
+%% description of the store
 %% ingestion system
 %% workflows, processors, parallelism
 %% description of the terms used
+The system being investigated in this thesis was the Microsoft Windows store.
+The store sells digital \emph{products} such as games and applications.
+Each product belongs to a \emph{publisher} such as an independent developer or a game company.
+A product is \emph{submitted} by a publisher as a digital application package.
+Before it is \emph{published} to the store catalog, it needs to be \emph{ingested},
+which means the package is verified and processed through multiple steps.
+After the package has been ingested and the necessary information has been collected,
+it can be published, which also involves a pipeline of steps.
+This involves an ingestion-publishing \emph{workflow} that consists of multiple \emph{activities} (steps).
+Completion of each of these activities is logged as an \emph{event}.
+The list of events for a single submission forms a \emph{trace}.
+
+% describe: workflow, trace (submission), product (bigid), publisher, event
+\begin{table}[htb]
+\begin{center}
+\begin{tabularx}{\linewidth}{| l | X |} \hline
+Product   & Single application package being processed in the system. \\ \hline
+Publisher & Developer or a company submitting a product into the store. \\ \hline
+Activity  & Single step of the workflow where some part of the product is processed. \\ \hline
+Processor & Part of the system that executes a specific activity. \\ \hline
+Workflow  & Abstract description of the whole pipeline consisting of a number of sequential and parallel activities. It contains the whole set of activities and their dependencies. \\ \hline
+Submission & Single execution of the workflow for a single product.\\ \hline
+Event     & Log entry documenting when a specific execution of an activity has finished or changed status. \\ \hline
+Trace     & Single set of events describing current or past submission. 
+            A trace is tied to a specific product from a specific publisher and has information about all 
+            the activities and their execution times. \\ \hline
+\end{tabularx}
+\end{center}
+\caption{Terms used in this thesis}
+\label{tab:termdefinitions}
+\end{table}
+
 %% logging
+These workflows are processed in a distributed system as a pipeline of steps. 
+Multiple concurrent submissions are in progress at any moment of time.
+Furthermore, many steps of the workflow are independent of each other.
+Thus, a single submission can have multiple steps in progress at the same time.
+These steps are often handled by an ''aggregator'' step which waits for 
+all the parallel steps to finish before continuing the workflow process.
+The different steps of the workflow have different durations that differ based on
+the step itself, the characteristics of the package, and the current workload of the system.
+Because of these uncertainties, traces from two different submissions may differ from each other, 
+since the completion order of the parallel steps is unknown.
+
+\nyi{Insert graph displaying a workflow with sequential and concurrent steps}
+
+When each step completes, an event is generated.
+These events are collected from the different processors into a single log database.
+Each step is associated with a timestamp and metadata from the event and the submissions.
+The system works with a ''best effort'' delivery, which means the delivery of the events to the log database
+may have undetermined delays. Furthermore, the distributed system involves multiple machines
+in multiple locations. This results in variance of seconds to minutes in the clocks of the systems.
+The clock variance is directly seen as noise in the timestamps of the events.
+
+Because of the parallelism and uncertainties mentioned the overall state of the system is difficult to describe at any given time. At the time of writing the system produced on average 15~000 events per hour with peak times averaging in the 30~000 range. For the publisher of a product the system is essentially a ''black box'' where
+they cannot see the internal status, only whether the workflow has been completed or if it is still in progress.
+
+\subsection{Requirements}
 
 %% description of users
 % engineers, developers, working on ingestion
 % first party and third party publisher release managers
 % managers, PMs
+To understand the purpose of the project described in this thesis, we need to look at the users of the system
+and what are their needs regarding to the project. There were four user groups relevant to the project.
+
+\textbf{Developers}  are the software engineers working on the ingestion and publishing system.
+\textbf{Managers}  are the developer leads and program managers who coordinate the developer time and what they are working on.
+\textbf{Publishers} are the independent developers and companies submitting the packages to the store.
+\textbf{Release managers} are the contacts on Microsoft's side who communicate with the large publishing companies who develop the ''triple-A'' games and applications.
+\textbf{Manual reviewers} are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes for example checking for fraud or inappropriate graphics or language.
+The needs for each user group are covered in table \ref{tab:userneeds}.
+I used the ''user story'' format for documenting the needs.
+%% description that user needs were not fully known so they need engineering
+
+It should be noted that the user needs were not fully understood in the beginning. The project was done in two cycles, with some necessary requirements engineering done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 
+The user needs found at the start of the second section were related mostly on the presentation and the user interface, so they did not affect the main structure of the project significantly.
 
 %% description of initial user needs
 % which?
 
-%% description that user needs were not fully known so they need engineering
+\begin{table}[htb]
+\begin{center}
+\begin{tabularx}{\linewidth}{| l | X |}
+\hline
+\textbf{User group} & \textbf{User stories} \nyi{TODO: format as user stories} \\
+\hline \hline
+\textbf{Developers} & 
+- Need to see the current status of a submission for investigating issues with a single submission or product \newline 
+- Need to see the shape of the workflows to find issues like race conditions\newline
+- Need to see statistics to report average times \newline
+- Need to be notified of any anomalies in the workflow to investigate issues faster\newline
+- Need to be able to customize their views to drill down to the specific events they care about\\
+\hline
+\textbf{Managers} & 
+- Need statistics of the workflows to report the system performance \\
+\hline
+\textbf{Publishers} & 
+- Need to be able to know estimated times for submission completion \newline
+- Need to be able to inquire about the status of their submissions \\
+\hline
+\textbf{Release managers} &
+- Need to see the detailed status of a single product or submission \newline
+- Need to see the big picture status quickly for all submissions related to a single product or publisher \newline
+- Need to be notified about completion of crucial steps of the workflow or any issues \newline
+- Need to be able to customize the views to show the submissions they are interested in \\
+\hline
+\textbf{Manual reviewers} & 
+- Need to be notified in advance when a product is heading towards a manual review to schedule their workload more efficiently \\
+\hline
+\end{tabularx}
+\end{center}
+\caption{Initial user needs found in January \nyi{is this all?}}
+\label{tab:userneeds}
+\end{table}
 
 %% business requirements
 %% need to integrate with an existing system
 %% confidentiality, integrity
 %% working with partners
+
+There were also several business requirements from Microsoft's side for this project. They can be summarized as integration with existing systems and following confidentiality requirements. \nyi{something else?}
+The project was required to integrate with the existing store backend systems. 
+The event collection and storing was already handled by a system called Jury, which is an interface to browse the products in the store and see diagnostics information.
+The existing system stored the events in a database and allowed the used to query the events with a SQL-like query language. The results were shown as a list of rows with the matching events and timestamps. The project was to integrate with this querying system to load the events from the database.
+The events and the product metadata in the system contained confidential information. Mainly there were two terms used to classify this. First term was \textit{Medium Business Intelligence} (MBI) and the more strict was \textit{Personally Identifiable Information} (PII). In practice it meant that PII-classified information should not be visible through the interface provided by the project, and the MBI-classified information related to a product should only be shown to the publisher or the partner who owns the product. However, the developers working at Microsoft should be able to see all MBI-classified information.
 
 %% challenges
 %%  user needs not fully understood
@@ -510,130 +628,19 @@ What else...?
 %%  unsupervised learning and adaptation
 %%  both real time and statistical data are needed
 
+There were several challenges discovered in the beginning of the project.
+The system implemented in the project should be unsupervised.
+This means that the system should use past data to build an understanding of the workflows, without the need for a user to supply any knowledge beforehand.
+The system should adapt to any changes in the workflow automatically.
+This means that the distributed workflows contain unknown parallelism that must be detected automatically.
+It was also discovered that the distributed system contains noise in the timestamps which further complicate the parallelism detection.
+In addition, the system should be able to provide two different kinds of information. The workflow models and statistics should be build based on a long term aggregate discovered from several days worth of data, but the system should also show the real time data for the current submissions.
+These two sides of information should both be utilized in the models.
+Lastly, the user needs needed some requirements engineering. This is why an iterative process was set up. Section \ref{sec:timeline} contains a detailed description of this process.
+
 %% needs discovered at meetings?
 
 %% conclusion, key goals
-
-
-\nyi{Needs a better intro paragraph}
-
-% the store application ingestion
-The system being investigated in this thesis was the Microsoft universal store and its workflows. 
-The workflows consist of applications, games, and other products being ingested to the store backend systems and published to the store catalog.
-The workflow starts when a real-world event (e.g. a developer submitting a new application) triggers it.
-For the many of the users of the system (such as the application developer), the workflow works 
-like a "black box" system. The workflow starts when it is triggered, and ends after some unknown time has passed.
-The users have no way of getting more information than that the workflow is in progress and will finish some time 
-in the future. This leaves the user in the dark. This is the problem this thesis is aiming to solve. 
-\nyi{this is not a good way to say this}
-\nyi{makes it seem like the whole store has no information to anyone}
-
-% description about workflows
-%  how they are similar but also different
-%  multiple concurrent flows
-%  different but unknown forks and parallelized steps
-%  durations unknown
-The submission workflow can be seen as a pipeline with a chain of multiple activities that depends on each other and have a sequence. 
-Some activities within the workflow do not depend on each other so they can run in parallel.
-Furthermore, multiple workflows run in parallel in the system.
-They start and stop at undetermined times and their running times depend on the task at hand and the system load.\\
-
-\nyi{Insert graph displaying a workflow with sequential and concurrent steps}\\
-
-A workflow is triggered by a real-world event, usually by a user.
-The user triggering a workflow is called the \emph{publisher}.
-The workflow consists of \emph{activities} processing and validating a specific \emph{product} that the publisher owns.
-The trigger happens when the publisher submits a product into the workflow.
-The system executes the activities on physical workflow \emph{processors}.
-Thus, a publisher can own multiple products and a product can go through a workflow multiple times.
-In this thesis such instances of a single workflow process \emph{(submission)} are called a \emph{trace}.
-
-In other words, a workflow describes the generic pipeline "shape" with all the activities and their dependencies.
-A trace is an instance of a triggered workflow that is tied to a specific product from a specific publisher.
-Furthermore, a trace contains more information related to the actual activities, such as a start time and an end time.
-Such log entry of an execution of an activity is called an \emph{event}. Table \ref{tab:termdefinitions} lists all these terms that are used in this thesis.\\
-
-\nyi{Insert graph describing the difference between workflow/activity and trace/event}\\
-
-\nyi{Clarification}: A workflow is an abstract description of the thole pipeline consisting of a number of sequential and parallel activities. A publisher submits a product into the system, which triggers a new trace where activities are executes on processors. These executions are logged into the trace as events with timestamp and status information.
-\nyi{embed this into the main text somehow}
-
-% describe: workflow, trace (submission), product (bigid), publisher, event
-\begin{table}[htb]
-\begin{center}
-\begin{tabularx}{\linewidth}{r | X}
-Product   & A single real-world entity being processed in the pipeline. \\
-Publisher & An agent such as a user who owns a product or multiple. \\
-Activity  & A single step where some part of the product is processed or validated. \\
-Processor & A part of the system receiving a product or its information that executes a specific activity. \\
-Workflow  & A description of the whole set of activities and their dependencies. \\ 
-Submission & A single triggered execution of the workflow for a single product.\\
-Event     & A log entry documenting when a specific execution of an activity has finished or changes status. \\
-Trace     & A single set of events describing current or past submission. 
-            A trace is tied to a specific product from a specific publisher and has information about all 
-            the activities and their execution times. \\
-\end{tabularx}
-\end{center}
-\caption{Terms used in this thesis \nyi{Needs formatting and further clarification}}
-\label{tab:termdefinitions}
-\end{table}
-
-% real time events from different sources
-% listeners interpreting events
-% master log containing everything
-% log entries can be queried from this master log
-% order unknown, somewhat accurate timestamps
-At the time of writing the system produced on average 15~000 activity events per hour with peak times averaging in the 30~000 range. The events are created on workflow processors running on multiple systems. These events are collected and written to a relational database. 
-The order of the arrival of events is not guaranteed to be the same as the order of the events really happening.
-To combat this, each event contains its associated timestamp for when it was created. However, the different systems are
-subject to clock skew, meaning the clocks of the systems may not be fully synchronized. 
-The clocks may differ in the range of seconds to minutes.
-After the events are received and written to the database, they can be queried.
-
-% user needs
-%  visualize processes without supervision or configuration
-%  must adapt to changes in workflow
-% different users concerned about different workflow steps or different entities
-%  customizable/tailored views
-%  ui level, user-level, no engineering effort
-%  MBI, confidentiality
-The user needs for the system include: \nyi{format}
-\begin{itemize}
-\item[--]visualize processes without supervision or configuration
-\item[--]must adapt to changes in workflow
-\item[--]different users concerned about different workflow steps or different products
-\item[--]confidentiality concerns (MBI)
-\end{itemize}
-
-%  unknown parallelism involved
-The solution developed needed to dynamically (unsupervised) generate a workflow description in the form of a directed graph
-from the past log data. The log data consists of the event database. The database contains all the 
-past and current traces. The traces are unorganized and interleaved in an random fashion. This is because many several
-workflows can run in parallel and the delivery of events to the database is best-effort. Furthermore, since some parts of the workflow are concurrent instead of sequential, the order of events within a single trace can change. 
-The solution should detect this parallelism automatically.
-
-% two sides of the information
-%  aggregate for past data
-%  real-time info about current processes
-The solution has to provide two types of information, the aggregate and the real-time. 
-The aggregate information should contain statistics and the workflow graph generated from many days of event data.
-The real-time data should reflect the current state of all the submissions in progress in the system.
-
-% integration with an existing system
-%  user interface
-%  query language
-%  authentication
-The solution was to be integrated to an existing store management interface called Jury. 
-Jury supports multiple users with various permission levels. Jury provides a query language to refine the information
-that the user wants to see. The solution should integrate with the query language to allow users to customize 
-what they see.
-
-% Key goals/values
-%  dynamic adaptation
-%  customization (queries)
-%  simplicity (speed)
-%  decoupling (as little hardcoding for specific details as possible)
-
 To recap, the key goals and values for the solution are the ability to dynamically adapt to changes in the workflow,
 the ability for the user to customize the information they need, an decoupling the solution from the specific 
 workflow steps of the store.
@@ -651,6 +658,7 @@ workflow steps of the store.
 %kerrotaan tutkimuksen toteutustapa ja k\"aytetyt menetelm\"at. 
 
 \subsection{Project timeline}
+\label{sec:timeline}
 % description of research timeline
 
 % - first iteration: supporting work, backend, graphing, initial UI
@@ -660,6 +668,8 @@ workflow steps of the store.
 % - second iteration: user interface work, features to fit needs
 %   - machine learning exploration
 %   - graphing accuracy exploration (alt graph)
+
+% weekly meetings with manager, PM
 
 \subsection{Data}
 % description of event hub
