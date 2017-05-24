@@ -14,6 +14,7 @@
 \usepackage{csquotes}
 \usepackage{biblatex}
 \usepackage{enumitem}
+\usepackage{textgreek}
 
 \addbibresource{bibliography.bib}
 
@@ -35,7 +36,7 @@
 % custom command for edit comments
 \definecolor{nyitext}{rgb}{0.2, 0.2, 0.2}
 \definecolor{nyibg}{rgb}{1.0, 1.0, 0.6}
-\newcommand{\nyi}[1]{\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}}
+\newcommand{\nyi}[1]{\noindent\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}}
 
 %\PackageWarning{NYI}{#1}
 
@@ -371,14 +372,14 @@ that uses the current and past logs to automatically determine all the actors,
 workflows, and steps related to the product submissions.
 The store pipeline is constantly being developed further to be faster and to include more functionality.
 The system should require as little maintenance as possible, retraining itself automatically and often to adapt to change.
-In addition, the system should include as little hardcoded configuration as possible.
+In addition, the project should include as little hardcoded configuration as possible.
 
-The second goal for the system was the capability to estimate future events (RQ2). 
+The second goal for the project was the capability to estimate future events (RQ2). 
 Many stakeholders are interested in the pipeline completion times, so they can schedule their tasks accordingly.
 Thirdly, comparisons between the estimations and the realized event times should be used to notify 
 about any anomalies, faults, or delays in the pipeline (RQ3).
 
-A further goal for the solution developed in this thesis was that it should not be tightly coupled to the 
+A further goal for the project developed in this thesis was that it should not be tightly coupled to the 
 specific submission workflows in the store. The solution should not depend on the specific activities so
 it requires less maintenance and could be reused in other systems.
 
@@ -398,12 +399,12 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 
 \subsection{Machine learning}
 
-\nyi{Broad intro to machine learning}
+\nyi{This is a lame placeholder}
 
 Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
 
 % insert graph for traditional vs machine learning
-\nyi{Insert the figure here}
+\nyi{Insert the traditional vs machine learnin figure here}
 
 In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
@@ -421,31 +422,31 @@ $$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - 
 
 \subsubsection{Regression}
 
-\nyi{Regression theory}
-
 % regression, theory overall (maybe move math stuff from above)
+\nyi{Regression theory overall}
 
 % list different models briefly
+\nyi{Breifly introduce different models}
 
 \subsubsection{Boosted decision trees}
 
-% introduce the concept
+\nyi{introduce the concept}
 
-% introduce mathematics
+\nyi{introduce mathematics}
 
-% talk about practical usage, limitations, etc
+\nyi{talk about practical usage, limitations, etc}
 
 \subsubsection{Poisson regression}
 
-% introduction 
+\nyi{introduction }
 
-% mathematics
+\nyi{mathematics}
 
-% practical usage, limitations
+\nyi{practical usage, limitations}
 
 \subsection{Process mining}
 
-% intro to process mining as a whole
+\nyi{intro to process mining as a whole}
 
 Process mining is a way of observing recorded events and extracting information from the underlying processes.
 In this thesis I focus mostly on \emph{process discovery} which consists of finding the underlying process model for a list of events. 
@@ -455,13 +456,16 @@ Incompleteness means the recorded events may not describe the full graph, especi
 sequences of event are more likely than others. 
 The events also contain noise and inaccuracy. \cite{van2013discovering}
 
-% talk about process discovery
+\nyi{talk about process discovery}
 
-% petri nets
+\subsubsection{Petri nets}
+\nyi{petri nets}
 
-% alpha algorithm
+\subsubsection{\textalpha-algorithm}
+\nyi{alpha algorithm}
 
-% talk about other methods for processes
+\subsubsection{Other methods?}
+\nyi{talk about other methods for processes ?}
 
 % - Anomaly detection ??
 % - something else?
@@ -474,9 +478,9 @@ The events also contain noise and inaccuracy. \cite{van2013discovering}
 \section{Related work}
 \label{sec:relatedwork}
 
-Anomaly detection \cite{bezerra2009anomaly}.
+\nyi{Anomaly detection} \cite{bezerra2009anomaly}.
 
-What else...?
+\nyi{What else...?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Problem statement
@@ -487,8 +491,8 @@ What else...?
 \label{sec:problem}
 
 %% intro
-In this section I will describe the system examined in this thesis and elaborate on the 
-problems that I was solving. I will also describe the users of the system and what the needs for
+In this section I will describe the distributed product ingestion and publishing system examined in this thesis (later: \textit{system})  and elaborate on the 
+problems that I was solving. I will also describe the users of the project developed in this thesis (later: \textit{project}) and what the needs for
 each of them were. \nyi{...}
 
 %% description of the store
@@ -660,61 +664,93 @@ workflow steps of the store.
 \subsection{Project timeline}
 \label{sec:timeline}
 % description of research timeline
+% weekly meetings with manager, PM
+While the main goal of the project was established as the project started in early January,
+the details needed some research. For this reason, an iterative process was set up.
+I held weekly meetings with my manager, as well as weekly project meetings together with my mentor, my manager, and the team program manager. In addition, in the mid-way point I held presentations to the end-users of the project to find out more requirements and to get feedback. Because of this, the project was divided in two iterations.
+The weekly meetings were carried out through both iterations.
+
+The project was carried out as follows:
+\textbf{November -- December}: Preparation and background research.
+\textbf{January -- Mid-February}: First iteration.
+\textbf{Mid-February}: User meetings.
+\textbf{Mid-February -- March}: Second iteration.
+\textbf{End of March}: Project end and delivery.
+\nyi{Format this as a figure}
 
 % - first iteration: supporting work, backend, graphing, initial UI
 %   - explorative prototypes
 %   - two UI proposals, graph and timeline
+I started the first iteration by building a prototype using a small constant dataset of events exported from the database. The purpose of the prototype was to explore the graph generation algorithms and to build a proof of concept. After the prototype was validate with the team I integrated it to the Jury system. I built two user interface proposals based on different types of presentation. The first one showed a directed graph describing the workflow model. The second interface showed the events on a scrollable timeline.
+
 % - user meetings (brownbag, 3pp)
+After the first iterations I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a "brown bag" type of open meeting with other team members who interact with the Jury system.
+In these meetings I validated my prototype designs and collected more requirements.
+
 % - second iteration: user interface work, features to fit needs
 %   - machine learning exploration
 %   - graphing accuracy exploration (alt graph)
-
-% weekly meetings with manager, PM
+In the second iteration I spent more effort on the user interface, based on the meetings.
+I experimented with machine learning models and the graphing algorithm.
+Furthermore, I worked with the team to integrate the graphs with the email notification system in Jury so they could be used to send emails about delays observed in the system. 
+By the end of the second iteration the project was fully integrated with Jury and was delivered to the users.
 
 \subsection{Data}
 % description of event hub
+The data used by the project is a list of events. The events work as log entries generated by the distributed processes of the store ingestion/publishing system. Each store system creates events and sends them through an Azure Event Hub. 
+
+Azure Event Hubs are a common event streaming platform that works as a platform-independent "front door" for all the events \cite{eventhubs}. All the processors of the store systems broadcast events into a common Event Hub.
+The events are then read and processed by Jury and stored in a SQL database.
 
 % specific description of events and how they are stored
+Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''.
+
+\nyi{event as a figure?}
 
 % methods explaining splitting and grouping of traces
+Thus, an arbitrary set of events can be grouped into traces by the submission field. Within the grouping each individual step can then be identified by the Source--Subsource pair.
+
+\nyi{figure of events grouped into traces}
 
 \subsection{Graph construction}
-% constructing graphs
-% these all on theoretical level
-% - dealing with noise, possible sources
-% - alpha algorithm
-% - simplified petri-net
-% - option/support for forced graph shape
-% - mention queries and customization
+\nyi{constructing graphs}\\
+\nyi{these all on theoretical level}
 
-% collecting statistics
-% - as graph is being generated
-% - with a predetermined shape
+\nyi{- alpha algorithm}\\
+\nyi{- simplified petri-net}\\
+\nyi{- dealing with noise, possible sources}\\
+\nyi{- option/support for forced graph shape}\\
+\nyi{- mention queries and customization}
+
+\nyi{collecting statistics}\\
+\nyi{- as graph is being generted}\\
+\nyi{- with a predetermined shape}
 
 \subsection{Real-time functionality}
-% overlaying real-time data
-% timeline generation
+\nyi{overlaying real-time data}\\
+\nyi{timeline generation}
 
 \subsection{Estimating the future}
-% estimating future
-% - - statistical approach TP75 etc
+\nyi{estimating future}\\
+\nyi{- - statistical approach TP75 etc}
 
 \subsection{Machine learning}
-% ML approach
-% explain models used (poisson, bdt) and reasoning why these
+\nyi{ML approach}\\
+\nyi{explain models used (poisson, bdt) and reasoning why these}
 
-% explain training dataset
+\nyi{explain training dataset}
 
-% tests with different features
-%  identical posting
+\nyi{tests with different features}\\
+\nyi{ identical posting}\\
 %  posting that needed human interventiondcxfkkkkkkkkkkkkkkkkkkm
 %                                       a cat did this ^ 
+\nyi{posting that needed human intervention}
 
 \subsubsection{Azure ML}
-% explain briefly what azure ML is
+\nyi{explain briefly what azure ML is}
 
 \subsection{Notifications}
-% describe how the estimates could be used for notifications
+\nyi{describe how the estimates could be used for notifications}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -724,54 +760,45 @@ workflow steps of the store.
 \clearpage
 \section{Implementation Details}
 
-\begin{itemize}
-\item[--]Setup, DB, caching
-\item[--]Graph construction
-\item[--]Timeline construction
-\item[--]Prediction
-\item[--]ML experiments
-\item[--]Anomalies/health detection
-\end{itemize}
+\nyi{some introduction}
 
-% some introduction
+\nyi{integration with the existing system}
 
-% integration with the existing system
+\nyi{sql queries, c\# linq to sql, combined with text query}\\
+\nyi{talk about customized views}\\
+\nyi{everything based on user-made queries, even templates}
 
-% sql queries, c# linq to sql, combined with text query
-% talk about customized views
-% everything based on user-made queries, even templates
+\nyi{details about the simple footprint generation}\\
+\nyi{include tables from observed noise}
 
-% details about the simple footprint generation
-% include tables from observed noise
+\nyi{turning the footprint into a graph}
 
-% turning the footprint into a graph
+\nyi{maybe: talk about implementing the alternative graph}
 
-% maybe: talk about implementing the alternative graph
+\nyi{option, read graph from definition file}
 
-% option, read graph from definition file
+\nyi{storing the graph, caching}
 
-% storing the graph, caching
+\nyi{overlaying real-time data with the model}
 
-% overlaying real-time data with the model
+\nyi{estimate based on collected statistics}\\
+\nyi{statistics}\\
+\nyi{machine learning models}
 
-% estimate based on collected statistics
-% statistics
-% machine learning models
+\nyi{constructing timeline from the graph}
 
-% constructing timeline from the graph
+\nyi{user interface}
 
-% user interface
+\nyi{mention difficulties (or write them down somewhere at least)}\\
+\nyi{you'll want these for the presentation}\\
+\nyi{ parallelism}\\
+\nyi{ clock skew}\\
+\nyi{ changes in workflow}\\
+\nyi{ bugs manifesting in graphs (is this really a bad thing?)}\\
+\nyi{ dealing with rare events (manual review)}\\
+\nyi{  ask tao whether event types and such are confidential}
 
-% mention difficulties (or write them down somewhere at least)
-% you'll want these for the presentation
-%  parallelism
-%  clock skew
-%  changes in workflow
-%  bugs manifesting in graphs (is this really a bad thing?)
-%  dealing with rare events (manual review)
-%   ask tao whether event types and such are confidential
-
-% vis js, asp.net mvc, etc
+\nyi{vis js, asp.net mvc, etc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Results
@@ -785,21 +812,16 @@ workflow steps of the store.
 %esitettyihin tutkimuskysymyksiin. Tieteellisen kirjoitelman
 %arvo mitataan t\"ass\"a osassa esitettyjen tulosten perusteella.
 
-\begin{itemize}
-\item[--]Generated process graphs
-\item[--]Prediction accuracy (numbers)
-\item[--]ML scores (numbers, graphs)
-\end{itemize}
+\nyi{graph generation}
 
-% graph generation
+\nyi{maybe: alternative graph failure because of noise and large variation}
 
-% maybe: alternative graph failure because of noise and large variation
+\nyi{statistics and their accuracy (run stats on the same dataset)}
 
-% statistics and their accuracy (run stats on the same dataset)
+\nyi{ML models and their scores}
 
-% ML models and their scores
+\nyi{user satisfaction}
 
-% user satisfaction
 
 \subsection{Evaluation}
 \label{sec:evaluation}
@@ -814,16 +836,16 @@ workflow steps of the store.
 %Jos tutkimustulosten merkityst\"a arvioidaan >>Tarkastelu>>-osassa,
 %voi luotettavuuden arviointi olla my\"os siell\"a. 
 
-% talk about success with graph generation
-%  maybe talk about alt graph?
-% finding bugs in system or faults based on graphs
-% good feedback from users
+\nyi{talk about success with graph generation}\\
+\nyi{maybe talk about alt graph?}\\
+\nyi{finding bugs in system or faults based on graphs}\\
+\nyi{good feedback from users}
 
-% talk about negatives with machine learning models
-% reason why they would turn out so bad
+\nyi{talk about negatives with machine learning models}\\
+\nyi{reason why they would turn out so bad}
 
-% talk about how the system went immediately into production
-% talk about the success of notifications built on top of the system
+\nyi{talk about how the system went immediately into production}\\
+\nyi{talk about the success of notifications built on top of the system}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Conclusions
@@ -834,9 +856,9 @@ workflow steps of the store.
 \label{sec:conclusions}
 
 \begin{itemize}
-\item[--]Contributions (positives)
-\item[--]Limitations (negatives)
-\item[--]Future work
+\item[--]\nyi{Contributions (positives)}
+\item[--]\nyi{Limitations (negatives)}
+\item[--]\nyi{Future work}
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
