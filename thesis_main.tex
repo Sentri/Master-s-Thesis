@@ -40,6 +40,9 @@
 
 %\PackageWarning{NYI}{#1}
 
+%\setlength{\parskip}{0.5ex}
+%\linespread{1.2}
+
 %% All that is printed on paper starts here
 \begin{document}
 
@@ -289,7 +292,7 @@ To save costs and time, the solution should adapt to change seamlessly without c
 
 %   not as easy as it seems
 However, modern software operations all these goals form a challenge.
-Complex, distributed, and interconnected systems may make this kind of monitoring complex.
+Complex, distributed, and interconnected systems may make this kind of monitoring difficult.
 
 \subsection{Microsoft}
 %        store with tons of products and parallel workflows ongoing continuously
@@ -332,13 +335,13 @@ The store pipeline consists of multiple separate systems and workflows processin
 If such a workflow does not have detailed monitoring functionality, 
 finding the details to investigate an issue prove to be challenging.
 This kind of workflow is, in essence, a black box system, since for an outside observer there is no information
-about the internal state, only whether the workflow is running or it has been completed.
+about the internal state, only whether the workflow is running or has been completed.
 In addition, the duration of these workflows can vary greatly from seconds to hours to days. 
 
 %        detecting failures is essential to keep up SLAs and good experience
 %            automation, prioritization, customization
 When running the store, Microsoft is providing a service to retail customers and product publishers.
-To provide good service, the goal is to be transparent enough that the store operations to not hinder the
+To provide good service, the goal is to be transparent enough that the store operations do not hinder the
 business of the customers. Providing accurate information and time estimations to the publishers
 not only helps Microsoft internally, but also helps the publishers' business.
 In addition, Microsoft must adhere to contracts such as
@@ -510,29 +513,48 @@ it can be published, which also involves a pipeline of steps.
 This involves an ingestion-publishing \emph{workflow} that consists of multiple \emph{activities} (steps).
 Completion of each of these activities is logged as an \emph{event}.
 The list of events for a single submission forms a \emph{trace}.
+These terms will be used throughout this thesis so they shall be formally defined as follows:
 
 % describe: workflow, trace (submission), product (bigid), publisher, event
-\begin{table}[htb]
-\begin{center}
-\begin{tabularx}{\linewidth}{| l | X |} \hline
-Product   & Single application package being processed in the system. \\ \hline
-Publisher & Developer or a company submitting a product into the store. \\ \hline
-Activity  & Single step of the workflow where some part of the product is processed. \\ \hline
-Processor & Part of the system that executes a specific activity. \\ \hline
-Workflow  & Abstract description of the whole pipeline consisting of a number of sequential and parallel activities. It contains the whole set of activities and their dependencies. \\ \hline
-Submission & Single execution of the workflow for a single product.\\ \hline
-Event     & Log entry documenting when a specific execution of an activity has finished or changed status. \\ \hline
-Trace     & Single set of events describing current or past submission. 
-            A trace is tied to a specific product from a specific publisher and has information about all 
-            the activities and their execution times. \\ \hline
-\end{tabularx}
-\end{center}
-\caption{Terms used in this thesis}
-\label{tab:termdefinitions}
-\end{table}
+
+\begin{description}[style=nextline]
+\item[Product] 
+Single application package being processed in the system. 
+
+\item[Publisher] 
+Independent developer or a company submitting a product into the store.
+
+\item[Activity] 
+Single step of the workflow where some part of the product is processed. 
+
+\item[Processor] 
+Part of the distributed system executing a specific activity.
+
+\item[Workflow]
+Abstract description of the whole pipeline consisting of a number of sequential and parallel activities. It contains the whole set of activities and their dependencies.
+
+\item[Submission] 
+Single execution of the workflow for a single product.
+
+\item[Event] 
+Log entry when a specific execution of an activity has finished or changed status. 
+
+\item[Trace] 
+Set of events describing current or past submission. 
+A trace is tied to a specific product from a specific publisher and has information about all the activities and their execution times. 
+
+\item[System] 
+The distributed store backend system as a whole, with all the processors and other parts involved.
+
+\item[Project] 
+The new part of the system implemented in this thesis.
+
+\label{desc:termdefinitions}
+\end{description}
+
 
 %% logging
-These workflows are processed in a distributed system as a pipeline of steps. 
+The workflows are processed in the distributed system as a pipeline of steps. 
 Multiple concurrent submissions are in progress at any moment of time.
 Furthermore, many steps of the workflow are independent of each other.
 Thus, a single submission can have multiple steps in progress at the same time.
@@ -563,17 +585,19 @@ they cannot see the internal status, only whether the workflow has been complete
 % first party and third party publisher release managers
 % managers, PMs
 To understand the purpose of the project described in this thesis, we need to look at the users of the system
-and what are their needs regarding to the project. There were four user groups relevant to the project.
+and what are their needs regarding to the project. There were five user groups relevant to the project.
 
-\textbf{Developers}  are the software engineers working on the ingestion and publishing system.
-\textbf{Managers}  are the developer leads and program managers who coordinate the developer time and what they are working on.
-\textbf{Publishers} are the independent developers and companies submitting the packages to the store.
-\textbf{Release managers} are the contacts on Microsoft's side who communicate with the large publishing companies who develop the ''triple-A'' games and applications.
-\textbf{Manual reviewers} are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes for example checking for fraud or inappropriate graphics or language.
+\begin{description}
+\item[Developers] are the software engineers working on the ingestion and publishing system.
+\item[Managers] are the developer leads and program managers who coordinate the developer time and what they are working on.
+\item[Publishers] are the independent developers and companies submitting the packages to the store.
+\item[Release managers] are the contacts on Microsoft's side who communicate with the large publishing companies who develop the ''triple-A'' games and applications.
+\item[Manual reviewers] are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes for example checking for fraud or inappropriate graphics or language.
 The needs for each user group are covered in table \ref{tab:userneeds}.
 I used the ''user story'' format for documenting the needs.
-%% description that user needs were not fully known so they need engineering
+\end{description}
 
+%% description that user needs were not fully known so they need engineering
 It should be noted that the user needs were not fully understood in the beginning. The project was done in two cycles, with some necessary requirements engineering done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 
 The user needs found at the start of the second section were related mostly on the presentation and the user interface, so they did not affect the main structure of the project significantly.
 
@@ -647,7 +671,7 @@ Lastly, the user needs needed some requirements engineering. This is why an iter
 %% conclusion, key goals
 To recap, the key goals and values for the solution are the ability to dynamically adapt to changes in the workflow,
 the ability for the user to customize the information they need, an decoupling the solution from the specific 
-workflow steps of the store.
+workflow steps of the store. The project needs to use \emph{unsupervised learning} to build the models, show \emph{real-time data} to the user based on the model, and use \emph{supervised learning} based on the models and the data to show predictions and send notifications.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Methods
