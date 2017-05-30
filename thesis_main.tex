@@ -15,6 +15,7 @@
 \usepackage{biblatex}
 \usepackage{enumitem}
 \usepackage{textgreek}
+\usepackage{amsthm}
 
 \addbibresource{bibliography.bib}
 
@@ -24,6 +25,9 @@
 %% not using the hyperref package.
 %%
 %\usepackage{url}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
 
 %% Use this if you want to get links and nice output. Works well with pdflatex.
 \usepackage{hyperref}
@@ -67,7 +71,7 @@
 %% Do not hyphenate titles.
 
 % working title
-\thesistitle{Analyzing real-time and past events for describing processes and detecting anomalies}
+\thesistitle{Analyzing real-time and past events to discover processes and to detect anomalies}
 
 \place{Espoo}
 
@@ -109,7 +113,7 @@
 %%% Abstracts & etc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Note that when writting your master's thesis in English, place
+%% Note that when writing your master's thesis in English, place
 %% the English abstract first followed by the possible Finnish abstract
 
 %% English abstract.
@@ -121,9 +125,17 @@
 %% niin kuin se on yllä määritelty.
 %% Avainsanat
 %%
-\keywords{event logs, machine learning, process mining}
+\keywords{Process discovery, Machine learning, Event logs}
 %% Abstract text
 \begin{abstractpage}[english]
+
+    \nyi{Should the title be more specific to the store?}
+    
+    \nyi{How deep should the theory go in background?}
+    
+    \nyi{How much code should be in implementation?}
+    
+
   Your abstract in English. Try to keep the abstract short; approximately 
   100 words should be enough. The abstract explains your research topic, 
   the methods you have used, and the results you obtained.  
@@ -144,14 +156,14 @@
 
 %% Abstract in Finnish.
 
-\thesistitle{Reaaliaikaisten ja menneiden prosessitapahtumien k\"aytt\"o prosessien kuvaamisessa}
+\thesistitle{Reaaliaikaisten ja menneiden prosessitapahtumien k\"aytt\"o prosessitutkinnassa ja poikkeavuuksien havainnassa}
 \supervisor{Prof.\ Petri Vuorimaa}
 \advisor{M.Sc.\ Tao Zhu}
 \advisor{M.Sc.\ Rafael Forsbach Valle}
 \department{Tietotekniikan laitos}
 \professorship{x}
 %% Avainsanat
-\keywords{Tapahtumalokit, koneoppiminen, prosessikaaviot}
+\keywords{Prosessitutkinta, Koneoppiminen, Tapahtumalokit}
 %% Tiivistelmän tekstiosa
 \begin{abstractpage}[finnish]
   Tiivistelmässä on lyhyt selvitys (noin 100 sanaa)
@@ -183,6 +195,7 @@ First I would like to thank...
 % thank the team mates
 % thank the company for the opportunity
 % thank kara for unending support
+% thank sanqui and birbs
 % thank other friends
 
 \vspace{5cm}
@@ -205,18 +218,21 @@ Espoo, y.y.2017
 \subsection*{Symbols}
 
 \begin{tabular}{ll}
-$\emptyset$  & empty set \\
+$\mathbb{B}(X)$  & a set of multi-sets over $X$ \\
+$\emptyset$      & empty set \\
 \end{tabular}
 
 \subsection*{Operators}
 
 \begin{tabular}{ll}
-$A \cup B$    & union of sets $A$ and $B$ \\
+$a \in A$    & $a$ is a member of set $A$ \\
+$A \cap B$   & intersection of sets $A$ and $B$ \\
 \end{tabular}
 
 \subsection*{Abbreviations}
 
 \begin{tabular}{ll}
+BI          & business intelligence \\
 MBI         & medium business intelligence \\
 MSE         & mean square error \\
 PII         & personally identifiable information \\
@@ -226,7 +242,7 @@ SQL         & structured query language \\
 
 
 %% Tweaks the page numbering to meet the requirement of the thesis format:
-%% Begin the pagenumbering in Arabian numerals (and leave the first page
+%% Begin the page numbering in Arabian numerals (and leave the first page
 %% of the text body empty, see \thispagestyle{empty} below).
 %% Additionally, force the actual text to begin on a new page with the 
 %% \clearpage command.
@@ -250,13 +266,11 @@ SQL         & structured query language \\
 
 \subsection{Motivation}
 %       Importance of accurate real time data
-\nyi{Still somewhat placeholder-y, needs sources?} \\
-
 Having diagnostics and real-time data is important in the modern software operations.
 Dashboards, visualizations, and interactive logging is becoming more and more important
 in the fast-changing digital world. Often these solutions are labeled Business Intelligence.
-Having an accurate sense of current system status and low response time to faults can provide a clear advantage
-in business against competitors. \nyi{citation needed}
+Having an accurate sense of current system status and low response time to faults can provide an advantage
+in business against competitors.
 
 %       Importance of having both a big picture and detailed view of current processes
 %         Information tailored to different people
@@ -400,14 +414,139 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 \section{Background}
 \label{sec:background}
 
+\subsection{Process mining}
+
+Process mining starts from the concept of an \emph{event log}.
+An event log is a collection of recorded data for an information system.
+Activities executed in the system leave records which are stored in the event log.
+\emph{Process mining} describes methods of using the event log data to extract useful information.
+The information can be used to discover processes without prior knowledge, to find bottlenecks and inefficiencies, to detect and understand anomalies, and to support redesign actions \cite{van2015extracting}.
+In this thesis I look at \emph{process discovery}, which means finding the underlying process model
+by reading the event log.
+In process discovery the model should be generated without any a-priori information, meaning that the algorithm should be unsupervised \cite{van2013discovering}.
+The process model can be expressed as a directed graph or a \emph{Petri net}.
+These models can be used for business intelligence (BI) solutions, or they can be compared to the real life
+known models to check conformance \cite{van2013discovering}.
+
+
+Discovering strictly sequential processes from event logs is straightforward. However, modern systems are increasingly concurrent which complicates the issue. 
+Parallel systems generate events in a undetermined order based on how the processes are interleaved. 
+When the events are logged the order is realized resulting in a totally ordered sequential log \cite{van2004workflow}. 
+The challenge is having to discover and construct the parallelism from the event log.
+Furthermore, the event log may be \emph{incomplete}, which means not all possible behaviour is present in the logs \cite{van2013discovering}.
+Additionally, the event logs can be \emph{noisy} and contain random infrequent behaviour \cite{van2013discovering}.
+It may be undesirable to present the infrequent behaviour in the models.
+These characteristics give the task of process discovery challenging trade-offs.
+
+\subsubsection{Event logs and traces}
+
+\begin{definition}
+Let $A$ be the set of all \emph{activities}. 
+$\sigma \in A^*$ is a workflow trace describing a \emph{sequence of events}.
+The event log $L \in \mathbb{B}(A^*)$ is a \emph{multi-set} of \emph{traces}.
+\end{definition}
+
+A process consists of a set of distinct \emph{activities}.
+An activity is a well-defined step belonging to the process.
+Each event in the event log refers to such an activity.
+The event may also hold additional information about the process.
+A workflow \emph{trace} contains a sequence of events documenting a single execution of the process (a \emph{process instance}).
+This kind of single process execution is called a \emph{case} (later in this thesis also: \emph{submission}).
+The event log can be seen as a \emph{multi-set} of \emph{traces}. 
+A multi-set (a \emph{bag}) is a set that allows multiple instances of the set's elements. \cite{van2015extracting}
+
+In this thesis it is assumed that any concurrent execution of events can be recorded into
+an ordered and sequential event log. 
+The concurrent execution generates randomly ordered sequences.
+The parallelisms can be discovered by observing the different traces and their frequencies.
+For example, for a process consisting of activities $a,b,c,d,e \in A$, one trace could be 
+$\langle a,b,c,d,e \rangle$ and another $\langle a,c,d,b,e \rangle$ \nyi{see figure}.
+These different traces could be found in the event log a number of times, some more frequent than others.
+In process discovery the task is to construct a model with sequential and parallel steps 
+that describes a process that can generate these traces \cite{van2013discovering}.
+The frequency of a trace matters in process discovery, and this is why the event log is a multi-set.
+
+\nyi{Figure illustrating traces and event logs}
+
+When dealing with discovering processes from event logs, there are two clear challenges: \emph{incompleteness} and \emph{noise}. 
+Discovering the model from the event log is difficult since one cannot assume that all the possible traces are present \cite{van2013discovering}. 
+In the case of concurrent processes the number of possible sequences is often larger than what has been observed in the logs \cite{van2007business}.
+Moreover, some sequences can be inherently more infrequent that others. 
+Such behaviour can be seen as undesirable noise, but sometimes infrequent traces may also present important information.
+This leads to need of making decisions about trade-offs. 
+The model should describe the process accurately, even when the event log is incomplete or noisy.
+
+Van der Aalst et al. \cite{van2013discovering} describe four criteria that need to be balanced when generating a model from a log: fitness, precision, generalization, and simplicity.
+\emph{Fitness} measures whether the model fits the log, meaning that the traces in the event log can be generated by the discovered model.
+\emph{Precision} measures whether the model allows only the behaviour observed in the event log. The model should describe the traces in the log but should not allow completely unrelated behaviour not seen in the traces.
+\emph{Generalization} relates to the unseen behaviour. The model should be general enough that it describes the process while allowing the cases that were not observed in the specific set of sequences.
+Lastly, \emph{simplicity} relates to the noisiness. The models should be as simple as possible and undesirable rare or exceptional behaviour should not be included if it increases the model complexity.
+
+
+\subsubsection{Process models and discovery}
+
+A simple way to describe a process model is a \emph{directed graph}. A directed graph is a set of \emph{nodes} that are connected together by \emph{edges}. 
+
+\begin{definition}
+A directed graph $G = (\mathcal{N}, \mathcal{E})$ consists of the set $\mathcal{N}$ of nodes and the set $\mathcal{E} = \{ (x,y) | x,y \in \mathcal{N} \} $ of edges, which are ordered pairs of nodes.
+\end{definition}
+
+A process can be described as a directed graph by having a graph node for each activity of the process ($\mathcal{N} = A$). The graph edges describe the possible transitions between the activities.
+A log is generated by travelling through the graph and visiting each node exactly once. \nyi{Needs more formal definition?}
+In this model, any two parallel activities $a, b \in A$ will have directed arcs $(a,b)$ and $(b,a)$ between them.
+
+A \emph{Petri net} \cite{rozenberg1998lectures} can be used as a more detailed process model. A Petri net consists of \emph{places}, \emph{transitions}, and directed arcs connecting them. In this thesis I focus on \emph{finite nets} where the sets forming a Petri net are finite.
+
+\begin{definition}
+A Petri net is a tuple $(S, T, F)$ which consists of:
+\begin{enumerate}
+    \item a set $S$ of \emph{places},
+    \item a set $T$ of \emph{transitions} in a way that $S \cap T = \emptyset$
+    \item a set $F$ (flow relation) of directed arcs: $F \subseteq (P \times T) \cup (T \times P)$ 
+\end{enumerate}
+\end{definition}
+
+In a Petri net, the places and transitions $S \cup T$ are called the \emph{elements} of $N$.
+For any element $x \in P \cup T$ its \emph{pre-set} ${}^\bullet x$ is all the elements that have a directed arc to $x$, that is ${}^\bullet x = \{y \in S \cup T | (y,x) \in F\}$. Similarly its \emph{post-set} $x^\bullet$ is defined as 
+$x^\bullet = \{y \in S \cup T | (x,y) \in F\}$.
+A Petri net can be mapped to a directed graph by creating equivalent nodes for each place and directed edges for each transition.
+
+Van der Aalst et al. \cite{van2013discovering} use a subclass of Petri nets called a \emph{workflow net} to describe processes. A workflow net (WF-net) is a Petri net with some further restrictions, to make it more suited for process discovery. In their description, a workflow needs a clear starting point (an input place) and a clear ending point (an output place). Furthermore they define that a WF-net needs to be \emph{strongly connected}, meaning every node is on a path from the start to the end.
+
+\begin{definition}
+Let $N = (S, T, F)$ be a Petri net. $N$ is a workflow net \emph{iff}:
+\begin{enumerate}
+    \item $S$ contains a input place $i$ such that ${}^\bullet i = \emptyset$ (starting point)
+    \item $S$ contains a output place $o$ such that $o^\bullet = \emptyset$ (ending point)
+    \item \nyi{Formulate this formally} (connectedness)
+\end{enumerate}
+\end{definition}
+
+With the definitions for event logs, traces and workflow nets, we can describe \textbf{process discovery} as an algorithm that maps any event log $L$ into a model such as a directed graph or a Petri net that describes the underlying process that generated the event log.
+
+\subsubsection{\textalpha-algorithm}
+\label{sec:alphaalgorithm}
+
+Constructing concurrent process models from an ordered event log is a challenging task.
+%Since the event log does not have any information related to parallelism
+
+\nyi{alpha algorithm}
+
+\subsubsection{Transition systems}
+
+\nyi{Explain alternative graph generation methods (transition systems) \cite{van2013discovering}}
+
+
+% ################################
+
 \subsection{Machine learning}
 
-\nyi{This is a lame placeholder}
+\nyi{This is some initial quick and dirty writing, needs a better writeup.}
 
 Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
 
 % insert graph for traditional vs machine learning
-\nyi{Insert the traditional vs machine learnin figure here}
+\nyi{Insert the traditional programming vs machine learning figure here}
 
 In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
@@ -426,52 +565,26 @@ $$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - 
 \subsubsection{Regression}
 
 % regression, theory overall (maybe move math stuff from above)
-\nyi{Regression theory overall}
+\nyi{Explain what is regression (maybe contrast to classification needed also?)}
 
 % list different models briefly
-\nyi{Breifly introduce different models}
+\nyi{Briefly introduce different regression models (bayesian, BDT, linear, poisson)}
 
 \subsubsection{Boosted decision trees}
 
-\nyi{introduce the concept}
+\nyi{Introduce the concept}
 
-\nyi{introduce mathematics}
+\nyi{Explain theory (mathematics)}
 
-\nyi{talk about practical usage, limitations, etc}
+\nyi{Talk about practical usage (strengths, limitations)}
 
 \subsubsection{Poisson regression}
 
-\nyi{introduction }
+\nyi{Introduce the concept}
 
-\nyi{mathematics}
+\nyi{Explain theory (mathematics)}
 
-\nyi{practical usage, limitations}
-
-\subsection{Process mining}
-
-\nyi{intro to process mining as a whole}
-
-Process mining is a way of observing recorded events and extracting information from the underlying processes.
-In this thesis I focus mostly on \emph{process discovery} which consists of finding the underlying process model for a list of events. 
-This model can be expressed as a directed graph, which describes the process generating the event logs. 
-The discovery is an exercise of dealing with log incompleteness and noise.
-Incompleteness means the recorded events may not describe the full graph, especially when some 
-sequences of event are more likely than others. 
-The events also contain noise and inaccuracy. \cite{van2013discovering}
-
-\nyi{talk about process discovery}
-
-\subsubsection{Petri nets}
-\nyi{petri nets}
-
-\subsubsection{\textalpha-algorithm}
-\nyi{alpha algorithm}
-
-\subsubsection{Other methods?}
-\nyi{talk about other methods for processes ?}
-
-% - Anomaly detection ??
-% - something else?
+\nyi{Talk about practical usage (strengths, limitations)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Related work
@@ -481,7 +594,9 @@ The events also contain noise and inaccuracy. \cite{van2013discovering}
 \section{Related work}
 \label{sec:relatedwork}
 
-\nyi{Anomaly detection} \cite{bezerra2009anomaly}.
+\nyi{Bezerra et al. Anomaly Detection using Process Mining (2009)} \cite{bezerra2009anomaly}.
+
+\nyi{Getta et al. Mining Periodic patterns from Nested event logs (2014)} \cite{getta2014mining}.
 
 \nyi{What else...?}
 
@@ -534,7 +649,7 @@ Part of the distributed system executing a specific activity.
 Abstract description of the whole pipeline consisting of a number of sequential and parallel activities. It contains the whole set of activities and their dependencies.
 
 \item[Submission] 
-Single execution of the workflow for a single product.
+Single execution of the workflow for a single product. Equates to a single \emph{case} in the process discovery model.
 
 \item[Event] 
 Log entry when a specific execution of an activity has finished or changed status. 
@@ -694,12 +809,12 @@ the details needed some research. For this reason, an iterative process was set 
 I held weekly meetings with my manager, as well as weekly project meetings together with my mentor, my manager, and the team program manager. In addition, in the mid-way point I held presentations to the end-users of the project to find out more requirements and to get feedback. Because of this, the project was divided in two iterations.
 The weekly meetings were carried out through both iterations.
 
-The project was carried out as follows:
-\textbf{November -- December}: Preparation and background research.
-\textbf{January -- Mid-February}: First iteration.
-\textbf{Mid-February}: User meetings.
-\textbf{Mid-February -- March}: Second iteration.
-\textbf{End of March}: Project end and delivery.
+The project was carried out as follows:\\
+\textbf{November -- December}: Preparation and background research.\\
+\textbf{January -- Mid-February}: First iteration.\\
+\textbf{Mid-February}: User meetings.\\
+\textbf{Mid-February -- March}: Second iteration.\\
+\textbf{End of March}: Project end and delivery.\\
 \nyi{Format this as a figure}
 
 % - first iteration: supporting work, backend, graphing, initial UI
@@ -710,6 +825,8 @@ I started the first iteration by building a prototype using a small constant dat
 % - user meetings (brownbag, 3pp)
 After the first iterations I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a "brown bag" type of open meeting with other team members who interact with the Jury system.
 In these meetings I validated my prototype designs and collected more requirements.
+In the meetings the timeline view was seen more useful for most user groups.
+The only exception was the engineers who saw the graph view more useful for debugging.
 
 % - second iteration: user interface work, features to fit needs
 %   - machine learning exploration
@@ -727,54 +844,69 @@ Azure Event Hubs are a common event streaming platform that works as a platform-
 The events are then read and processed by Jury and stored in a SQL database.
 
 % specific description of events and how they are stored
-Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''.
+Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. This field can be used to reason about the duration of the events and to determine whether the event is final. 
+For example, the states ''Completed'' and ''Failed'' are final statuses.
+The ''In progress'' events are not final, since they will eventually be followed by a final status event with the same Source and Subsource.
 
-\nyi{event as a figure?}
+\nyi{Figure illustrating an event with all its fields}
+
+\nyi{Table listing of final and not final statuses}
 
 % methods explaining splitting and grouping of traces
 Thus, an arbitrary set of events can be grouped into traces by the submission field. Within the grouping each individual step can then be identified by the Source--Subsource pair.
 
-\nyi{figure of events grouped into traces}
+\nyi{Figure of events grouped into traces?}
+
+\subsubsection{Challenges in the real-world data}
+
+\nyi{Incomplete traces in the chosen ''slice'' (events missing from beginning/end)} \cite{bezerra2009anomaly}
+
+\nyi{Noise in data, lost events, delayed events (because of event hub best effort)}
+
+\nyi{Clock skew between different systems}
+
+\nyi{Changes in the system reflected real time (also a strength?)}
 
 \subsection{Graph construction}
-\nyi{constructing graphs}\\
-\nyi{these all on theoretical level}
 
-\nyi{- alpha algorithm}\\
-\nyi{- simplified petri-net}\\
-\nyi{- dealing with noise, possible sources}\\
-\nyi{- option/support for forced graph shape}\\
-\nyi{- mention queries and customization}
+\nyi{Using the alpha algorithm}\\
+\nyi{Generating directed graphs}\\
+\nyi{Dealing with noise}\\
+\nyi{- Mention queries and customization}
 
-\nyi{collecting statistics}\\
-\nyi{- as graph is being generted}\\
-\nyi{- with a predetermined shape}
+\nyi{Collecting statistics}\\
+\nyi{Methods of generating median, TP75, TP90}\\
+\nyi{What is different when using a predetermined JSON shape}
 
 \subsection{Real-time functionality}
-\nyi{overlaying real-time data}\\
-\nyi{timeline generation}
+\nyi{Overlaying real-time data with generated process model}\\
+\nyi{Generating a timeline view with start and end times from the overlay}\\
+\nyi{Methods of finding the start times and dealing with parallelism}
 
 \subsection{Estimating the future}
-\nyi{estimating future}\\
-\nyi{- - statistical approach TP75 etc}
+\nyi{Estimating future on incomplete logs}\\
+\nyi{Statistical approach by using TP75}
 
 \subsection{Machine learning}
-\nyi{ML approach}\\
-\nyi{explain models used (poisson, bdt) and reasoning why these}
+\nyi{How ML approach could be used to improve the statistical approach}\\
+\nyi{Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})}\\
+\nyi{Explain why these ones were chosen}
 
-\nyi{explain training dataset}
+\nyi{Explain training dataset generation}
 
-\nyi{tests with different features}\\
-\nyi{ identical posting}\\
+\nyi{Explain initial testing}\\
+\nyi{Testing with noisy features removed (textual fields)}
+\nyi{Explain additional features}\\
+\nyi{ - identical resubmission}\\
 %  posting that needed human interventiondcxfkkkkkkkkkkkkkkkkkkm
 %                                       a cat did this ^ 
-\nyi{posting that needed human intervention}
+\nyi{ - posting that needed human intervention (manual review)}
 
 \subsubsection{Azure ML}
-\nyi{explain briefly what azure ML is}
+\nyi{Explain briefly what azure ML is}
 
 \subsection{Notifications}
-\nyi{describe how the estimates could be used for notifications}
+\nyi{Describe how the estimates could be used for notifications}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -784,45 +916,49 @@ Thus, an arbitrary set of events can be grouped into traces by the submission fi
 \clearpage
 \section{Implementation Details}
 
-\nyi{some introduction}
+\nyi{Introduction}
 
-\nyi{integration with the existing system}
+\nyi{Explain integration with the existing system}
 
-\nyi{sql queries, c\# linq to sql, combined with text query}\\
-\nyi{talk about customized views}\\
-\nyi{everything based on user-made queries, even templates}
+\nyi{SQL queries, C\# LINQ to SQL, combined with textual query}\\
+\nyi{Talk about user-customized views}\\
+\nyi{Everything based on user-made queries, even templates}\\
 
-\nyi{details about the simple footprint generation}\\
-\nyi{include tables from observed noise}
+\nyi{Details about the simple footprint generation}\\
+\nyi{Include tables/figures from observed noise to illustrate noise levels}\\
 
-\nyi{turning the footprint into a graph}
+\nyi{Turning the footprint into a directed graph}
 
-\nyi{maybe: talk about implementing the alternative graph}
+\nyi{Maybe: Talk about implementing the alternative graph? not much to say..}
 
-\nyi{option, read graph from definition file}
+\nyi{Implementing the option of reading the graph shape from a JSON definition file}
 
-\nyi{storing the graph, caching}
+\nyi{Storing the graph, caching in DB, memory}
 
-\nyi{overlaying real-time data with the model}
+\nyi{Overlaying real-time data with the model}\\
 
-\nyi{estimate based on collected statistics}\\
-\nyi{statistics}\\
-\nyi{machine learning models}
+\nyi{Estimate based on collected statistics}\\
+\nyi{ - statistics}\\
+\nyi{ - machine learning models}
 
-\nyi{constructing timeline from the graph}
+\nyi{Constructing timeline from the graph}\\
 
-\nyi{user interface}
+\nyi{User Interface}\\
+\nyi{vis js, asp.net mvc, etc}\\
+\nyi{ - displaying the graph}\\
+\nyi{ - merging of ''bubbles''}\\
+\nyi{ - timeline view}\\
+\nyi{ - multiple graphs/timelines per page}\\
 
-\nyi{mention difficulties (or write them down somewhere at least)}\\
-\nyi{you'll want these for the presentation}\\
-\nyi{ parallelism}\\
-\nyi{ clock skew}\\
-\nyi{ changes in workflow}\\
-\nyi{ bugs manifesting in graphs (is this really a bad thing?)}\\
-\nyi{ dealing with rare events (manual review)}\\
-\nyi{  ask tao whether event types and such are confidential}
+\nyi{Make sure the difficulties are all mentioned somewhere}\\
+\nyi{(you'll want these for the presentation)}\\
+\nyi{ - parallelism}\\
+\nyi{ - clock skew}\\
+\nyi{ - changes in workflow}\\
+\nyi{ - bugs manifesting in graphs (is this really a bad thing?)}\\
+\nyi{ - dealing with rare events (manual review)}\\
+\nyi{ - confidentiality}\\
 
-\nyi{vis js, asp.net mvc, etc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Results
@@ -836,16 +972,29 @@ Thus, an arbitrary set of events can be grouped into traces by the submission fi
 %esitettyihin tutkimuskysymyksiin. Tieteellisen kirjoitelman
 %arvo mitataan t\"ass\"a osassa esitettyjen tulosten perusteella.
 
-\nyi{graph generation}
+\nyi{Graphs generated by the system (pictures!)}
 
-\nyi{maybe: alternative graph failure because of noise and large variation}
+\begin{figure}[htb]
+\centering \includegraphics[width=\linewidth]{gfx/graph.png}
+\caption{Graph view \label{fig:graph}}
+\end{figure}
 
-\nyi{statistics and their accuracy (run stats on the same dataset)}
+\begin{figure}[htb]
+\centering \includegraphics[width=\linewidth]{gfx/timeline.png}
+\caption{Timeline view \label{fig:timeline}}
+\end{figure}
+
+\begin{figure}[htb]
+\centering \includegraphics[width=\linewidth]{gfx/estimates.jpg}
+\caption{Timeline view with estimates \label{fig:estimates}}
+\end{figure}
+
+\nyi{Statistics and their scores}
+% (run stats on the same dataset)
 
 \nyi{ML models and their scores}
 
-\nyi{user satisfaction}
-
+\nyi{User satisfaction}
 
 \subsection{Evaluation}
 \label{sec:evaluation}
@@ -860,16 +1009,16 @@ Thus, an arbitrary set of events can be grouped into traces by the submission fi
 %Jos tutkimustulosten merkityst\"a arvioidaan >>Tarkastelu>>-osassa,
 %voi luotettavuuden arviointi olla my\"os siell\"a. 
 
-\nyi{talk about success with graph generation}\\
-\nyi{maybe talk about alt graph?}\\
-\nyi{finding bugs in system or faults based on graphs}\\
-\nyi{good feedback from users}
+\nyi{Talk about success with graph generation}\\
+\nyi{Maybe talk about alternative graph?}\\
+\nyi{Finding bugs in system (race conditions!) based on graphs}\\
+\nyi{Feedback from users}
 
-\nyi{talk about negatives with machine learning models}\\
-\nyi{reason why they would turn out so bad}
+\nyi{Talk about negatives with machine learning models}\\
+\nyi{Reason why they didn't end up working}
 
-\nyi{talk about how the system went immediately into production}\\
-\nyi{talk about the success of notifications built on top of the system}
+\nyi{Talk about how the system went immediately into production}\\
+\nyi{Talk about the success of notifications built on top of the system}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Conclusions
