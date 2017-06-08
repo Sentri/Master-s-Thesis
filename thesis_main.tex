@@ -16,6 +16,9 @@
 \usepackage{enumitem}
 \usepackage{textgreek}
 \usepackage{amsthm}
+\usepackage{blkarray}
+\usepackage{amsmath}
+\usepackage{subcaption}
 
 \addbibresource{bibliography.bib}
 
@@ -411,7 +414,7 @@ This thesis is divided in ... chapters. Chapter x explains ... and after that ..
 
 %% In a thesis, every section starts a new page, hence \clearpage
 \clearpage
-\section{Background}
+\section{Background and related work}
 \label{sec:background}
 
 \subsection{Process mining}
@@ -621,8 +624,8 @@ $$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - 
 %%% Related work
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\clearpage
-\section{Related work}
+%\clearpage
+\subsection{Related work}
 \label{sec:relatedwork}
 
 \nyi{Bezerra et al. Anomaly Detection using Process Mining (2009)} \cite{bezerra2009anomaly}.
@@ -880,9 +883,11 @@ All the processors of the store systems broadcast events into a common Event Hub
 The events are then read and processed by Jury and stored in a SQL database.
 
 % specific description of events and how they are stored
-Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. This field can be used to reason about the duration of the events and to determine whether the event is final. 
+Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. This field can be used to reason about the duration of the events and to determine whether the event is \emph{final}. 
+A final-status event means that the processor has completed the activity and will not be sending further events for the activity in question.
 For example, the states ''Completed'' and ''Failed'' are final statuses.
-The ''In progress'' events are not final, since they will eventually be followed by a final status event with the same Source and Subsource.
+The ''In progress'' events are \emph{non-final}, since they will eventually be followed by a final status such as ''Completed'' or ''Failed'' event with the same Source and Subsource.
+These events are fired to show that a long-running activity is still running and hasn't failed.
 
 \nyi{Figure illustrating an event with all its fields}
 
@@ -931,32 +936,185 @@ This leads to a situation where the trace seems to restart from the beginning or
 
 Another big challenge comes from the real-time characteristics of the data. Since all data describes the current state of the system, the underlying process model can change any time. Because of agile practices and continuous delivery, the store systems are under constant change. This means that the process model generated a day before may not reflect the current state anymore. The system should be flexible and should adapt to any changes in the underlying models.
 
+% invalid states
+Furthermore, the production data will include also traces that have failures or phases that are in progress.
+A trace with failed or erroneous steps should be considered anomalous, since they are not guaranteed to progress normally after an error. 
+Similarly, the traces include events that do not describe a final state, but only broadcast status. 
+The most common type of event like this events with an ''In progress'' status.
+If an event is non-final, it means that the same process is still expected to fire a final event afterwards.
+These events should be handled differently in the modeling phase.
+
 All these characteristics require that the system uses some kind of pre-processing method that takes the slice of the real-world data and outputs an ordered and grouped set of traces with the anomalous traces removed.
 
 \subsection{Graph construction}
 
-\nyi{input should be any set of events}\\
-\nyi{- Mention queries and customization}\\
-\nyi{pre-processing}\\
+\subsubsection{Pre-processing}
 
-\nyi{Using the alpha algorithm}\\
-\nyi{Generating directed graphs}\\
-\nyi{Dealing with noise}
+To comply with the user requirements of being able to generate models from custom queries and real-time production data, the system developed in this thesis should be able to take any set of events as the input.
+Because of the challenges outlined in the previous section, a pre-processing step is needed.
+
+The pre-processing method chosen takes a set of events as the input. The pre-processing works as follows:
+\begin{enumerate}
+    \item Group all events by \textbf{submission ID}.
+    \item Create a trace corresponding to a submission for each group.
+    \item Order all events in each trace by ascending timestamp, then by event ID.
+    \item Drop all traces with an erroneous event such as ''Failed''.
+    \item Drop all non-final events from each trace.
+\end{enumerate}
+After these steps the result is a set of valid traces, each corresponding to a unique submission ID with only final events.
+
+\subsubsection{Creating directed graphs}
+
+The model chosen to represent the process models is the directed graph. 
+In this model, every pair of directly subsequent events $(a,b)$ appearing in a trace corresponds to a 
+graph edge from node $a$ to node $b$.
+The parallelism is generated by observing the direct follow-relations as in the \textalpha-algorithm.
+
+To generate a graph from a set of traces, I started by generating an event log \emph{footprint matrix}.
+The footprint matrix describes the relation of all the events in the event log regarding to each other.
+This means that the matrix describes which events immediately follow another events in the set of traces.
+The columns and rows of the matrix correspond to all the distinct activities (the vocabulary).
+The matrix is square and should have a zero diagonal.
+The row describes the first event, and the column the event directly following.
+The number in the cell describes the frequency that this follow relation was observed in the logs.
+
+I will illustrate this with an example. Consider an event log with four activities $a,b,c,d,$ and $e$.
+Figure \ref{fig:exampletraces} illustrates the six traces in the event log. There are two unique kinds of traces, $abcde$ and $acbde$, both of which have been observed three times. Figure \ref{fig:examplematrix} shows the footprint matrix generated from these traces.
+The diagonal is zeroes, since no event follows itself.
+From the upper triangle the matrix shows for example that $b$ has followed $a$ three times and $c$ has followed $b$ three times. From the lower triangle we see for example that $a$ has never followed $b$, but $b$ has followed $c$ three times.
+By comparing the frequencies in the upper triangle to the lower triangle we can discover dependencies suggested by the event log, and from a lack of dependency we can suggest parallelism.
+
+\begin{figure}
+    \centering
+    % example traces
+    \begin{subfigure}[h]{0.4\linewidth}
+        \begin{center}
+        \begin{tabular}{| r | l |}
+        Trace & Frequency \\
+        \hline
+        a b c d e & 3\\
+        a c b d e & 3 \\
+        \hline
+        \end{tabular}
+        \end{center}
+        \caption{A list of example traces}
+        \label{fig:exampletraces}
+    \end{subfigure}
+    % footprint example
+    \begin{subfigure}[h]{0.4\linewidth}
+        \begin{center}
+        \begin{blockarray}{cccccc}
+          & a & b & c & d & e\\
+        \begin{block}{c(ccccc)}
+        a & 0 & 3 & 3 & 0 & 0 \\
+        b & 0 & 0 & 3 & 3 & 0 \\
+        c & 0 & 3 & 0 & 3 & 0 \\
+        d & 0 & 0 & 0 & 0 & 6 \\
+        e & 0 & 0 & 0 & 0 & 0 \\
+        \end{block}
+        \end{blockarray}
+        \end{center}
+        \caption{An example footprint matrix $M$ }
+        \label{fig:examplematrix}
+    \end{subfigure}
+    \caption{Example for traces containing events $\{a,b,c,d,e\}$}
+\end{figure}
+
+% turning the matrix into a graph
+The generated footprint matrix corresponds directly to the log-based ordering relations described by van der Aalst and van Dongen \cite{van2013discovering,van2016process}.
+There are four possible relations between any two events in an event log $L$:
+\begin{itemize}
+    \item $a \rightarrow_L b$: $b$ \emph{directly follows} $a$.
+    \item $a \leftarrow_L b$: $b$ \emph{directly precedes} $a$.
+    \item $a ||_L b$: $a$ and $b$ are \emph{parallel}.
+    \item $a \#_L b$: $a$ and $b$ are not directly related, they are $unrelated$.
+\end{itemize}
+
+Note that it always applies that $a \rightarrow_L b \Leftrightarrow b \leftarrow_L a$.
+We can find these relations from the footprint matrix by comparing each cell $m_{ij}$ the upper triangle with the corresponding cell $m_{ji}$ lower triangle by using the following algorithm:
+
+\begin{definition}
+Let $A = \{ a_i | 0 < i \le n \}$ be a set of $n$ activities (the \emph{vocabulary}).
+Let $M$ be an $n \times n$ footprint matrix corresponding to $A$.
+For each cell $m_{ij} \in M$ where $i < j$:
+\begin{itemize}
+    \item $a \#_L b$ iff $m_{ij} = 0$ and $m_{ji} = 0$
+    \item $a_i \rightarrow_L a_j$ iff $m_{ij} > m_{ji}$ and $m_{ji} = 0$
+    \item $a_i \leftarrow_L a_j$ iff $m_{ij} < m_{ji}$ and $m_{ij} = 0$
+    \item $a_i ||_L a_j$ iff $m_{ij} > 0$ and $m_{ji} > 0$
+\end{itemize}
+Furthermore, it should be noted that these relations are symmetrical:
+\begin{itemize}
+    \item $a \#_L b \Leftrightarrow b \#_L a$ 
+    \item $a_i \rightarrow_L a_j \Leftrightarrow a_j \leftarrow_L a_i$
+    \item $a_i ||_L a_j \Leftrightarrow a_j ||_L a_i$ 
+\end{itemize}
+\label{def:logrelations}
+\end{definition}
+
+In the example, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ we get $a \rightarrow b$. \nyi{formatting?}
+However, by comparing $M[b,c] = 3$ to $M[c,b] = 3$ we see that $b || c$. 
+Figure \ref{tab:examplefootprint} shows the generated footprint for the matrix shown in figure \ref{fig:examplematrix}.
+Note that it is enough to only examine the upper triangle of the matrix, since the generated footprint is always symmetrical across the diagonal.
+
+This footprint maps directly to a corresponding directed graph.
+Every activity in the vocabulary corresponds to a graph node.
+Every ''directly follows'' relation corresponds to a directed arc in the graph. A parallel relation corresponds to arcs in both directions.
+Figure \ref{fig:examplegraph} shows the directed graph corresponding to the footprint from figure \ref{tab:examplefootprint}.
+
+
+\begin{figure}
+    \centering
+    % example traces
+    \begin{subfigure}[h]{0.4\linewidth}
+        \begin{center}
+        \begin{tabular}{cccccc}
+        \hline
+          & a & b & c & d & e\\
+        \hline
+        a & \# & $\rightarrow$ & $\rightarrow$ & \# & \# \\
+        b & $\leftarrow$ & \# & || & $\rightarrow$ & \# \\
+        c & $\leftarrow$ & || & \# & $\rightarrow$ & \# \\
+        d & \# & $\leftarrow$ & $\leftarrow$ & \# & $\rightarrow$ \\
+        e & \# & \# & \# & $\leftarrow$ & \# \\
+        \hline
+        \end{tabular}
+        \end{center}
+        \caption{Generated footprint}
+        \label{tab:examplefootprint}
+    \end{subfigure}
+    % footprint example
+    \begin{subfigure}[h]{0.4\linewidth}
+        \centering \includegraphics[width=\linewidth]{gfx/graphthing.jpg}
+        \caption{Generated graph \nyi{remake}}
+        \label{fig:examplegraph}
+    \end{subfigure}
+    \caption{Graph generation from the footprint}
+\end{figure}
+
+% Dealing with noise
+Noise in the event log data creates problems if unhandled. 
+\nyi{talk about noise}
+
+\subsubsection{Statistics}
 
 \nyi{Collecting statistics}\\
 \nyi{Methods of generating median, TP75, TP90}\\
 \nyi{What is different when using a predetermined JSON shape}
 
 \subsection{Real-time functionality}
+
 \nyi{Overlaying real-time data with generated process model}\\
 \nyi{Generating a timeline view with start and end times from the overlay}\\
 \nyi{Methods of finding the start times and dealing with parallelism}
 
 \subsection{Estimating the future}
+
 \nyi{Estimating future on incomplete logs}\\
 \nyi{Statistical approach by using TP75}
 
 \subsection{Machine learning}
+
 \nyi{How ML approach could be used to improve the statistical approach}\\
 \nyi{Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})}\\
 \nyi{Explain why these ones were chosen}
