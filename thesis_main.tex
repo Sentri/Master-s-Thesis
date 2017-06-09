@@ -904,11 +904,11 @@ Thus, an arbitrary set of events can be grouped into traces by the submission fi
 
 \nyi{Figure of events grouped into traces?}
 
-\subsubsection{Challenges in the real-world data}
+\subsubsection{Challenges found in the production data}
 
 In section \ref{sec:eventtheory} we considered the event log to be a totally ordered flat log. In this theoretical log each event would have its own metadata and an accurate interleaving, combined with a case identifier.
 In theory, this case identifier and the log order can be used to split the log into traces and further order the events in each trace.
-However, the real-world data proved to be messier than that. 
+However, the production data proved to be more complex than that. 
 
 % event hub ordering
 As mentioned earlier, the event hub processors work in several partitions to improve availability.
@@ -983,7 +983,7 @@ This means that the matrix describes which events immediately follow another eve
 The columns and rows of the matrix correspond to all the distinct activities (the vocabulary).
 The matrix is square and should have a zero diagonal.
 The row describes the first event, and the column the event directly following.
-The number in the cell describes the frequency that this follow relation was observed in the logs.
+The number in the cell describes the frequency that this follow relation was observed in the logs (follow-frequency matrix).
 
 I will illustrate this with an example. Consider an event log with four activities $a,b,c,d,$ and $e$.
 Figure \ref{fig:exampletraces} illustrates the six traces in the event log. There are two unique kinds of traces, $abcde$ and $acbde$, both of which have been observed three times. Figure \ref{fig:examplematrix} shows the footprint matrix generated from these traces.
@@ -1021,7 +1021,7 @@ By comparing the frequencies in the upper triangle to the lower triangle we can 
         \end{block}
         \end{blockarray}
         \end{center}
-        \caption{An example footprint matrix $M$ }
+        \caption{An example footprint (follow-frequency) matrix $M$ }
         \label{fig:examplematrix}
     \end{subfigure}
     \caption{Example for traces containing events $\{a,b,c,d,e\}$}
@@ -1063,16 +1063,19 @@ In the example, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ we get $a \
 However, by comparing $M[b,c] = 3$ to $M[c,b] = 3$ we see that $b || c$. 
 Figure \ref{tab:examplefootprint} shows the generated footprint for the matrix shown in figure \ref{fig:examplematrix}.
 Note that it is enough to only examine the upper triangle of the matrix, since the generated footprint is always symmetrical across the diagonal.
+If the rows and columns are ordered by dependency, the dependencies follow the diagonal of the footprint.
+The parallel activities can be seen visually as square-shaped symmetric regions.
+The parallel region border consists of follow-relations while the inside of the region contains parallel-relations.
+This shape can be seen in the example figure \ref{tab:examplefootprint}.
 
 This footprint maps directly to a corresponding directed graph.
 Every activity in the vocabulary corresponds to a graph node.
 Every ''directly follows'' relation corresponds to a directed arc in the graph. A parallel relation corresponds to arcs in both directions.
 Figure \ref{fig:examplegraph} shows the directed graph corresponding to the footprint from figure \ref{tab:examplefootprint}.
 
-
 \begin{figure}
     \centering
-    % example traces
+    % footprint table example
     \begin{subfigure}[h]{0.4\linewidth}
         \begin{center}
         \begin{tabular}{cccccc}
@@ -1087,10 +1090,10 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
         \hline
         \end{tabular}
         \end{center}
-        \caption{Generated footprint}
+        \caption{Generated footprint of log relations}
         \label{tab:examplefootprint}
     \end{subfigure}
-    % footprint example
+    % directed graph example
     \begin{subfigure}[h]{0.4\linewidth}
         \centering \includegraphics[width=\linewidth]{gfx/graphthing.jpg}
         \caption{Generated graph \nyi{remake}}
@@ -1100,8 +1103,31 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
 \end{figure}
 
 % Dealing with noise
-Noise in the event log data creates problems if unhandled. 
-\nyi{talk about noise}
+Noise in the event log data creates problems if it is not appropriately handled. 
+Network delays, bugs, and outages cause events to get lost or erroneously arranged. 
+This noise manifests in the footprint follow-frequency matrix.
+
+Figure \ref{fig:examplenoise} shows an example footprint matrix from a slice of production logs.
+The frequencies shown in the figure are logarithmic for improved coloration.
+As can be seen from the figure, two parallel regions of activities can be seen clearly in the data.
+The first region contains three parallel activities, and the second one seven activities.
+Within the regions, the frequencies observed are fairly constant.
+However, outside the regions most cells still have non-zero values, even though the real process model
+does not have parallelism between the leftmost and the rightmost activities.
+This is the aforementioned log noise.
+If left as is, the noise will create invalid extraneous arcs in the graph.
+
+\begin{figure}[htb]
+    \centering \includegraphics[width=0.6\linewidth]{gfx/noise.png}
+    \caption{Observed noise in production data (logarithmic scale)}
+    \label{fig:examplenoise}
+\end{figure}
+
+My method of dealing with the noise was to apply a threshold value to all the frequencies.
+The value was a fraction $0 \le t < 1$ of the number of traces $N$ analyzed in the event log.
+Any value in the matrix lower than $tN$ will be set to zero before the matrix is turned into a graph.
+Similar thresholding will be performed when checking for parallelism (see definition \ref{def:logrelations}).
+Initial tests on the production data showed that relatively small ($t < 0.01$) values were sufficient to counter the noise without affecting the model negatively.
 
 \subsubsection{Statistics}
 
