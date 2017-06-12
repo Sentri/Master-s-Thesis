@@ -164,7 +164,7 @@
 \advisor{M.Sc.\ Tao Zhu}
 \advisor{M.Sc.\ Rafael Forsbach Valle}
 \department{Tietotekniikan laitos}
-\professorship{x}
+\professorship{Multimediatekniikka}
 %% Avainsanat
 \keywords{Prosessitutkinta, Koneoppiminen, Tapahtumalokit}
 %% Tiivistelmän tekstiosa
@@ -191,7 +191,24 @@
 \mysection{Preface}
 
 This thesis work was carried out at the Microsoft headquarters at the campus in Redmond, USA.
-First I would like to thank...
+It has been written as the last part of my Master's degree.
+
+I would like to thank the people at Microsoft for the opportunity.
+Thank you Kristin and Britt at recruiting for figuring out the unusual circumstances for me.
+Thank you Tao and Rafael for mentoring and guiding me during my work.
+I would also like to thank the rest of the ICH Catalog Health team for dealing with my constant questions
+and helping me feel like home in my team.
+
+Great thanks to professor Petri Vuorimaa for being my supervisor and for helping me with the practicalities.
+
+I would like to thank my friends for supporting me.
+I would like to thank my girlfriend Kara for her unending support and understanding during this stressful time.
+It is not an understatement that without you I would not be where I am today.
+Thank you Max and David for your endless support and for proofreading.
+Thank you Xane, Jorge, Cody, and other friends and birds for keeping me sane.
+
+Lastly I would like to thank all my family for standing by me and dealing with my travels and schedules.
+
 
 % thank professor
 % thank advisors for helping
@@ -972,6 +989,13 @@ The pre-processing method chosen takes a set of events as the input. The pre-pro
 \end{enumerate}
 After these steps the result is a set of valid traces, each corresponding to a unique submission ID with only final events.
 
+By using different time slices or different filters on which events to include, we can generate models for different purposes. 
+For example, we can try to generate a more accurate process model by filtering.
+If we filter the events in the pre-processing step to only include events related to certain products
+or product types, we can assume that the process model and the statistics will better describe those products.
+However, filtering reduces the number of events used for the model, which can lead to overfitting.
+\nyi{some theory here? overfitting? wut?}
+
 \subsubsection{Creating directed graphs}
 
 The model chosen to represent the process models is the directed graph. 
@@ -1158,11 +1182,100 @@ Since each cell in the footprint corresponds to an edge in the graph, I construc
 When a number in the follow-frequency matrix is incremented, I also store the latency between the two events in the corresponding array. 
 After the graph is generated, I can store the chosen key statistics (TP50, TP75, TP90) for each graph edge and discard the matrix and the arrays.
 
+% directed graph tldr
+The result of this method is a directed graph with nodes and edges.
+Each node corresponds to an activity in the process model.
+Each edge corresponds to a possible transition (pair of two consecutive events) in the trace.
+The model can be verified by ''re-playing'' a trace. \nyi{elaborate?}
+Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
+The graph describes the process model that was discovered from the event log.
+
+\nyi{figure for trace replay}
+
 \subsection{Real-time functionality}
 
-\nyi{Overlaying real-time data with generated process model}\\
-\nyi{Generating a timeline view with start and end times from the overlay}\\
-\nyi{Methods of finding the start times and dealing with parallelism}
+Until this point I have considered the case of the event log, that corresponds to a time slice of past data.
+This type of data can be seen as an ''aggregate'', since it will result in a model that describes events over a long period of time.
+However, a key part of the analytics for the store is the ability to analyze and debug the current state of the system.
+Without such functionality it will be difficult to analyze the state of the current submissions in the system.
+
+\begin{figure}[htb]
+    \centering \includegraphics[width=0.7\linewidth]{gfx/plaineventlog.png}
+    \caption{Event log query result view in Jury}
+    \label{fig:plaineventlog}
+\end{figure}
+
+The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
+A query is a string containing user-provided criteria for which events to show.
+This could for example be querying for a specific product or a specific submission ID.
+The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
+I call this the \textbf{log view}.
+The users of the system reported that this view was useful for debugging a specific issue for e.g. with a specific activity, but it does not provide a good overall view.
+The request from the users was a view that shows a big picture of the status of a submission with the option to also drill down to the details.
+
+% new small dataset from a query, often a single trace
+My solution was to leverage the previously discovered aggregate model for visualization.
+The model would be combined with the list of events returned by the query.
+The aggregate model would be used to visualize the process, and the real-time data from the query would be ''overlayed'' on top of the model.
+
+The method was to ''color'' the model with the data from the query.
+The query results in a set of events that corresponds to the user's criteria.
+For simplicity we can assume that the result is a single trace for an ongoing submission,
+meaning that it is a set of sequential events that all belong to a single case.
+In the full implementation the result can also be events from many separate submissions,
+but the system handles it by splitting them into separate visualizations and then handling each one of them as a single trace.
+
+In the beginning we create an ''colorless'' graph by copying the process model discovered earlier.
+The colorless graph has a node for each activity and the corresponding graph edges between them.
+The nodes are tied to the specific activities by including the Source and Subsource fields but they have no status, timestamp, or other metadata.
+The visualization is ''colored'' by traversing through the trace in sorted order (ascending timestamp).
+For each event in the trace, we find the corresponding node in the graph.
+The node can then be ''colored'' by copying the status, timestamp, and other metadata from the event.
+This can be repeated until we reach the end of the trace.
+The result is a ''colored'' graph where all the activities that have been finished have a status and a time.
+The nodes for the activities yet to come remain uncolored.
+
+\nyi{graph coloring figure}
+
+This graph can now be shown to the user.
+The nodes are drawn on the screen as circles or rectangles, and the directed edges as arrows between them.
+This is what I call the \textbf{graph view}.
+The parallel nods are connected by double-sided arrows or an edge that otherwise indicates the parallelism.
+In my visualization I took the ''colorization'' quite literally by having each status correspond to a color in the visuals. 
+Uncolored nodes remained grey, completed nodes green or blue, nodes in progress yellow, and failed nodes red.
+The colors help the user to get an immediate understanding of what the state of a submission is.
+An example can be seen in figure \ref{fig:coloredgraph}.
+
+\begin{figure}[htb]
+    \centering \includegraphics[width=0.9\linewidth]{gfx/graphcolor.png}
+    \caption{Colored graph view}
+    \label{fig:coloredgraph}
+\end{figure}
+
+\subsubsection{Timeline view}
+
+\begin{figure}[htb]
+    \centering \includegraphics[width=0.6\linewidth]{gfx/basictimeline.png}
+    \caption{A basic example of a ''timeline'' \nyi{make a better one}}
+    \label{fig:basictimeline}
+\end{figure}
+
+During the protyping phase I discovered that the directed graphs were not intuitive to read for the users.
+Trying to manipulate the graph shape and selecting each node to see the details turned out to be cumbersome.
+Two users wished for a ''sorted'' view in the initial tests.
+The sorted view should show the events arranged horizontally across the screen by time.
+This resulted in the second prototype which I labelled the \textbf{timeline view}.
+A basic example of what a timeline is can be seen in figure \ref{fig:basictimeline}.
+
+% Generating a timeline view with start and end times from the overlay
+As can be seen from the figure, each item in the timeline has a width.
+This means that the items have a both a \textit{starting time} and an \textit{ending time}.
+However, in the event log each event only has a single timestamp.
+The event timestamp corresponds to the ending time of an activity.
+To find the starting times, we can leverage the process model graph.
+
+% Methods of finding the start times and dealing with parallelism
+\nyi{nyi}
 
 \subsection{Estimating the future}
 
@@ -1209,6 +1322,10 @@ After the graph is generated, I can store the chosen key statistics (TP50, TP75,
 
 \nyi{Details about the simple footprint generation}\\
 \nyi{Include tables/figures from observed noise to illustrate noise levels}\\
+
+% filtering of events
+% incomplete traces
+% sorting of views
 
 \nyi{Turning the footprint into a directed graph}
 
