@@ -1252,6 +1252,11 @@ An example can be seen in figure \ref{fig:coloredgraph}.
     \label{fig:coloredgraph}
 \end{figure}
 
+\subsection{Estimating the future}
+
+\nyi{Estimating future on incomplete logs}\\
+\nyi{Statistical approach by using TP75}
+
 \subsubsection{Timeline view}
 
 \begin{figure}[htb]
@@ -1275,12 +1280,15 @@ The event timestamp corresponds to the ending time of an activity.
 To find the starting times, we can leverage the process model graph.
 
 % Methods of finding the start times and dealing with parallelism
-\nyi{nyi}
+In my project I made the assumption that switching tasks takes a negligible time.
+This means that when a task ends, the next task begins immediately.
+With this assumption we can discover the starting time by looking at the end time of a previous task.
+We can find the previous task by following the graph edges backwards and finding its dependencies.
+Choosing the latest ending time of these dependencies results in the starting time of the activity.
+In this method, all parallel tasks are treated equal, so each activity also must take into account all dependencies of its parallel tasks.
+In the case where there are no dependencies (such as the first activity of the graph) a predetermined length will be used as a fallback.
 
-\subsection{Estimating the future}
 
-\nyi{Estimating future on incomplete logs}\\
-\nyi{Statistical approach by using TP75}
 
 \subsection{Machine learning}
 
