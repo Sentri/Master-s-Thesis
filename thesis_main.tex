@@ -1157,6 +1157,7 @@ Similar thresholding will be performed when checking for parallelism (see defini
 Initial tests on the production data showed that relatively small ($t < 0.01$) values were sufficient to counter the noise without affecting the model negatively.
 
 \subsubsection{Latency}
+\label{sec:latency}
 
 In addition to discovering the process model, one of the requirements was to see statistics of the times each of the activities take. 
 Since the event timestamps describe the end time for each activity, the length (or duration) of an activity can be found by comparing the timestamps of two consequent events. 
@@ -1254,8 +1255,61 @@ An example can be seen in figure \ref{fig:coloredgraph}.
 
 \subsection{Estimating the future}
 
-\nyi{Estimating future on incomplete logs}\\
-\nyi{Statistical approach by using TP75}
+One of the requirements discovered \nyi{where?} was to be able to provide estimations for the submission workflow completion times (labelled \emph{estimated time of arrival} or ETA). 
+To provide such estimates I developed a method to traverse the graph forward after it has been colored.
+
+% Estimating future on incomplete logs
+The algorithm used in the project was a recursive traversal by using a stack.
+The input for the algorithm is a graph which has been partly colored by a trace.
+This means that some of the graph nodes have timestamps and metadata, while others (towards the end of the workflow) do not.
+The goal is to use the previously generated process model to estimate
+and fill in the data for the uncolored nodes.
+
+% Statistical approach by using TP75
+To fill in the data for future nodes, the algorithm needs a measure to be used for the estimation. 
+This measure corresponds to the estimated ''edge length'' for each edge in the graph.
+A simple method is to use the statistical values that were collected during the graph generation process (see section \ref{sec:latency}).
+The statistics are useful, since when giving time estimates we should aim for overestimating or giving the ''worst case'' guess \nyi{why?}.
+For example, using the TP90 value should lead to an estimation that estimates the latencies in a way that overestimates 90~\% of the submissions.
+However, choosing the right statistic should be considered since it is a trade-off between accuracy and overestimation \nyi{rephrase, citation needed}.
+The plan was to use machine learning to improve the estimations (see section \ref{sec:ml-estimation}).
+
+\nyi{pseudocode?}
+
+% algorithm description
+In theory, since all the graphs are workflow graphs, there should not be any loops \nyi{citation?}. 
+In practice noise, errors, and changes in the system can lead to loops.
+An empty list is initialized to keep track which nodes of the graph have already been visited.
+The purpose of the list is to prevent a loop in the graph resulting in infinite execution.
+First the algorithm finds the node which has the earliest timestamp.
+This is treated as the graph start.
+An empty stack is initialized and the start node is pushed into the stack.
+After this initialization a recursive step is executed in a loop until the stack is empty.
+
+The recursive step starts by popping a node (called the \emph{current node}) from the stack and checking if the node is valid.
+This means checking that the node has not been visited already, that the node is not an error state, and that the node has a timestamp.
+If the node has been visited already, it is ignored.
+Error states are seen as anomalous, and since they often lead to the workflow being aborted, they should not be used for estimations.
+The node needs to have a timestamp, otherwise there is no starting point for the estimation.
+After the node has been deemed valid, it is marked as visited.
+
+After the initial check all children for the node are retrieved.
+This means finding all the edges that have the current node as the source, and collecting the nodes that the edges point towards.
+For each of these nodes, the estimation is performed.
+If the child node already has a timestamp from the coloration phase, it is ignored.
+Otherwise, if the node is uncolored, the previously chosen edge length measure is used for the estimation. 
+The length of an edge is a timespan, corresponding to an estimate for how much time will pass between the two events.
+By adding the timespan to the timestamp of the current node, we get the estimation for the timestamp of the child node.
+
+For parallel nodes (the nodes with a directed edge both to and from the current node) the step differs slightly. 
+Since the activity corresponding to the node is known to be parallel to the current one, the edge length is seen as zero.
+For this reason, the estimation step does not add anything to the timestamp but instead just copies the current node's timestamp to the parallel node.
+
+After the timestamps of the child nodes have been estimated the child nodes are added to the stack and the step is performed again.
+This continues until the stack is empty.
+The stack will be empty when all the nodes connected to the starting node have been visited.
+This means that barring error states every node will now either be colored or have a timestamp estimation.
+These estimations can be shown to the user when the graph is visualized.
 
 \subsubsection{Timeline view}
 
@@ -1271,13 +1325,17 @@ Two users wished for a ''sorted'' view in the initial tests.
 The sorted view should show the events arranged horizontally across the screen by time.
 This resulted in the second prototype which I labelled the \textbf{timeline view}.
 A basic example of what a timeline is can be seen in figure \ref{fig:basictimeline}.
+The timeline has items set on a horizontal axis.
+The horizontal axis corresponds to time, with past being on the left and the future on the right.
+The vertical axis has no meaning other than to separate the parallel items visually to help the user see which activities happen in parallel.
 
 % Generating a timeline view with start and end times from the overlay
 As can be seen from the figure, each item in the timeline has a width.
 This means that the items have a both a \textit{starting time} and an \textit{ending time}.
 However, in the event log each event only has a single timestamp.
 The event timestamp corresponds to the ending time of an activity.
-To find the starting times, we can leverage the process model graph.
+For the purposes of the timeline, it does not matter whether the timestamp comes from the log or whether it is an estimation.
+To find the starting times, we can leverage the process model graph again.
 
 % Methods of finding the start times and dealing with parallelism
 In my project I made the assumption that switching tasks takes a negligible time.
@@ -1288,9 +1346,16 @@ Choosing the latest ending time of these dependencies results in the starting ti
 In this method, all parallel tasks are treated equal, so each activity also must take into account all dependencies of its parallel tasks.
 In the case where there are no dependencies (such as the first activity of the graph) a predetermined length will be used as a fallback.
 
+In other words, before this step the timeline has all events as zero-width with only the end times. The algorithm sets the start time to be the earliest possible time without breaking the restrictions given by the process model dependencies.
+After this step, all items in the timeline correspond to an activity in the workflow. Furthermore, all items have a start time and an end time.
+When the timeline is visualized, the items where the timestamp is an estimation can be separated by color or other means.
+Furthermore, since the horizontal axis corresponds to time, the current time of the user can be shown as a vertical line.
+This helps to highlight the current time to the user and to separate future estimations from observed events.
 
+\nyi{add picture of a finished timeline}
 
 \subsection{Machine learning}
+\label{sec:ml-estimation}
 
 \nyi{How ML approach could be used to improve the statistical approach}\\
 \nyi{Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})}\\
@@ -1334,6 +1399,7 @@ In the case where there are no dependencies (such as the first activity of the g
 % filtering of events
 % incomplete traces
 % sorting of views
+% dealing with loops/resubmissions
 
 \nyi{Turning the footprint into a directed graph}
 
