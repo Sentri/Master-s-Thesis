@@ -1268,7 +1268,7 @@ and fill in the data for the uncolored nodes.
 % Statistical approach by using TP75
 To fill in the data for future nodes, the algorithm needs a measure to be used for the estimation. 
 This measure corresponds to the estimated ''edge length'' for each edge in the graph.
-A simple method is to use the statistical values that were collected during the graph generation process (see section \ref{sec:latency}).
+A simple approach is to use the statistical values that were collected during the graph generation process (see section \ref{sec:latency}).
 The statistics are useful, since when giving time estimates we should aim for overestimating or giving the ''worst case'' guess \nyi{why?}.
 For example, using the TP90 value should lead to an estimation that estimates the latencies in a way that overestimates 90~\% of the submissions.
 However, choosing the right statistic should be considered since it is a trade-off between accuracy and overestimation \nyi{rephrase, citation needed}.
@@ -1357,22 +1357,74 @@ This helps to highlight the current time to the user and to separate future esti
 \subsection{Machine learning}
 \label{sec:ml-estimation}
 
-\nyi{How ML approach could be used to improve the statistical approach}\\
-\nyi{Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})}\\
-\nyi{Explain why these ones were chosen}
+% How ML approach could be used to improve the statistical approach
+After I had implemented the statistical estimation, the next step was to research whether it could be improved by using machine learning. 
+The idea was that for each graph edge, instead of using a statistical value to estimate the length, a machine learning model could be used.
+The model could take into account the current time and transition, in addition to other characteristics of the submission such as details about the application package.
+The hypothesis was that characteristics such as the application package size have a predictable effect on the latencies.
 
-\nyi{Explain training dataset generation}
+To test this hypothesis I collected a set of training data from the production environment and used it to train and test machine learning models.
+Had the model accuracy been proven to be more accurate than the statistics, the model could have been deployed to the production system.
 
-\nyi{Explain initial testing}\\
-\nyi{Testing with noisy features removed (textual fields)}
-\nyi{Explain additional features}\\
-\nyi{ - identical resubmission}\\
+% Explain training dataset generation
+The training dataset was generated from a time slice of the event logs. 
+By using both a predetermined (JSON) process model \nyi{this should be introduced somewhere before} and the automatically discovered process model, two datasets were created. The dataset contained the observed values for the latencies, labelled by the activity transition and the application it belongs to.
+These rows were then joined with a dataset of known applications and their characteristics to create the final training data.
+The resulting dataset consisted of 16 columns of features such as the package size and the current transition (activity being observed), and a label column corresponding to the measured latency in seconds. \nyi{does this need a concrete listing?}
+The data was filtered to only contain measurements from valid traces with the requirement of having no errors and conforming to the process model.
+The datasets used contained \nyi{XX~XXX} rows for the JSON template, and \nyi{XX~XXX} rows for the automatically discovered template.
+
+% Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})
+% data suitability
+% result interpretation
+The machine learning models used in training were Poisson Regression \cite{azurepoisson} and Boosted Decision Trees \cite{azurebdt}.
+These were chosen based on a few factors.
+The first factor was that the model needs to suit the data.
+Since the latencies are values of time measured as activity durations, they fall on a Poisson distribution. 
+This is why a Poisson Regression model was selected.
+The Boosted Decision Trees model had been used before in the store for application classification with good results, so it was believed to work well with application characteristics.
+
+Second factor for choosing the models was the interpretability of the results.
+Since this project was experimental and there was no baseline, I wanted to be able to inspect the models and reason about their characteristics.
+Since both the Poisson Regression model and the Boosted Decision Trees output the per-feature weights for the model, they can be inspected and reasoned about.
+Compared to something like a neural network, which is highly challenging for humans to interpret \nyi{citation needed} this is a clear advantage.
+The best model based on prediction accuracy was to be chosen for an in-production test.
+
+% accuracy
+% training / regression speed
+The average error and the mean square error values were to be used to evaluate model accuracy \nyi{maybe elaborate}.
+Lastly, if multiple accurate models was to be found, the model training and regression performance would be used to evaluate them.
+
+\nyi{insert graph for data distribution}
+
+% Explain initial testing
+% Testing with noisy features removed (textual fields)
+The features used in the data were chosen based on experimental testing and domain knowledge.
+Initially, 12 features read from the application package characteristics where used. The features were numeric and boolean describing the package size, the capabilities required, and other features that would be available immediately at the start of the submission.
+Furthermore, two features read from the event logs were added.
+These were an enumerator for the current transition (activity being measured) and the time passed since the beginning of the trace.
+The label column was the measured latency.
+Initially, data also included other fields such as the application description, keywords, and other developer-supplied (mostly textual) information. 
+However, these were deemed noisy and resulted in overfitting.
+They also drastically increased the training time because of n-gram generation.
+The domain experts (the system engineers) knew to inform that those fields are not used in the ingestion pipeline so they were removed resulting in the 12 features.
+
+% Explain additional features
+% identical resubmission
+After the initial testing, two additional features were added to the dataset.
+The first additional feature was a boolean value describing whether the application package is identical to the previous submission.
+This was because the domain experts knew that this would lead to some of the activities skipping execution internally, drastically reducing the execution time. This was also clearly seen in the data when the latency distribution for an activity were plotted. This can be seen in figure \nyi{XX}. With this graph the training data could be split into two sets labelled by whether the submission is an identical resubmission.
 %  posting that needed human interventiondcxfkkkkkkkkkkkkkkkkkkm
 %                                       a cat did this ^ 
-\nyi{ - posting that needed human intervention (manual review)}
+The second additional feature was whether the application ingestion triggered a manual review (human curation). 
+Since orchestrating human manual reviewers contains overhead, a manual review is known to delay the ingestion time considerably.
+This can also seen from a latency distribution graph as a clear difference.
+This was used similarly to add the manual review boolean feature into the dataset.
+I performed more tests with these additional features to test whether they improved model accuracy.
 
 \subsubsection{Azure ML}
 \nyi{Explain briefly what azure ML is}
+\nyi{I don't think this belongs here}
 
 \subsection{Notifications}
 \nyi{Describe how the estimates could be used for notifications}
@@ -1448,6 +1500,8 @@ This helps to highlight the current time to the user and to separate future esti
 %arvo mitataan t\"ass\"a osassa esitettyjen tulosten perusteella.
 
 \nyi{Graphs generated by the system (pictures!)}
+
+% conforming to the JSON graphs (visually?)
 
 \begin{figure}[htb]
 \centering \includegraphics[width=\linewidth]{gfx/graph.png}
