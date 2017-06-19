@@ -1,0 +1,225 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% In a thesis, every section starts a new page, hence \clearpage
+\clearpage
+\section{Background and related work}
+\label{sec:background}
+
+\subsection{Process mining}
+
+Process mining starts from the concept of an \emph{event log}.
+An event log is a collection of recorded data for an information system.
+Activities executed in the system leave records which are stored in the event log.
+\emph{Process mining} describes methods of using the event log data to extract useful information.
+The information can be used to discover processes without prior knowledge, to find bottlenecks and inefficiencies, to detect and understand anomalies, and to support redesign actions \cite{van2015extracting}.
+In this thesis I look at \emph{process discovery}, which means finding the underlying process model
+by reading the event log.
+In process discovery the model should be generated without any a-priori information, meaning that the algorithm should be unsupervised \cite{van2013discovering}.
+The process model can be expressed as a directed graph or a \emph{Petri net}.
+These models can be used for business intelligence (BI) solutions, or they can be compared to the real life
+known models to check conformance \cite{van2013discovering}.
+
+
+Discovering strictly sequential processes from event logs is straightforward. However, modern systems are increasingly concurrent which complicates the issue. 
+Parallel systems generate events in a undetermined order based on how the processes are interleaved. 
+When the events are logged the order is realized resulting in a totally ordered sequential log \cite{van2004workflow}. 
+The challenge is having to discover and construct the parallelism from the event log.
+Furthermore, the event log may be \emph{incomplete}, which means not all possible behaviour is present in the logs \cite{van2013discovering}.
+Additionally, the event logs can be \emph{noisy} and contain random infrequent behaviour \cite{van2013discovering}.
+It may be undesirable to present the infrequent behaviour in the models.
+These characteristics give the task of process discovery challenging trade-offs.
+
+\subsubsection{Event logs and traces}
+
+\label{sec:eventtheory}
+
+\begin{definition}
+Let $A$ be the set of all \emph{activities}. 
+$\sigma \in A^*$ is a workflow trace describing a \emph{sequence of events}.
+The event log $L \in \mathbb{B}(A^*)$ is a \emph{multi-set} of \emph{traces}.
+\end{definition}
+
+A process consists of a set of distinct \emph{activities}.
+An activity is a well-defined step belonging to the process.
+Each event in the event log refers to such an activity.
+The event may also hold additional information about the process.
+A workflow \emph{trace} contains a sequence of events documenting a single execution of the process (a \emph{process instance}).
+This kind of single process execution is called a \emph{case} (later in this thesis also: \emph{submission}).
+The event log can be seen as a \emph{multi-set} of \emph{traces}. 
+A multi-set (a \emph{bag}) is a set that allows multiple instances of the set's elements. \cite{van2015extracting}
+
+In this thesis it is assumed that any concurrent execution of events can be recorded into
+an ordered and sequential event log. 
+The concurrent execution generates randomly ordered sequences.
+The parallelisms can be discovered by observing the different traces and their frequencies.
+For example, for a process consisting of activities $a,b,c,d,e \in A$, one trace could be 
+$\langle a,b,c,d,e \rangle$ and another $\langle a,c,d,b,e \rangle$ \nyi{see figure}.
+These different traces could be found in the event log a number of times, some more frequent than others.
+In process discovery the task is to construct a model with sequential and parallel steps 
+that describes a process that can generate these traces \cite{van2013discovering}.
+The frequency of a trace matters in process discovery, and this is why the event log is a multi-set.
+
+\nyi{Figure illustrating traces and event logs}
+
+When dealing with discovering processes from event logs, there are two clear challenges: \emph{incompleteness} and \emph{noise}. 
+Discovering the model from the event log is difficult since one cannot assume that all the possible traces are present \cite{van2013discovering}. 
+In the case of concurrent processes the number of possible sequences is often larger than what has been observed in the logs \cite{van2007business}.
+Moreover, some sequences can be inherently more infrequent that others. 
+Such behaviour can be seen as undesirable noise, but sometimes infrequent traces may also present important information.
+This leads to need of making decisions about trade-offs. 
+The model should describe the process accurately, even when the event log is incomplete or noisy.
+
+Van der Aalst et al. \cite{van2013discovering} describe four criteria that need to be balanced when generating a model from a log: fitness, precision, generalization, and simplicity.
+\emph{Fitness} measures whether the model fits the log, meaning that the traces in the event log can be generated by the discovered model.
+\emph{Precision} measures whether the model allows only the behaviour observed in the event log. The model should describe the traces in the log but should not allow completely unrelated behaviour not seen in the traces.
+\emph{Generalization} relates to the unseen behaviour. The model should be general enough that it describes the process while allowing the cases that were not observed in the specific set of sequences.
+Lastly, \emph{simplicity} relates to the noisiness. The models should be as simple as possible and undesirable rare or exceptional behaviour should not be included if it increases the model complexity.
+
+
+\subsubsection{Process models and discovery}
+
+A simple way to describe a process model is a \emph{directed graph}. A directed graph is a set of \emph{nodes} that are connected together by \emph{edges}. 
+
+\begin{definition}
+A directed graph $G = (\mathcal{N}, \mathcal{E})$ consists of the set $\mathcal{N}$ of nodes and the set $\mathcal{E} = \{ (x,y) | x,y \in \mathcal{N} \} $ of edges, which are ordered pairs of nodes.
+\end{definition}
+
+A process can be described as a directed graph by having a graph node for each activity of the process ($\mathcal{N} = A$). The graph edges describe the possible transitions between the activities.
+A log is generated by travelling through the graph and visiting each node exactly once. \nyi{Needs more formal definition?}
+In this model, any two parallel activities $a, b \in A$ will have directed arcs $(a,b)$ and $(b,a)$ between them.
+
+A \emph{Petri net} \cite{rozenberg1998lectures} can be used as a more detailed process model. A Petri net consists of \emph{places}, \emph{transitions}, and directed arcs connecting them. In this thesis I focus on \emph{finite nets} where the sets forming a Petri net are finite.
+
+\begin{definition}
+A Petri net is a tuple $(S, T, F)$ which consists of:
+\begin{enumerate}
+    \item a set $S$ of \emph{places},
+    \item a set $T$ of \emph{transitions} in a way that $S \cap T = \emptyset$
+    \item a set $F$ (flow relation) of directed arcs: $F \subseteq (P \times T) \cup (T \times P)$ 
+\end{enumerate}
+\end{definition}
+
+In a Petri net, the places and transitions $S \cup T$ are called the \emph{elements} of $N$.
+For any element $x \in P \cup T$ its \emph{pre-set} ${}^\bullet x$ is all the elements that have a directed arc to $x$, that is ${}^\bullet x = \{y \in S \cup T | (y,x) \in F\}$. Similarly its \emph{post-set} $x^\bullet$ is defined as 
+$x^\bullet = \{y \in S \cup T | (x,y) \in F\}$.
+A Petri net can be mapped to a directed graph by creating equivalent nodes for each place and directed edges for each transition.
+
+Van der Aalst et al. \cite{van2013discovering} use a subclass of Petri nets called a \emph{workflow net} to describe processes. A workflow net (WF-net) is a Petri net with some further restrictions, to make it more suited for process discovery. In their description, a workflow needs a clear starting point (an input place) and a clear ending point (an output place). Furthermore they define that a WF-net needs to be \emph{strongly connected}, meaning every node is on a path from the start to the end.
+
+\begin{definition}
+Let $N = (S, T, F)$ be a Petri net. $N$ is a workflow net \emph{iff}:
+\begin{enumerate}
+    \item $S$ contains a input place $i$ such that ${}^\bullet i = \emptyset$ (starting point)
+    \item $S$ contains a output place $o$ such that $o^\bullet = \emptyset$ (ending point)
+    \item \nyi{Formulate this formally} (connectedness)
+\end{enumerate}
+\end{definition}
+
+With the definitions for event logs, traces and workflow nets, we can describe \textbf{process discovery} as an algorithm that maps any event log $L$ into a model such as a directed graph or a Petri net that describes the underlying process that generated the event log.
+
+\subsubsection{\textalpha-algorithm}
+\label{sec:alphaalgorithm}
+
+Constructing concurrent process models from an ordered event log is a challenging task.
+Since the event log is linear and ordered, it does not have any information related to parallelism.
+The \textalpha-algorithm is a process discovery algorithm that reads ordered event logs.
+The algorithm discovers parallelism by comparing the order of events in different traces.
+In a trace, the activities that depend on another activity always come later in the trace.
+However, the activities that are parallel and have no such dependency can come in any order regarding each other.
+Thus, in different traces the parallel activities are ordered differently. 
+This is the main idea behind the \textalpha-algorithm.
+
+A detailed mathematical description of the \textalpha-algorithm can be found in \cite{van2004workflow}.
+The idea of the algorithm is:
+
+\begin{enumerate}
+    \item Find all the activities that appear in event log $L$. I call this the \emph{vocabulary}. This corresponds to all the transitions $T_L$ in the WF-net.
+    \item Find the activities that appear as the first event in a trace (the \emph{start transitions}).
+    \item Find all the activities that appear at the end of the log (the \emph{end transitions}).
+    \item Find all pairs of sets of activities $(A,B)$ that have a (causal) dependency in all the traces. This means that all activities in $A$ always come before all the activities in $B$ in all the traces.
+    \item Reduce the set of pairs discovered in the previous step to only include the ''maximal pairs'' (see below). 
+    \item Create a place for each pair $(A,B)$ from the previous step. Additionally, create places for a starting point $i$ and an ending point $o$. This will be the set of places $S_L$.
+    \item Connect the arcs (the flow relation $F_L$). All start transitions from step 2 will have $i$ as their input place and all end transitions from step 3 will have $o$ as their output place. All the places for each pair $(A,B)$ will have transitions in $A$ as their input node and transitions in $B$ as their output node.
+    \item The result is a WF-net $\alpha(L) = ( S_L, T_L, F_L )$.
+\end{enumerate}
+
+In step 5, the set of ''maximal pairs'' means that there are no pairs which include subsets of another pair. For example, the pairs $\{(\{a\},\{b,c\}),(\{a\},\{b\}),(\{a\},\{c\})\}$ can be reduced into just $\{(\{a\},\{b,c\})\}$.
+
+In essence, the \textalpha-algorithm tries to find arcs that form a WF-net describing the causal dependencies observed over all the traces in the event log. 
+For example, if activity $b$ comes after activity $a$ in all the traces, then it suggests a causal dependency $a \rightarrow b$.
+On the other hand, if in some traces $a$ comes after $b$ and some others before, then it suggests that the activities do not depend on each other and are parallel.
+
+There are some limitations to this algorithm.
+The \textalpha-algorithm assumes that the event log is complete and has accurate ordering \cite{van2013discovering}. This means that all the events are present in the logs, and that the time-ordering in the traces corresponds to causal relations accurately. Furthermore, there can be different WF-nets that create similar traces \cite{van2013discovering}. In other words, different process models can create the same traces.
+The algorithm is also not suited to dealing with non-local dependencies \cite{van2013discovering}.
+For example, if an activity $b$ depends on $a$, and $c$ depends on both $b$ and $a$, this $a \rightarrow c$ dependency is said to be ''non-local'', since from the logs it would only appear that $b \rightarrow c$. 
+
+\subsubsection{Transition systems}
+
+\nyi{Explain alternative graph generation methods (transition systems) \cite{van2013discovering}}
+
+
+% ################################
+
+\subsection{Machine learning}
+
+\nyi{This is some initial quick and dirty writing, needs a better writeup.}
+
+Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
+
+% insert graph for traditional vs machine learning
+\nyi{Insert the traditional programming vs machine learning figure here}
+
+In \emph{classification} tasks the training data consists of a training set of $N$ input vectors $\mathbf{x}^t$ and $N$ output values $r^t$.
+$$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \{0, 1\} $$
+Here $d$ is the dimension of vectors $\mathbf{x}^t$ and $N$ is the number of samples in the training set.
+The two classes are $C_0$ and $C_1$. $r^t = 1$ when $\mathbf{x}^t$ belongs to class $C_1$, $r^t = 0$ otherwise. \cite{alpaydin}
+In \emph{regression} tasks the training data is very similar, with the exception of each desired value $r^t$ being a real number \cite{alpaydin}.
+$$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \mathbb{R}$$
+In both cases the algorithms implement a function $g(\mathbf{x})$ which estimates the output parameter $r$ for a new vector $\mathbf{x}$. 
+In classification $g(\mathbf{x}) = c$ where $c \in \{0, 1\}$. 
+In regression $g(\mathbf{x}) = r$ where $r \in \mathbb{R}$.
+The learners are evaluated over a separate test set.
+$$\mathcal{D}_{test} = \{ (\mathbf{x}_*^t , r_*^t) \}_{t=1}^{N_{test}}$$
+A metric such as the \emph{mean square error} (MSE) can be used as a score to evaluate the learner. \cite{alpaydin}
+$$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - g(\mathbf{x}_*^t))^2$$
+
+\subsubsection{Regression}
+
+% regression, theory overall (maybe move math stuff from above)
+\nyi{Explain what is regression (maybe contrast to classification needed also?)}
+
+% list different models briefly
+\nyi{Briefly introduce different regression models (bayesian, BDT, linear, poisson)}
+
+\subsubsection{Boosted decision trees}
+
+\nyi{Introduce the concept}
+
+\nyi{Explain theory (mathematics)}
+
+\nyi{Talk about practical usage (strengths, limitations)}
+
+\subsubsection{Poisson regression}
+
+\nyi{Introduce the concept}
+
+\nyi{Explain theory (mathematics)}
+
+\nyi{Talk about practical usage (strengths, limitations)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Related work
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\clearpage
+\subsection{Related work}
+\label{sec:relatedwork}
+
+\nyi{Bezerra et al. Anomaly Detection using Process Mining (2009)} \cite{bezerra2009anomaly}.
+
+\nyi{Getta et al. Mining Periodic patterns from Nested event logs (2014)} \cite{getta2014mining}.
+
+\nyi{What else...?}
