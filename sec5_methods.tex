@@ -10,19 +10,31 @@ I will also introduce the technology choices and explain how they were used to i
 
 \subsection{Chosen technologies}
 
-\nyi{talk about C\#, asp.net MVC, sql server}
-\nyi{existing text engine}
-\nyi{user customized views from queries}
-\nyi{azure ml}
+The decision about which technologies I would use for my project was straightforward.
+Since the project was to integrate with the existing Jury system, I chose to use shared technologies and libraries.
+Jury was built with C\#, running as an ASP.NET MVC application with the .NET runtime \nyi{cite? version?}.
+The database was running on SQL Server, and the query engine was set up with a object-relational mapping tool called Entity Framework. The approach used was a ''data first'' model, where the system automatically generates models (classes in code) based on the database schema. \nyi{links, citations}
+The user provided text queries were translated to database queries with LINQ. \nyi{elaborate?}
+I used these same technologies in my project.
 
 \subsection{Graph construction}
 \subsubsection{Pre-processing}
 
 To comply with the user requirements of being able to generate models from custom queries and real-time production data, the system developed in this thesis should be able to take any set of events as the input.
-Because of the challenges outlined in the previous section, a pre-processing step is needed.
+As outlined before, the system should use the textual query system to retrieve the events from the database.
+The system will not have any knowledge of what filtering has been used, it only executes the user-given query.
+The only check the system needs to do is to check the events against the current user's permissions, to protect confidential information.
+
+The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
+A query is a string containing user-provided criteria for which events to show.
+This could for example be querying for a specific product or a specific submission ID.
+The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
+After the query has been executed, the result is a set of events.
+Because of the challenges outlined in section \ref{sec:datachallenges}, a pre-processing step is needed.
 
 The pre-processing method chosen takes a set of events as the input. The pre-processing works as follows:
 \begin{enumerate}
+    \item Drop events based on the user's permission level.
     \item Group all events by \textbf{submission ID}.
     \item Create a trace corresponding to a submission for each group.
     \item Order all events in each trace by ascending timestamp, then by event ID.
@@ -36,9 +48,19 @@ For example, we can try to generate a more accurate process model by filtering.
 If we filter the events in the pre-processing step to only include events related to certain products
 or product types, we can assume that the process model and the statistics will better describe those products.
 However, filtering reduces the number of events used for the model, which can lead to overfitting.
-\nyi{some theory here? overfitting? wut?}
+\nyi{some theory here? overfitting? explain?}
 
-\nyi{implementation details}
+\begin{figure}[htb]
+    \centering \includegraphics[width=0.7\linewidth]{gfx/plaineventlog.png}
+    \caption{Event log query result view in Jury}
+    \label{fig:plaineventlog}
+\end{figure}
+
+In my implementation I use the existing queries in Jury to retrieve events from the database. The queries can be written by users and saved in the system.
+These saved queries are then used to discover the process models.
+Each model corresponds to the query.
+For example, if the query searches for events belonging to only game products, then the discovered process model will reflect the underlying process for games.
+This allows for a highly flexible system where the users can create models for any subset of products or events they desire. 
 
 \subsubsection{Creating directed graphs}
 
@@ -241,6 +263,16 @@ The graph describes the process model that was discovered from the event log.
 
 \nyi{figure for trace replay}
 
+% implementation, paging
+In my implementation I wanted to create a paged view that visualizes event based on the user's query.
+For this reason I ran two nested database queries.
+First, I run the user's query and retrieve the events, filtered by the user's permission level.
+I sort these events by descending timestamp and pick five latest submission IDs.
+These IDs will correspond to the five latest submission traces matching the user's query.
+''Latest'' in this context means the traces with the most recent activity.
+This query may also be paged, allowing the user to choose the next five traces, or any later set of five.
+After five submission IDs has been retrieved, they are used to query all events belonging to these submissions. This results in five traces that can now be processed.
+
 \subsubsection{Alternative methods}
 \nyi{Maybe: Talk about implementing the alternative graph? not much to say..}\\
 \nyi{Implementing the option of reading the graph shape from a JSON definition file}
@@ -255,16 +287,7 @@ This type of data can be seen as an ''aggregate'', since it will result in a mod
 However, a key part of the analytics for the store is the ability to analyze and debug the current state of the system.
 Without such functionality it will be difficult to analyze the state of the current submissions in the system.
 
-\begin{figure}[htb]
-    \centering \includegraphics[width=0.7\linewidth]{gfx/plaineventlog.png}
-    \caption{Event log query result view in Jury}
-    \label{fig:plaineventlog}
-\end{figure}
-
-The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
-A query is a string containing user-provided criteria for which events to show.
-This could for example be querying for a specific product or a specific submission ID.
-The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
+As outlined before, the system already had a view to list events based on the user's query, as seen in figure \ref{fig:plaineventlog}.
 I call this the \textbf{log view}.
 The users of the system reported that this view was useful for debugging a specific issue for e.g. with a specific activity, but it does not provide a good overall view.
 The request from the users was a view that shows a big picture of the status of a submission with the option to also drill down to the details.

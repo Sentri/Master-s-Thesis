@@ -7,68 +7,55 @@
 \label{sec:materials}
 
 In this section I will describe how the project was planned to be executed.
-I will go over the project timeline and the materials I had to use.
-I will talk about the systems I wrote my project on top of, and the data I had to be used in the project.
-
-\subsection{Project timeline}
-\label{sec:timeline}
-% description of research timeline
-% weekly meetings with manager, PM
-While the main goal of the project was established as the project started in early January,
-the details needed some research. For this reason, an iterative process was set up.
-I held weekly meetings with my manager, as well as weekly project meetings together with my mentor, my manager, and the team program manager. In addition, in the mid-way point I held presentations to the end-users of the project to find out more requirements and to get feedback. Because of this, the project was divided in two iterations.
-The weekly meetings were carried out through both iterations.
-
-The project was carried out as follows:\\
-\textbf{November -- December}: Preparation and background research.\\
-\textbf{January -- Mid-February}: First iteration.\\
-\textbf{Mid-February}: User meetings.\\
-\textbf{Mid-February -- March}: Second iteration.\\
-\textbf{End of March}: Project end and delivery.\\
-\nyi{Format this as a figure}
-
-% - first iteration: supporting work, backend, graphing, initial UI
-%   - explorative prototypes
-%   - two UI proposals, graph and timeline
-I started the first iteration by building a prototype using a small constant dataset of events exported from the database. The purpose of the prototype was to explore the graph generation algorithms and to build a proof of concept. After the prototype was validate with the team I integrated it to the Jury system. I built two user interface proposals based on different types of presentation. The first one showed a directed graph describing the workflow model. The second interface showed the events on a scrollable timeline.
-
-% - user meetings (brownbag, 3pp)
-After the first iterations I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a "brown bag" type of open meeting with other team members who interact with the Jury system.
-In these meetings I validated my prototype designs and collected more requirements.
-In the meetings the timeline view was seen more useful for most user groups.
-The only exception was the engineers who saw the graph view more useful for debugging.
-
-% - second iteration: user interface work, features to fit needs
-%   - machine learning exploration
-%   - graphing accuracy exploration (alt graph)
-In the second iteration I spent more effort on the user interface, based on the meetings.
-I experimented with machine learning models and the graphing algorithm.
-Furthermore, I worked with the team to integrate the graphs with the email notification system in Jury so they could be used to send emails about delays observed in the system. 
-By the end of the second iteration the project was fully integrated with Jury and was delivered to the users.
+I will start by describing the existing systems that I was to integrate with.
+Next I will describe the data that was available to be used for the project. 
+Lastly, I will describe the project schedule and how it was executed.
 
 \subsection{Existing systems}
 
-\nyi{Describe integration with existing systems shortly}\\
-\nyi{existing text engine}\\
-\nyi{Talk about user-customized views}\\
-\nyi{Everything based on user-made queries, even templates}
+The project was to be integrated on top of existing diagnostics systems to minimize extraneous work and to improve the overall user experience.
+The store has an internal monitoring tool called Jury for the developers and other users to visualize details and relationships of the products and publishers in the store.
+Jury implements a user interface to query the production database for products, publishers, and events.
+Jury also handles authentication, authorization, and permissions.
+This is needed to preserve confidentiality of private information.
+
+Jury includes a textual query language to filter and search the database.
+The query language allows the users to query for the information that they are interested in.
+The queries can be saved for later use. 
+The saved queries can be used as shortcuts or ''dashboards'' for the users.
+For example, a user can save a query that searches for new products published within the last 24 hours.
+This query can then be used by the user to periodically check the new products.
+
+The idea for this project was to make use of the query system as much as possible.
+This way the benefits like user-made views and integration with the saved queries could be used with little extra work.
+The statistics and any real-time visualizations should use the query system to retrieve the events to preserve the customization capabilities.
+When retrieving the events, the user's permissions need to be taken into account to preserve confidentiality.
+
+\subsubsection{Azure ML}
+
+Azure ML (publicly available at \cite{azuremlpub}) is a cloud service that offers machine learning capabilities on demand. 
+They offer ready-made machine learning models for anyone to use in the cloud.
+They also allow the user to use their own code or models.
+One of the major features it offers is a visual interface for machine learning called the ''Machine Learning Studio'' \cite{azureml}.
+The interface allows the user to set up the data flow of their machine learning solution visually and then executing it in the cloud.
+
+I chose Azure ML for my solution, because of the accessibility, quick setup, and the multitude of models offered.
+With Azure ML I was able to take the data I had and start training models quickly without setting up anything on my local machine.
 
 \subsection{Data}
 % description of event hub
 The data used by the project is a list of events. The events work as log entries generated by the distributed processes of the store ingestion/publishing system. Each store system creates events and sends them through an Azure Event Hub. 
-
-\nyi{maybe more detail on event hubs?}
-
-Azure Event Hubs are a common event streaming platform that works as a platform-independent "front door" for all the events \cite{eventhubs}. 
+Azure Event Hubs are a shared event streaming platform that works as a platform-independent "front door" for all the events \cite{eventhubs}. 
 The event hub is divided into several separate partitions to improve availability \cite{eventhubavail}.
 Furthermore, separate partitions allow for concurrent read of events to improve throughput.
 All the processors of the store systems broadcast events into a common Event Hub.
 The events are then read and processed by Jury and stored in a SQL database.
+My project did not concern the event hub, instead I only read the events as they appeared in the database.
 
 % specific description of events and how they are stored
 Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. 
 The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. 
-In addition to these, the three idenfier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. 
+In addition to these, the three identifier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. 
 The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. 
 Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. 
 The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. 
@@ -88,6 +75,7 @@ Thus, an arbitrary set of events can be grouped into traces by the submission fi
 \nyi{Figure of events grouped into traces?}
 
 \subsubsection{Challenges found in the production data}
+\label{sec:datachallenges}
 
 In section \ref{sec:eventtheory} we considered the event log to be a totally ordered flat log. In this theoretical log each event would have its own metadata and an accurate interleaving, combined with a case identifier.
 In theory, this case identifier and the log order can be used to split the log into traces and further order the events in each trace.
@@ -136,6 +124,38 @@ These events should be handled differently in the modeling phase.
 
 All these characteristics require that the system uses some kind of pre-processing method that takes the slice of the real-world data and outputs an ordered and grouped set of traces with the anomalous traces removed.
 
-\subsection{Azure ML}
-\nyi{Explain briefly what azure ML is}
-\nyi{not sure if this belongs here}
+\subsection{Project timeline}
+\label{sec:timeline}
+% description of research timeline
+% weekly meetings with manager, PM
+While the main goal of the project was established as the project started in early January,
+the details needed some research. For this reason, an iterative process was set up.
+I held weekly meetings with my manager, as well as weekly project meetings together with my mentor, my manager, and the team program manager. In addition, in the mid-way point I held presentations to the end-users of the project to find out more requirements and to get feedback. Because of this, the project was divided in two iterations.
+The weekly meetings were carried out through both iterations.
+
+The project was carried out as follows:\\
+\textbf{November -- December}: Preparation and background research.\\
+\textbf{January -- Mid-February}: First iteration.\\
+\textbf{Mid-February}: User meetings.\\
+\textbf{Mid-February -- March}: Second iteration.\\
+\textbf{End of March}: Project end and delivery.\\
+\nyi{Format this as a figure}
+
+% - first iteration: supporting work, backend, graphing, initial UI
+%   - explorative prototypes
+%   - two UI proposals, graph and timeline
+I started the first iteration by building a prototype using a small constant dataset of events exported from the database. The purpose of the prototype was to explore the graph generation algorithms and to build a proof of concept. After the prototype was validate with the team I integrated it to the Jury system. I built two user interface proposals based on different types of presentation. The first one showed a directed graph describing the workflow model. The second interface showed the events on a scrollable timeline.
+
+% - user meetings (brownbag, 3pp)
+After the first iterations I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a "brown bag" type of open meeting with other team members who interact with the Jury system.
+In these meetings I validated my prototype designs and collected more requirements.
+In the meetings the timeline view was seen more useful for most user groups.
+The only exception was the engineers who saw the graph view more useful for debugging.
+
+% - second iteration: user interface work, features to fit needs
+%   - machine learning exploration
+%   - graphing accuracy exploration (alt graph)
+In the second iteration I spent more effort on the user interface, based on the meetings.
+I experimented with machine learning models and the graphing algorithm.
+Furthermore, I worked with the team to integrate the graphs with the email notification system in Jury so they could be used to send emails about delays observed in the system. 
+By the end of the second iteration the project was fully integrated with Jury and was delivered to the users.
