@@ -195,8 +195,6 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
     \caption{Graph generation from the footprint}
 \end{figure}
 
-\nyi{implementation details for footprints}
-
 % Dealing with noise
 Noise in the event log data creates problems if it is not appropriately handled. 
 Network delays, bugs, and outages cause events to get lost or erroneously arranged. 
@@ -219,12 +217,16 @@ If left as is, the noise will create invalid extraneous arcs in the graph.
 \end{figure}
 
 My method of dealing with the noise was to apply a threshold value to all the frequencies.
-The value was a fraction $0 \le t < 1$ of the number of traces $N$ analyzed in the event log.
-Any value in the matrix lower than $tN$ will be set to zero before the matrix is turned into a graph.
-Similar thresholding will be performed when checking for parallelism (see definition \ref{def:logrelations}).
-Initial tests on the production data showed that relatively small ($t < 0.01$) values were sufficient to counter the noise without affecting the model negatively.
+The value was a fraction $0 \le t_n < 1$ of the number of traces $N$ analyzed in the event log.
+Any value in the matrix lower than $t_n N$ will be set to zero before the matrix is turned into a graph.
+Similar thresholding will be performed when checking for parallelism (see definition \ref{def:logrelations}). 
+For parallelism I calculate a fraction $d_p = \frac{f_\text{follow}}{f_\text{follow} + f_\text{precede}}$, where $f_\text{follow}$ is the frequency of follow relations from the upper triangle of the footprint matrix and $f_\text{precede}$ is the respective frequency from the lower triangle.
+To counter noise, the relation is only considered to be parallel if the fraction is between the treshold values $t_p \le d_p \le (1 - t_p)$. 
 
-\nyi{implementation details for noise filtering}
+Initial tests on the production data showed that relatively small ($t_n \le 0.01$) values were sufficient to counter the noise without affecting the model negatively. 
+I used $t_n = 0.01$ and $t_p = 0.005$ to remove 1~\% of noise.
+
+\nyi{Add figure for observed relations from excel}
 
 \subsubsection{Latency}
 \label{sec:latency}
@@ -278,7 +280,43 @@ After five submission IDs has been retrieved, they are used to query all events 
 \nyi{Implementing the option of reading the graph shape from a JSON definition file}
 
 \subsubsection{Storing the graphs}
-\nyi{Storing the graph, caching in DB, memory}
+
+As described before, the project allows the users to generate new graphs from any query supplied by the user.
+Reading hundreds of thousands of events from the database, sorting them and generating the graph takes a lot of time, in the order of several minutes.
+Since generating new graphs is resource-intensive, this functionality is restricted to the system administrators in Jury. 
+Since Jury is an online tool the service response times need to be fast, preferably in the hundreds of milliseconds to preserve a smooth user experience \nyi{cite?}.
+Generating the graph from a set of events for each web request from any user would be inefficient and the page load times would be in the order of minutes.
+Because of this, I implemented two levels of caching in the system.
+
+The Jury web server is distributed onto multiple server instances to provide high availability. The database server is shared between the instances.
+Each generated graph is cached both in memory and in the database.
+The in-memory cache is local to each instance and the database cache is shared.
+
+Each cached graph is associated with a timestamp corresponding to the time when it was generated. 
+This timestamp is used by the servers to determine when the cache is too old and should be refreshed.
+For the in-memory cache this maximum age was chosen to be 15 minutes.
+For the database cache the maximum age was set to 12 hours.
+The long time was chosen since while the process model of the store system changes when improvements are made it will be in the order of days so a day old cached model will be accurate in most cases.
+
+The cache system works as follows (in the perspective of a server instance):
+\begin{enumerate}
+    \item The server receives a HTTP request requiring a specific graph.
+    \item The server reads the in-memory cache. \\
+    \textbf{Less than 15 minutes old}: Return graph from memory to the user and stop. \\
+    \textbf{Older than 15 minutes}: Return graph from memory to the user and continue to the next step in the background.
+    \textbf{Graph not in memory}: Continue to the next step.
+    \item The server reads the timestamp (age) from the graph stored in database\\
+    \textbf{Less than 12 hours old}: Load graph from the database, store it in memory. Return to user if needed.
+    \textbf{Older than 12 hours or not in database}: Move the graph timestamp in the database 15 minutes forward and generate a new graph. Once the task is finished, save it in the database, and in memory.
+\end{enumerate}
+
+This means that if the requested graph is in memory, it will be returned to the user immediately. If the version in memory is too old, a background task to retrieve or generate a new graph is started. This means that the user almost never has to wait for the page to load while the graph is being generated.
+The only case when the user has to wait for the graph generation is if the instance has no graph in memory and the version in the database is also too old.
+In practice this will only happen after a server restart when all the in-memory caches are purged.
+
+The graph timestamp is moved 15 minutes forward at the start of graph generation to prevent a situation where two different server instances are generating the same graph separately.
+
+This two-level caching improved the page loads from minutes to fractions of a second. Furthermore, since the graphs are now stored also in the same database as the events, they can be used in SQL queries. This proved useful, since SQL queries can be constructed to improve the notification functionality. See section \ref{sec:notifications} for more details about notifications.
 
 \subsection{Real-time functionality}
 
@@ -522,6 +560,8 @@ I performed more tests with these additional features to test whether they impro
 \end{figure}
 
 \subsection{Notifications}
+\label{sec:notifications}
+
 \nyi{Describe how the estimates could be used for notifications}
 
 \subsection{User interface}
