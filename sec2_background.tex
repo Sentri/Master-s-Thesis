@@ -165,9 +165,23 @@ For example, if an activity $b$ depends on $a$, and $c$ depends on both $b$ and 
 
 \subsection{Machine learning}
 
-\nyi{This is some initial quick and dirty writing, needs a better writeup.}
+Machine learning means the study and development of algorithms that give computers the ability to learn from data without being explicitly programmed for that data. 
+The traditional approach in programming is to explicitly define the steps the computer should take to solve a problem.
+However, sometimes you know the input to a problem and what the solution should be, but not how to get to the solution (see figure \nyi{XX}).
+For example, we could have a thousand photos of birds and a thousand photos of animals other than birds.
+For these photos we know exactly which ones are the birds, but we don't know exactly what rules in the pixels of an image makes it a bird photo.
+This situation is what machine learning algorithms are meant for.
 
-Machine learning is a term to describe algorithms that give computers the ability to learn from data without being explicitly programmed for that data. Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of training data with predefined labels. For example, the training data could be a set of emails each labeled with ''spam'' and ''not spam''. The algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new unseen data.
+Machine learning is data driven and the focus is less on traditional programming instructions.
+The machine learning algorithms focus on finding patterns and models in data.
+The patterns can then be used to process new data or make predictions.
+
+Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of \textit{training data} with predefined labels. 
+This training data is the ''known'' data points of the ''seen'' data.
+For example in the case of email spam detection, the training data could be a set of emails and labels.
+The emails would have been ''spam'' or ''not spam'' when constructing the training data. 
+Usually these labels come from real world measurements or manual (human) labeling.
+The supervised machine learning algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new (unseen) data.
 
 % insert graph for traditional vs machine learning
 \nyi{Insert the traditional programming vs machine learning figure here}

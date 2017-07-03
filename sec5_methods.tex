@@ -319,10 +319,10 @@ The cache system works as follows (in the perspective of a server instance):
     \item The server receives a HTTP request requiring a specific graph.
     \item The server reads the in-memory cache. \\
     \textbf{Less than 15 minutes old}: Return graph from memory to the user and stop. \\
-    \textbf{Older than 15 minutes}: Return graph from memory to the user and continue to the next step in the background.
+    \textbf{Older than 15 minutes}: Return graph from memory to the user and continue to the next step in the background.\\
     \textbf{Graph not in memory}: Continue to the next step.
-    \item The server reads the timestamp (age) from the graph stored in database\\
-    \textbf{Less than 12 hours old}: Load graph from the database, store it in memory. Return to user if needed.
+    \item The server reads the timestamp (age) from the graph stored in database.\\
+    \textbf{Less than 12 hours old}: Load graph from the database, store it in memory. Return to user if needed.\\
     \textbf{Older than 12 hours or not in database}: Move the graph timestamp in the database 15 minutes forward and generate a new graph. Once the task is finished, save it in the database, and in memory.
 \end{enumerate}
 
@@ -373,7 +373,7 @@ The nodes for the activities yet to come remain uncolored.
 This graph can now be shown to the user.
 The nodes are drawn on the screen as circles or rectangles, and the directed edges as arrows between them.
 This is what I call the \textbf{graph view}.
-The parallel nods are connected by double-sided arrows or an edge that otherwise indicates the parallelism.
+The parallel nodes are connected by double-sided arrows or an edge that otherwise indicates the parallelism.
 In my visualization I took the ''colorization'' quite literally by having each status correspond to a color in the visuals. 
 Uncolored nodes remained grey, completed nodes green or blue, nodes in progress yellow, and failed nodes red.
 The colors help the user to get an immediate understanding of what the state of a submission is.
@@ -385,7 +385,11 @@ An example can be seen in figure \ref{fig:coloredgraph}.
     \label{fig:coloredgraph}
 \end{figure}
 
-\nyi{implementation details for overlays}
+In my implementation I had to add one hard-coded aspect for an edge case. In the store system, it is possible for a publisher or a developer to ''re-publish'' a product. 
+When a re-publish is triggered, the publishing steps of the workflow are run again with the same submission ID. 
+This means that a trace from a single submission may contain several publishes.
+My implementation detects this when the first step of the publishing workflow is seen again in a single trace. 
+When this happens, the trace is split in two and the re-publish will be shown as a separate trace and a separate visualization.
 
 \subsection{Estimating the future}
 
