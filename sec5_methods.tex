@@ -42,7 +42,7 @@ The only check the system needs to do is to check the events against the current
 
 The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
 A query is a string containing user-provided criteria for which events to show.
-This could for example be querying for a specific product or a specific submission ID.
+This could for example be querying for a specific product or a specific submission ID. \nyi{examples of queries???}
 The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
 After the query has been executed, the result is a set of events.
 Because of the challenges outlined in section \ref{sec:datachallenges}, a pre-processing step is needed.
@@ -281,21 +281,37 @@ The graph describes the process model that was discovered from the event log.
 
 \nyi{figure for trace replay}
 
+\subsubsection{Paging}
+\label{sec:paging}
+
 % implementation, paging
-In my implementation I wanted to create a paged view that visualizes event based on the user's query.
-For this reason I ran two nested database queries.
+Many queries can return hundreds of thousands of events and visualizing all of them would be resource-intensive.
+In addition, when discussing the requirements with the users they often only wanted to see the latest few submissions.
+Because of these reasons I developed a paged view that visualizes the events retrieved from the user's query, but restricts the number of graphs shown to the user in a predictable way.
+
 First, I run the user's query and retrieve the events, filtered by the user's permission level.
-I sort these events by descending timestamp and pick five latest submission IDs.
+I sort these events by descending timestamp and pick the five latest submission IDs.
 These IDs will correspond to the five latest submission traces matching the user's query.
 ''Latest'' in this context means the traces with the most recent activity.
 This query may also be paged, allowing the user to choose the next five traces, or any later set of five.
 After five submission IDs has been retrieved, they are used to query all events belonging to these submissions. This results in five traces that can now be processed.
+
+This is implemented with two SQL queries.
+The first query that retrieves the five submissions can be paged with a standard page selector user interface component.
+This means that the user can choose to see the next ''page'' of submissions containing submissions 6-10 and onwards. \nyi{format}
+The first query uses a GROUP BY clause to group the events by submission ID and to choose the maximum timestamp.
+This result is then sorted and teh top five IDs are selected.
+This selection can be paged with a SQL OFFSET clause based on the user's page selection.
+The query runs in only a couple seconds on a cloud-hosted SQL Server instance.
+The second query retrieves all events that belong to the retrieved five submissions.
+These events are then passed to the graph generation algorithm.
 
 \subsubsection{Alternative methods}
 \nyi{Maybe: Talk about implementing the alternative graph? not much to say..}\\
 \nyi{Implementing the option of reading the graph shape from a JSON definition file}
 
 \subsubsection{Storing the graphs}
+\label{storinggraphs}
 
 As described before, the project allows the users to generate new graphs from any query supplied by the user.
 Reading hundreds of thousands of events from the database, sorting them and generating the graph takes a lot of time, in the order of several minutes.
@@ -495,7 +511,7 @@ This helps to highlight the current time to the user and to separate future esti
 
 \nyi{add picture of a finished timeline}
 
-\nyi{timeline implementation details}
+\nyi{timeline implementation details any?}
 
 \subsection{Machine learning}
 \label{sec:ml-estimation}
@@ -582,7 +598,46 @@ I performed more tests with these additional features to test whether they impro
 \subsection{Notifications}
 \label{sec:notifications}
 
-\nyi{Describe how the estimates could be used for notifications}
+One of the main functionailities of Jury is user-defined notifications.
+The users can run queries and ''subscribe'' to them.
+Whenever an event arrives to Jury which matches a subscribed query, a notification such as an email is sent to the user.
+This allows users to get notified for example when a product they are interested in receives an update or when an error happens.
+Because the notifications use the same queries as the otehr parts of Jury, they allow the same high level of customization.
+
+However, notifications are only triggered as a response to an incoming event.
+This means that if an event is missing or delayed no notification can be sent.
+Similarly, no notification can be sent about a workflow activity until after it has been completed.
+
+Receiving notifications for delayed submissions was a common requirement discovered from many users \nyi{refer to it}.
+Furthermore, notifying about a workflow activity before it happens was seen to be useful for scheduling purposes.
+This functionality or the data required for these functions were not possible in the old Jury system.
+However, with the process models and statistics being stored in the database (as described in section \ref{storinggraphs}) this data is now available in the same database as the events.
+This allows for SQL queries to be created to detect when an event is ''late'' before it even arrives.
+
+For detecting late events, the system needs to examine the current ongoing submissions and the events that have been received already.
+We can find the submissions and their latest events with a GROUP BY query as described in section \ref{sec:paging}.
+In addition, each transition (graph edge) in a process model is associated with its statistics. 
+This means that when the edge is stored in the database it also contains numeric values for the statistics such as the TP50, TP75, and TP90 \nyi{refer}.
+We can use the latest event and the process model to find the next expected transition for each event by joining the latest events with the process model graph edge that corresponds to that event.
+By adding the statistic (such as the TP75) to the event's timestamp we get an ''estimated time of arrival'' (ETA) for the next expected event.
+If the current system time is past this ETA, we know that the next event is currently late and should have been received based on the statistic chosen.
+
+% tolerance, absolute and statx2
+Because of the natural randomness and varying small delays in the system, choosing a good statistics is crucial. 
+For example, if we used the TP75 as the statistic for late event notifications, even in the ideal case the user would be notified 75~\% of the time.
+Furthermore, the users generally are not interested in event being very slightly late (such as a couple minutes) but only after the event is ''considerably'' late.
+What ''considerably late'' means should be chosen by the user who is the domain expert, not the developer.
+In addition, some activites may involve absolute contractual SLA times that are critical and should not be based on statistics but rather the absolute value.
+Similarly, some activities are very short in length so even a one minute delay caused by the clock skew can seem like a percentually large delay.
+The user is the expert knowing the activities and their characteristics.
+For this purpose the choice of what is considered ''late'' is left to the user.
+
+After my process models were available in Jury, a colleague implemented the ''lateness'' syntax into the Jury query language. 
+This allows the user to add a keyword \emph{latest} to the query to run the previously described GROUP BY MAX(timestamp) query.
+Furthermore, the user can add filters for ''lateness'' such as to only show events that are delayed for more than two times the TP75 value.
+The user can also supply an absolute value, or a combination of these two.
+For example, the user may want to be notified for events that are later than two times the TP75 value, but only with a minimum value of five minutes of delay.
+Because all this was added to the query language, no new notification system was needed since Jury could already notify based on queries.
 
 \subsection{User interface}
 
