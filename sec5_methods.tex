@@ -641,8 +641,16 @@ Because all this was added to the query language, no new notification system was
 
 \subsection{User interface}
 
-\nyi{description of user interface}\\
-\nyi{user interface features discovered at mid point}
+The main purpose of this project was to help users understand the event data in Jury.
+Visualizations played a key role in giving the users the ''big picture'' of the submissions and the state of the products.
+Since the users were mostly not developers, the visualizations needed to be easily accessible.
+This required a graphical user interface integrated directly to Jury.
+Furthermore, the visualizations should be intuitive and easily readable by possibly non-technical users.
+
+For the visualizations I used a javascript library called \emph{vis.js} \nyi{citation needed} that was already being used elsewhere in Jury.
+The library supports drawing and manipulating graphs with nodes and edges in the client browser.
+Furthermore, the library supports drawing activities on a timeline out of the box.
+
 
 \nyi{vis js, asp.net mvc, etc}\\
 \nyi{ - displaying the graph}\\
@@ -658,3 +666,5 @@ Because all this was added to the query language, no new notification system was
 \nyi{ - bugs manifesting in graphs (is this really a bad thing?)}\\
 \nyi{ - dealing with rare events (manual review)}\\
 \nyi{ - confidentiality}
+
+\nyi{user interface features discovered at mid point}
