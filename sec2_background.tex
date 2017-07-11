@@ -212,9 +212,10 @@ The model could then be used to estimate the quality of a previously unseen wine
 The model would then output a number from 1 to 10 as the estimate for the wine quality.
 
 Expressed mathematically, regression estimates an output value $r \in \mathbb{R}$, which is a real number \cite{alpaydin}.
-The training set consists of $N$ feature vectors (inputs) $\mathbf{x}^t$ and $N$ output values $r^t$.
+The training set consists of $N \in \mathbb{N}$ feature vectors (inputs) $\mathbf{x}^t \in \mathbb{R}^d$ and $N$ output values $r^t$.
+Here $d \in \mathbb{N}$ is the number of features used as inputs.
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \mathbb{R}$$
-The regression algorithm (the learner) processes the training data and outputs a model $g(\mathbf{x})$ which estimates the output parameter $r$ for a new unseen feature vector $\mathbf{x}$.
+The regression algorithm (the learner) processes the training data and outputs a model $g(\mathbf{x})$ which estimates the output parameter $r$ for a new unseen feature vector $\mathbf{x} \in \mathbb{R}^d$.
 $$g(\mathbf{x}) = r$$
 
 The model is evaluated over a separate test set.
