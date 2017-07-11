@@ -651,12 +651,43 @@ For the visualizations I used a javascript library called \emph{vis.js} \nyi{cit
 The library supports drawing and manipulating graphs with nodes and edges in the client browser.
 Furthermore, the library supports drawing activities on a timeline out of the box.
 
+\nyi{add figures for all the views}
 
-\nyi{vis js, asp.net mvc, etc}\\
-\nyi{ - displaying the graph}\\
-\nyi{ - merging of ''bubbles''}\\
-\nyi{ - timeline view}\\
-\nyi{ - multiple graphs/timelines per page}\\
+The events section of Jury was to have easy access to the three different views outlined before: the log view, the graph view, and the timeline view. Furthermore, the user should be able to select the process model that they want to use for the visualizations.
+For example, an user examining a game submission may want to use the aggregated process model from several days of only game submissions.
+
+As explained before, the process models can be generated from any user-supplied queries.
+However, the team decided to not allow any user generate a model from any query, since processing hundreds of thousands of events to generate a new model is very resource-intensive.
+Only users with admin privileges in Jury were to be able to save queries as process models.
+The admin user can then choose to publish the model to be used by everybody.
+We chose to call these published models ''templates'', since they affect the visual shape of the graph in the visualizations.
+The real-time data is then overlayed on the template.
+
+The user interface was designed with these three goals:
+\begin{itemize}
+    \item The user should be able to switch between the three views without losing prior input such as the search query.
+    \item The user should be able to select the template from the admin-specified queries.
+    \item The interface should help the user find the right keywords and drill down to specific submissions if multiple are shown.
+\end{itemize}
+
+To accomplish the goals the views were set up with a shared header and toolbars.
+The main header with the search bar on top of the page remains the same across all the pages of Jury.
+Furthermore, all the event pages share a header that enables switching between the detailed log view and the visualizations. 
+It allows the user to select the template (the process model) used for the visualizations, since the model is shared between all the search results.
+In addition, each visualization (both in graph view and timeline view) includes its own header showing the basic details about the submission, such as the product name and submission ID. The header also includes shortcuts specific to the submission shown, such as links to queries that only return events belonging to the same submission.
+A small ''hamburger menu'' on each submission includes links to other parts of Jury, such as links to the publisher information, the product information, and to other systems that may have related information.
+
+Using vis.js for the visualizations was straightforward after my algorithms had already generated the graphs on the server side. 
+On the client side (in the user's browser) I only needed to supply vis.js with a JavaScript object containing a list of nodes and a list of edges. When supplied with a list of additional options, vis.js builds a graph and fits it in the view automatically. The user can even manipulate the graph with the mouse to rotate the graph. The graph has simple two dimensional physics where the edges act as springs.
+
+However, the users did not like this visualization. The moving nodes and springs were seen as ''chaotic'' and ''annoying'' rather than useful. 
+The users requested some kind of sorting or ordering in the view, such as aligning the nodes on a horizontal axis. 
+This is why the timeline view was implemented. 
+Similarly as the graph view, vis.js draws and arranges the timeline automatically when supplied a list of nodes with start and end times.
+My algorithm already generated this information, so implementing it was only about formatting it to the right kind of JavaScript object.
+
+The user interface was constructed in an iterative manner, rather than all at once. The link targets, positions, and sizes were adjusted based on what the users wanted. Most of this was done during the second half of my project timeline.
+After adjusting to the users' feedback, the user interface and the event system was released to production to Jury to be used by any Microsoft employee.
 
 \nyi{Make sure the difficulties are all mentioned somewhere}\\
 \nyi{(you'll want these for the presentation)}\\
@@ -665,6 +696,5 @@ Furthermore, the library supports drawing activities on a timeline out of the bo
 \nyi{ - changes in workflow}\\
 \nyi{ - bugs manifesting in graphs (is this really a bad thing?)}\\
 \nyi{ - dealing with rare events (manual review)}\\
-\nyi{ - confidentiality}
-
-\nyi{user interface features discovered at mid point}
+\nyi{ - confidentiality}\\
+\nyi{user interface features discovered at mid point ??}
