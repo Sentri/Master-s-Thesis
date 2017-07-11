@@ -538,6 +538,7 @@ The datasets used contained \nyi{XX~XXX} rows for the JSON template, and \nyi{XX
 % result interpretation
 The machine learning models used in training were Poisson Regression \cite{azurepoisson} and Boosted Decision Trees \cite{azurebdt}.
 \nyi{add: compared/contest, not together}
+The performance of these models was to be tested, and the better performing model was to be used in production.
 These were chosen based on a few factors.
 The first factor was that the model needs to suit the data.
 Since the latencies are values of time measured as activity durations, they fall on a Poisson distribution. 
@@ -662,6 +663,10 @@ Only users with admin privileges in Jury were to be able to save queries as proc
 The admin user can then choose to publish the model to be used by everybody.
 We chose to call these published models ''templates'', since they affect the visual shape of the graph in the visualizations.
 The real-time data is then overlayed on the template.
+
+I also implemented a fallback option for using templates not generated from log data. The store engineers who have developer access to Jury can supply a JSON configuration file containing the shape of the process model. The format of the file was chosen to be the same than what was used in other store backend systems. 
+When using the supplied template file, the system skips the step where past events are fed through the algorithm, and instead reads the shape of the model from the file.  
+This enables the option of having a template in the system that never changes without developer action, for example for debugging purposes.
 
 The user interface was designed with these three goals:
 \begin{itemize}

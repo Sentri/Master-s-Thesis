@@ -228,9 +228,10 @@ The difference between the values is the \emph{error}.
 The aim of machine learning is to minimize this error by choosing a good model for the application and the data, and tuning the model parameters until the desired (low) error is reached.
 
 All this is based on the assumption that the distribution of the features and the labels is the same in the training set, the test set, and for any unseen data point outside these sets. \nyi{cite and add name for the iid}
-Thus, if there is enough information in the training set, the model should be able to use the information to label new data points.
+Thus, if there is enough information in the training set, the model should be able to use the information to label new data points with the same performance as over the test set.
+Thus the performance over the test set can be used to estimate the performance of the model for unseen data.
 
-There are many different regression learners that are based on different theory. The two models used in this thesis are Boosted Decision Trees \nyi{cite} and Poisson Regression \nyi{cite}.
+There are many different regression learners that are based on different theories. The two models used in this thesis are Boosted Decision Trees \nyi{cite} and Poisson Regression \nyi{cite}.
 
 \subsubsection{Boosted decision trees}
 
