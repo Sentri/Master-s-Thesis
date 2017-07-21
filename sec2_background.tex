@@ -231,9 +231,9 @@ All this is based on the assumption that the distribution of the features and th
 Thus, if there is enough information in the training set, the model should be able to use the information to label new data points with the same performance as over the test set.
 Thus the performance over the test set can be used to estimate the performance of the model for unseen data.
 
-There are many different regression learners that are based on different theories. The two models used in this thesis are Boosted Decision Trees \nyi{cite} and Poisson Regression \nyi{cite}.
+There are many different regression learners that are based on different theories. The two models used in this thesis are Poisson Regression \nyi{cite} and Boosted Decision Trees \nyi{cite}.
 
-\subsubsection{Boosted decision trees}
+\subsubsection{Poisson regression}
 
 \nyi{Introduce the concept}
 
@@ -241,9 +241,19 @@ There are many different regression learners that are based on different theorie
 
 \nyi{Talk about practical usage (strengths, limitations)}
 
-\subsubsection{Poisson regression}
+\subsubsection{Boosted decision trees}
 
 \nyi{Introduce the concept}
+
+The boosted decision tree learner in Azure ML is based on LambdaMART \cite{lambdamart2010}.
+LambdaMART is a set of algorithms that implement a forest of regression trees.
+Each tree of the forest is a binary decision tree.
+The result of the regression given by the forest is a linear combination of the outputs of the trees.
+At each node some feature of the data point is compared against a threshold value, starting from the root.
+If the value is lower (or higher) than the threshold value, a decision is made and either the left or the right child node is chosen.
+This is repeated until we reach the leaf node at the bottom of the tree. 
+The resulting value is the value at the node.
+LambdaMART trains both the decision thresholds at the nodes as well as the weights for the linear combination to minimize error over the training set.
 
 \nyi{Explain theory (mathematics)}
 
