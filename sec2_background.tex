@@ -218,6 +218,15 @@ $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, 
 The regression algorithm (the learner) processes the training data and outputs a model $g(\mathbf{x})$ which estimates the output parameter $r$ for a new unseen feature vector $\mathbf{x} \in \mathbb{R}^d$.
 $$g(\mathbf{x}) = r$$
 
+The model $g(\mathbf{x})$ is chosen based on the data and domain knowledge. 
+The models can range from a simple linear models to complex models such as decision forests.
+In theory any model $g: \mathbb{R}^d \rightarrow \mathbb{R}$ can work,
+as long as a learning algorithm for the model exists.
+In the case of features that are not real numbers, a mapping function is used that takes a different type of feature (such as a string or a boolean) and converts it into a real number.
+In the ideal case the model should fit the phenomenon (physical or other) being modeled in the machine learning application.
+However, sometimes the underlying model is not known. 
+In these cases multiple models can be used and compared based on the dataset and any information is available.
+
 The model is evaluated over a separate test set.
 Commonly, the test set is created by separating the training set into two distict sets before the training phase.
 $$\mathcal{D}_{test} = \{ (\mathbf{x}_*^t , r_*^t) \}_{t=1}^{N_{test}}$$
@@ -235,29 +244,45 @@ There are many different regression learners that are based on different theorie
 
 \subsubsection{Poisson regression}
 
-\nyi{Introduce the concept}
+Poisson regression models data with labels that fall into a poisson distribution.
+Poisson distribution often describes count data, such as the count or probablility of events happening during a fixed time interval. \nyi{add references}
+When graphed, the distribution has a peak in the beginning and long tail, as seen from figure \nyi{XX}.
 
-\nyi{Explain theory (mathematics)}
+\nyi{poisson distribution graph}
 
-\nyi{Talk about practical usage (strengths, limitations)}
+\nyi{Explain more theory? (mathematics)}
+
+% Talk about practical usage (strengths, limitations)
+A poisson regression model works well in data involving counts and times that are distibuted along a poisson distribution. 
+In other types of data the poisson regression model will not give good results.
 
 \subsubsection{Boosted decision trees}
 
-\nyi{Introduce the concept}
-
-The boosted decision tree learner in Azure ML is based on LambdaMART \cite{lambdamart2010}.
-LambdaMART is a set of algorithms that implement a forest of regression trees.
-Each tree of the forest is a binary decision tree.
-The result of the regression given by the forest is a linear combination of the outputs of the trees.
-At each node some feature of the data point is compared against a threshold value, starting from the root.
+The second model used in this thesis is boosted decision trees (BDT).
+A \textit{decision tree} is a model for supervised learning that is based on a sequence of splits \cite{alpaydin}.
+The splits form a hierarchical tree.
+The tree consists of internal decision nodes and the terminal leaves containing values.
+To find the result of the regression model, the algorithm steps through the decision nodes starting from the root.
+At each node a component of the feature vector is compared against a predetermined threshold value.
 If the value is lower (or higher) than the threshold value, a decision is made and either the left or the right child node is chosen.
-This is repeated until we reach the leaf node at the bottom of the tree. 
-The resulting value is the value at the node.
-LambdaMART trains both the decision thresholds at the nodes as well as the weights for the linear combination to minimize error over the training set.
+This is repeated until a terminal leaf node is reached at the bottom of the tree. 
+The terminal nodes contain the label values.
+The value in the leaf reached by the iterative algorithm is the result of the regression model.
 
-\nyi{Explain theory (mathematics)}
+The boosted decision tree learner in Azure ML is based on LambdaMART \cite{azurebdt}.
+LambdaMART is a set of algorithms that implement a \textit{forest} of regression trees \cite{lambdamart2010}.
+Gradient boosting \nyi{cite} is used to build a model combining several weaker models to form a stronger model.
+The forest consists of multiple decision trees.
+The result of the regression given by the LambdaMART forest is a linear combination of the outputs of the trees.
+The learner trains the thresholds at the decision nodes and the values at the terminal leaves of each tree, as well as the weights for the linear combination to minimize error over the training set.
 
-\nyi{Talk about practical usage (strengths, limitations)}
+\nyi{Write above paragraph with mathy expressions?}
+
+% Talk about practical usage (strengths, limitations)
+One strength of the boosted decision tree model is that it is highly interpretable and can be used for rule extraction \cite{alpaydin}. Each tree can be converted into a set of IF-THEN rules, and the weights of the linear combination correspond to the importance of each tree. 
+Because of these reasons, the domain expert can analyze the model to see which features are being used and whether the model seems to make sense.
+Furthermore, the model can even provide information about the real world ruleset for the measured phenomenon.
+In general, boosted decision trees work well when the components of the feature vectors are related. In the case of completely independent vectors, a BDT model will not be as good \cite{azurebdt}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Related work

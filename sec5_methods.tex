@@ -533,6 +533,10 @@ The resulting dataset consisted of 16 columns of features such as the package si
 The data was filtered to only contain measurements from valid traces with the requirement of having no errors and conforming to the process model.
 The datasets used contained \nyi{XX~XXX} rows for the JSON template, and \nyi{XX~XXX} rows for the automatically discovered template.
 
+\nyi{Explain features and their formats and how they are mapped into inputs}
+
+\nyi{Add example rows as attachment?}
+
 % Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})
 % data suitability
 % result interpretation
@@ -541,10 +545,12 @@ The machine learning models used in training were Poisson Regression \cite{azure
 The performance of these models was to be tested, and the better performing model was to be used in production.
 These were chosen based on a few factors.
 The first factor was that the model needs to suit the data.
-Since the latencies are values of time measured as activity durations, they fall on a Poisson distribution. 
+Since the latencies are based on the probability of an event happening, they fall on a Poisson distribution. 
 This is why a Poisson Regression model was selected.
 The Boosted Decision Trees model had been used before in the store for application classification with good results, so it was believed to work well with 
 the feature set that I had available for the applications.
+
+\nyi{add graph for poisson distribution of a label}
 
 Second factor for choosing the models was the interpretability of the results.
 Since this project was experimental and there was no baseline, I wanted to be able to inspect the models and reason about their characteristics.
@@ -596,6 +602,12 @@ I performed more tests with these additional features to test whether they impro
     \caption{Latency distribution for manualreview \nyi{remake}}
     \label{fig:manualreview}
 \end{figure}
+
+The best models were found by random model generation.
+This meant that the model parameters were randomized and several models were trained and tested in parallel.
+In my experiment 20 models were trained at the same time, and the best model was chosen.
+This testing was run on a machine with 32 processor cores to ensure quick parallel execution. 
+The resulting numbers can be seen in section \nyi{ref}.
 
 \subsection{Notifications}
 \label{sec:notifications}
