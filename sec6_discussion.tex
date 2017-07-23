@@ -36,6 +36,35 @@
 
 \nyi{ML models and their scores}
 
+\begin{table}[htb]
+\begin{center}
+\begin{tabularx}{\linewidth}{| X | r | r | r | r |}
+\hline
+~ & \multicolumn{2}{c|}{BDT} & \multicolumn{2}{c|}{Poisson} \\
+Dataset & Absolute & RMSE & Absolute & RMSE \\
+\hline
+\textbf{JSON template} &  &  &  &  \\
+No extra features                   & 809.1 & 6290.7 & 881.1 & 5970.6 \\
+with current time                   & 825.2 & 6130.3 & 881.1 & 5971.0 \\
+with manual review                  & 689.7 & 5819.0 & 809.3 & 5800.9 \\
+with resubmission                   & 831.5 & 6255.3 & 881.1 & 5971.2 \\
+with manual review and resubmission & 703.7 & 5807.5 & 808.9 & 5800.8 \\
+with all extra features             & 693.5 & 5801.9 & 808.3 & 5800.4 \\
+\hline
+\textbf{Automatically generated template} &  &  &  &  \\
+No extra features                   & 994.8 & 5756.3 & 1243.9 & 6563.3 \\
+with current time                   & 1099.7 & 6470.5 & 1225.8 & 6558.7 \\
+with manual review                  & 815.1 & 5332.1 & 1038.5 & 5785.0 \\
+with resubmission                   & 1004.3 & 5845.3 & 1219.1 & 6553.8 \\
+with manual review and resubmission & 806.5 & 5428.4 & 1038.4 & 5785.7 \\
+with all extra features             & 787.8 & 5234.4 & 1038.6 & 5785.4 \\
+\hline
+\end{tabularx}
+\end{center}
+\label{tab:mlresults}
+\caption{Results from the best ML models}
+\end{table}
+
 \nyi{User satisfaction}
 
 \subsection{Evaluation}
