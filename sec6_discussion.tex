@@ -25,18 +25,40 @@ evaluate the value of the thesis.
 \end{figure}
 
 \begin{figure}[htb]
-\centering \includegraphics[width=\linewidth]{gfx/graph.png}
-\caption{Graph view \label{fig:graph}}
-\end{figure}
-
-\begin{figure}[htb]
 \centering \includegraphics[width=\linewidth]{gfx/estimates.jpg}
 \caption{Timeline view with estimates \label{fig:estimates}}
 \end{figure}
 
+\begin{figure}[htb]
+\centering \includegraphics[width=\linewidth]{gfx/graph.png}
+\caption{Graph view \label{fig:graph}}
+\end{figure}
+
 Figure \ref{fig:timeline} shows the final product developed in this thesis.
-Figure \ref{fig:graph} shows the alternate directed graph view.
-Figure \ref{fig:estimates} displays the timeline view with the future estimates. The red line describes the current time.
+The topmost bar is the main navigation of the website.
+On the navigation bar the user can query the events.
+The page below can display any number of traces corresponding to the events that match the user's query.
+If a large number of traces would be returned, the view is paged.
+The second bar under the navigation is the event navigation bar I developed, which includes all the functionality that affects all the content on the vents page.
+It allows the user to switch between the log view (See figure \ref{fig:plaineventlog}) and the visualizations.
+It also includes functionality for sorting the visualizations and choosing which process model to build the visualization from.
+
+Each trace returned by the query is visualized as a timeline or a graph. On top of the visualization the user can see the basic information about the trace containing the submission ID and the name of the product.
+Under the visualization there are options to choose how the visualization is displayed (between the log view, the graph view, and the timeline view) and an option to toggle help.
+The visualization can be manipulated with the mouse or a touch screen. It allows panning and zooming actions.
+The user can select or mouseover individual events to see all the metadata related to the event.
+
+In the timeline view (figure \ref{fig:timeline}) the visualization is set on top of a horizontal axis that corresponds to time. The activities shown have start and end times which can be seen visually or in the metadata.
+Parallel activities are stacked on top of each other.
+Figure \ref{fig:estimates} shows the estimations for an incomplete submission.
+The activities yet to happen are drawn with a faint blue color and their estimated start and end times are visualized similarly as the logged activities.
+The red line describes the current time.
+The user can visually see the status of the submission and the activities that are predicted to have happened already.
+
+Figure \ref{fig:graph} shows the alternate directed graph view. In the graph view the directed graph is drawn for the user. The graph nodes are interactive and the edges act as two-dimensional springs.
+The user can thus manipulate the nodes and move them. Panning and zooming actions are also enabled.
+
+\nyi{Talk about user satisfaction here?}
 
 \begin{table}[htb]
 \begin{center}
@@ -97,8 +119,6 @@ with all extra features             & 787.8 & 5234.4 & 1038.6 & 5785.4 \\
 \caption{Results from the best ML models}
 \label{tab:mlresults}
 \end{table}
-
-\nyi{Talk about user satisfaction here?}
 
 \subsection{Evaluation}
 \label{sec:evaluation}
