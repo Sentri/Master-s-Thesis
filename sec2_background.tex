@@ -292,8 +292,31 @@ In general, boosted decision trees work well when the components of the feature 
 \subsection{Related work}
 \label{sec:relatedwork}
 
-\nyi{Bezerra et al. Anomaly Detection using Process Mining (2009)} \cite{bezerra2009anomaly}.
+Process mining has gained interest in the recent years, since it offers possibilities of streamlining business processes and gaining business intelligence (BI) by finding bottlenecks and inefficiencies in the processes.
+Process mining has many uses, such as process discovery \cite{van2016discovery, van2013discovering}, trace clustering \cite{de2016general}, and conformance checking \cite{chomyat2016process}. Furthermore, there's some research done in the area of automatically detecting process anomalies automatically \cite{bezerra2009anomaly}.
 
-\nyi{Getta et al. Mining Periodic patterns from Nested event logs (2014)} \cite{getta2014mining}.
+Process discovery is in the heart of process mining, since most process mining methods rely on modeling the process and taking advantage of the model in some manner.
+Because of this, process discovery is talked about in many papers related to process mining \cite{chomyat2016process, de2016general, van2013discovering, van2015extracting, van2016process,bezerra2009anomaly}.
 
-\nyi{What else...?}
+Conformance checking means making sure the current process conforms to a previously determined set of rules or a model \cite{chomyat2016process}.
+Conformance checking can be especially useful in sectors where conforming to regulations or other such rules is critical for the work.
+Examples of such sectors are the financial sector, medical business, and government institutions.
+Process mining can be used to ensure the regulations are being followed.
+
+The main purpose of my thesis is to help visualize the processes and to show anomalies to the users or even notify about them automatically.
+The definition of \textit{anomaly} is not consistent across research \cite{bezerra2009anomaly}. 
+An anomaly can be anything exceptional or abnormal in the behaviour of a system. 
+It can also describe an error, noise, or fraudulent behaviour.
+Usual definitions include that an anomaly needs to be infrequent, unexpected, and something that deviates with the normal behaviour.
+Precise definition is difficult to formally define, since the definition of what is considered ''normal'' differs between cases. 
+Bezerra et al. \cite{bezerra2009anomaly} present how an established process mining tool ProM can be used to discover models and check their conformance.
+Each trace gets assigned a conformance value (fitness) describing how well it fits the previously discovered model.
+With this method, a threshold value for required model fitness can be assigned to find the anomalous traces.
+However, there is little focus on detecting anomalies real-time.
+
+The past event logs can also be used to build workload histograms \cite{getta2014mining}.
+This method reads event logs with periodic patterns (such as the re-occuring submissions in the Microsoft store).
+The workload information can be used to predict incoming workloads to improve system performance by preparing against peak loads.
+This method is \textit{process enhancement}. 
+An example of process enhancement is detecting periods of low activity and using them to run background tasks.
+This type of balancing decreases the idle time of a system and improves its capability to respond to peak loads \cite{getta2014mining}.
