@@ -46,7 +46,7 @@ and enables it to be useful for different systems in different environments.
 To save costs and time, the solution should adapt to change seamlessly without constant maintenance from the users or the system administrators. However, unintended changes should be detected and notified about.
 
 %   not as easy as it seems
-However, modern software operations all these goals form a challenge.
+However, all these goals together form a challenge in modern software operations.
 Complex, distributed, and interconnected systems may make this kind of monitoring difficult.
 
 \subsection{Microsoft}
@@ -88,7 +88,7 @@ When such an issue arises, engineers and managers need to have tools to investig
 
 The store pipeline consists of multiple separate systems and workflows processing the incoming products.
 If such a workflow does not have detailed monitoring functionality, 
-finding the details to investigate an issue prove to be challenging.
+finding the details to investigate an issue proves to be challenging.
 This kind of workflow is, in essence, a black box system, since for an outside observer there is no information
 about the internal state, only whether the workflow is running or has been completed.
 In addition, the duration of these workflows can vary greatly from seconds to hours to days. 
@@ -96,8 +96,8 @@ In addition, the duration of these workflows can vary greatly from seconds to ho
 %        detecting failures is essential to keep up SLAs and good experience
 %            automation, prioritization, customization
 When running the store, Microsoft is providing a service to retail customers and product publishers.
-To provide good service, the goal is to be transparent enough that the store operations do not hinder the
-business of the customers. Providing accurate information and time estimations to the publishers
+To provide good service, the goal is to be transparent enough that the maintenance and operation of the store do not hinder the business of the customers. 
+Providing accurate information and time estimations to the publishers
 not only helps Microsoft internally, but also helps the publishers' business.
 In addition, Microsoft must adhere to contracts such as
 service level agreements (SLA). These contracts determine, among other metrics, 
@@ -125,7 +125,7 @@ I carried out research and development at Microsoft to answer the following rese
     \item How can the predictions be used to detect anomalies in new events (or lack thereof)?
 \end{enumerate}
 
-For the first question (RQ1), the goal was to have a dynamic and unsupervised monitoring system 
+For the first question (RQ1), the goal was to have an unsupervised monitoring system 
 that uses the current and past logs to automatically determine all the actors, 
 workflows, and steps related to the product submissions.
 The store pipeline is constantly being developed further to be faster and to include more functionality.
