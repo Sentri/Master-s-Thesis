@@ -54,8 +54,33 @@ My project did not concern the event hub, instead I only read the events as they
 
 % specific description of events and how they are stored
 Each event consists of a \textbf{timestamp}, identifying fields, and some metadata. 
-The event timestamp describes the exact time the event happened. There are also three reference fields referencing the \textbf{submission}, the \textbf{product}, and the \textbf{publisher} that the event belongs to. 
-In addition to these, the three identifier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}. 
+The event also has a \textbf{submission identifier} which identifies the trace that the event belongs to.
+In other words, all events with the same submission identifiers belong to a single trace.
+The event timestamp describes the exact time the event happened. There are also two reference fields referencing the \textbf{product} and the \textbf{publisher} that the event belongs to. 
+Since these references are not used in this thesis, they can be seen simply as integer type identifier fields.
+In addition to these, the three identifier fields relevant in this research are textual (string-type) fields \textbf{Source}, \textbf{Subsource}, and \textbf{Status}.
+The event type is described in table \ref{tab:event}.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{| c |}
+\hline
+\textbf{Event} \\
+\hline
+SubmissionId : long integer\\
+ProductId : long integer\\
+PublisherId : long integer\\
+Timestamp : DateTime\\
+Source : string\\
+Subsource : string\\
+Status : string\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Event and its fields}
+\label{tab:event}
+\end{table}
+
 The Source field identifies the even source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. 
 Thus, the Source--Subsource pair is enough to identify the exact step of the workflow. 
 The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. 
@@ -63,16 +88,31 @@ This field can be used to reason about the duration of the events and to determi
 A final-status event means that the processor has completed the activity and will not be sending further events for the activity in question.
 For example, the states ''Completed'' and ''Failed'' are final statuses.
 The ''In progress'' events are \emph{non-final}, since they will eventually be followed by a final status such as ''Completed'' or ''Failed'' event with the same Source and Subsource.
-These events are fired to show that a long-running activity is still running and hasn't failed.
-
-\nyi{Figure illustrating an event with all its fields}
-
-\nyi{Table listing of final and not final statuses}
+These events are fired to show that a long-running activity has been started, is still running, and hasn't failed.
+The common statuses are listed in table \ref{tab:statuses}.
 
 % methods explaining splitting and grouping of traces
-Thus, an arbitrary set of events can be grouped into traces by the submission field. Within the grouping each individual step can then be identified by the Source--Subsource pair.
+Thus, an arbitrary set of events can be grouped into traces by the submission identifier field. Within the grouping each individual step can then be identified by the Source--Subsource pair.
 
-\nyi{Figure of events grouped into traces?}
+\begin{table}[htb]
+\begin{center}
+\begin{tabularx}{\linewidth}{| l | c | X | }
+\hline
+\textbf{Status} & \textbf{Final} & \textbf{Meaning} \\
+\hline
+Completed   & Yes & The activity was completed successfully. \\
+\hline
+Skipped     & Yes & The activity was not needed for this submission and was skipped. \\
+\hline
+Failed      & Yes & The activity was completed with an error. The activity may be retried or the whole workflow may be stopped. \\
+\hline
+In progress & No  & The activity has been started and will finish later. \\
+\hline
+\end{tabularx}
+\end{center}
+\caption{The common values of the status field of events}
+\label{tab:statuses}
+\end{table}
 
 \subsubsection{Challenges found in the production data}
 \label{sec:datachallenges}
@@ -92,7 +132,7 @@ Furthermore, some events may be lost because of bugs, unhandled exceptions, or o
 This means that ordering the events by timestamp generates noise, which needs to be considered.
 
 \begin{figure}[htb]
-\centering \includegraphics[width=0.5\linewidth]{gfx/slice.png}
+\centering \includegraphics[width=0.5\linewidth]{gfx/figures/slice.png}
 \caption{Time slice and incomplete logs \nyi{redo}}
 \label{fig:timeslice}
 \end{figure}
@@ -132,14 +172,13 @@ While the main goal of the project was established as the project started in ear
 the details needed some research. For this reason, an iterative process was set up.
 I held weekly meetings with my manager, as well as weekly project meetings together with my mentor, my manager, and the team program manager. In addition, in the mid-way point I held presentations to the end-users of the project to find out more requirements and to get feedback. Because of this, the project was divided in two iterations.
 The weekly meetings were carried out through both iterations.
+The complete timeline of the project can be seen in figure \ref{fig:projecttimeline}.
 
-The project was carried out as follows:\\
-\textbf{November -- December}: Preparation and background research.\\
-\textbf{January -- Mid-February}: First iteration.\\
-\textbf{Mid-February}: User meetings.\\
-\textbf{Mid-February -- March}: Second iteration.\\
-\textbf{End of March}: Project end and delivery.\\
-\nyi{Format this as a figure}
+\begin{figure}[htb]
+\centering \includegraphics[width=0.9\linewidth]{gfx/figures/projecttimeline.png}
+\caption{Project timeline}
+\label{fig:projecttimeline}
+\end{figure}
 
 % - first iteration: supporting work, backend, graphing, initial UI
 %   - explorative prototypes

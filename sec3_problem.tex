@@ -9,7 +9,7 @@
 %% intro
 In this section I will describe the distributed product ingestion and publishing system examined in this thesis (later: \textit{system})  and elaborate on the 
 problems that I was solving. I will also describe the users of the project developed in this thesis (later: \textit{project}) and what the needs for
-each of them were. \nyi{...}
+each of them were, as discovered by the requirements engineering work I did.
 
 %% description of the store
 %% ingestion system
@@ -76,12 +76,17 @@ Furthermore, many steps of the workflow are independent of each other.
 Thus, a single submission can have multiple steps in progress at the same time.
 These steps are often handled by an ''aggregator'' step which waits for 
 all the parallel steps to finish before continuing the workflow process.
+Figure \ref{fig:workflowexample} illustrates this.
 The different steps of the workflow have different durations that differ based on
 the step itself, the characteristics of the package, and the current workload of the system.
 Because of these uncertainties, traces from two different submissions may differ from each other, 
 since the completion order of the parallel steps is unknown.
 
-\nyi{Insert graph displaying a workflow with sequential and concurrent steps}
+\begin{figure}[htb]
+\centering \includegraphics[width=0.9\linewidth]{gfx/figures/workflow.png}
+\caption{A workflow with sequential, parallel, and aggregator steps}
+\label{fig:workflowexample}
+\end{figure}
 
 When each step completes, an event is generated.
 These events are collected from the different processors into a single log database.
@@ -109,9 +114,10 @@ and what are their needs regarding to the project. There were five user groups r
 \item[Publishers] are the independent developers and companies submitting the packages to the store.
 \item[Release managers] are the contacts on Microsoft's side who communicate with the large publishing companies who develop the ''triple-A'' games and applications.
 \item[Manual reviewers] are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes for example checking for fraud or inappropriate graphics or language.
-The needs for each user group are covered in table \ref{tab:userneeds}.
-I used the ''user story'' format for documenting the needs.
 \end{description}
+
+The needs for each user group are covered in table \ref{tab:userneeds}.
+I used the ''user story'' format for documenting the needs \cite{cohn2004user}.
 
 %% description that user needs were not fully known so they need engineering
 It should be noted that the user needs were not fully understood in the beginning. The project was done in two cycles, with some necessary requirements engineering done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 
@@ -122,37 +128,46 @@ The user needs found at the start of the second section were related mostly on t
 
 \begin{table}[htb]
 \begin{center}
-\begin{tabularx}{\linewidth}{| l | X |}
+\begin{tabularx}{\linewidth}{| X |}
 \hline
-\textbf{User group} & \textbf{User stories} \nyi{TODO: format as user stories} \\
-\hline \hline
-\textbf{Developers} & 
-- Need to see the current status of a submission for investigating issues with a single submission or product \newline 
-- Need to see the shape of the workflows to find issues like race conditions\newline
-- Need to see statistics to report average times \newline
-- Need to be notified of any anomalies in the workflow to investigate issues faster\newline
-- Need to be able to customize their views to drill down to the specific events they care about\newline
-- Need to be notified about big issues fast\\
+
+\textbf{As a developer I want...} \newline
+- to see the current status of a submission so that I can investigate issues with a single submission or product.\newline
+- to see the shape of the store workflows so that I can find issues in the dependencies.\newline
+- to see statistics about the activities so that I can write reports to my superiors.\newline
+- to be able to customize what I see so that I can have exactly the information I care about.\newline
+- to be notified of any anomalies in the workflow so that I can investigate issues faster.\newline
+- to be notified about big issues distinctively so that I can prioritize my work.
+\\
 \hline
-\textbf{Managers} & 
-- Need statistics of the workflows to report the system performance \\
+
+\textbf{As a manager I want...} \newline
+- to have statistics of the workflows so that I can report the system performance and improvements over time to my superiors.
+\\
 \hline
-\textbf{Publishers} & 
-- Need to be able to know estimated times for submission completion \newline
-- Need to be able to inquire about the status of their submissions \\
+
+\textbf{As a publisher I want...} \newline
+- to be able to know estimated times for submission completion so that I can schedule my work day.\newline
+- to be able to inquire about the status of my submissions so that I can escalate any issues that arise
+\\
 \hline
-\textbf{Release managers} &
-- Need to see the detailed status of a single product or submission \newline
-- Need to see the big picture status quickly for all submissions related to a single product or publisher \newline
-- Need to be notified about completion of crucial steps of the workflow or any issues \newline
-- Need to be able to customize the views to show the submissions they are interested in \\
+
+\textbf{As a release manager I want...} \newline
+- to see the detailed status of a single product or submission so that I can report it onwards. \newline
+- to see the big picture status for all submissions related to a single product or publisher quickly so that I can save time. \newline
+- to be notified about completion of crucial steps of the workflow or any issues so that I can schedule and prioritize my work. \newline
+- to be able to customize what I see so that I do not see information about products that I do not own.
+\\
 \hline
-\textbf{Manual reviewers} & 
-- Need to be notified in advance when a product is heading towards a manual review to schedule their workload more efficiently \\
+
+\textbf{As a manual reviewer I want...} \newline
+- to be notified in advance when a product is heading towards a manual review so that I can schedulemy work day.
+\\
 \hline
+
 \end{tabularx}
 \end{center}
-\caption{Initial user needs found in January \nyi{is this all?}}
+\caption{Initial user needs found in January}
 \label{tab:userneeds}
 \end{table}
 

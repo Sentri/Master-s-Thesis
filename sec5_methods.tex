@@ -26,8 +26,8 @@ I will also introduce the technology choices and explain how they were used to i
 
 The decision about which technologies I would use for my project was straightforward.
 Since the project was to integrate with the existing Jury system, I chose to use shared technologies and libraries.
-Jury was built with C\#, running as an ASP.NET MVC application with the .NET runtime \nyi{cite? version?}.
-The database was running on SQL Server, and the query engine was set up with a object-relational mapping tool called Entity Framework. The approach used was a ''data first'' model, where the system automatically generates models (classes in code) based on the database schema. \nyi{links, citations}
+Jury was built with C\#, running as an ASP.NET MVC application with .NET Framework.
+The database was running on SQL Server, and the query engine was set up with a object-relational mapping tool called Entity Framework. \nyi{Need versions?} The approach used was a ''data first'' model, where the system automatically generates models (classes in code) based on the database schema. \nyi{links, citations}
 The user provided text queries were translated to database queries with LINQ. \nyi{elaborate?}
 I used these same technologies in my project.
 
@@ -41,8 +41,11 @@ The system will not have any knowledge of what filtering has been used, it only 
 The only check the system needs to do is to check the events against the current user's permissions, to protect confidential information.
 
 The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
-A query is a string containing user-provided criteria for which events to show.
-This could for example be querying for a specific product or a specific submission ID. \nyi{examples of queries???}
+A query is a string containing user-provided criteria for which events to show, based on the fields of the event entry (see table \ref{tab:event}).
+This could for example be querying for a specific product or a specific submission ID.
+For example, the query ''\texttt{submissionid is 100100}'' would return all events from the specified submission.
+Multiple conditions can be combined to form a more complex query.
+
 The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
 After the query has been executed, the result is a set of events.
 Because of the challenges outlined in section \ref{sec:datachallenges}, a pre-processing step is needed.
@@ -62,11 +65,15 @@ By using different time slices or different filters on which events to include, 
 For example, we can try to generate a more accurate process model by filtering.
 If we filter the events in the pre-processing step to only include events related to certain products
 or product types, we can assume that the process model and the statistics will better describe those products.
+
 However, filtering reduces the number of events used for the model, which can lead to overfitting.
-\nyi{some theory here? overfitting? explain?}
+For example, if the model is generated for only submissions that contain large file sizes, it may affect the parallelism detection. 
+Since in theory some of the activity durations can depend on the file size, a query only containing large files may result in these activities always appear to complete later in the log.
+This would result in inaccurate process models.
+Because of this, care should be taken when creating models from small datasets.
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.7\linewidth]{gfx/plaineventlog.png}
+    \centering \includegraphics[width=0.7\linewidth]{gfx/screenshots/plaineventlog.png}
     \caption{Event log query result view in Jury}
     \label{fig:plaineventlog}
 \end{figure}
@@ -168,7 +175,7 @@ Furthermore, it should be noted that these relations are symmetrical:
 \label{def:logrelations}
 \end{definition}
 
-In the example, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ we get $a \rightarrow b$. \nyi{formatting?}
+In the example, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ we get $a \rightarrow b$.
 However, by comparing $M[b,c] = 3$ to $M[c,b] = 3$ we see that $b || c$. 
 Figure \ref{tab:examplefootprint} shows the generated footprint for the matrix shown in figure \ref{fig:examplematrix}.
 Note that it is enough to only examine the upper triangle of the matrix, since the generated footprint is always symmetrical across the diagonal.
@@ -204,8 +211,8 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
     \end{subfigure}
     % directed graph example
     \begin{subfigure}[h]{0.4\linewidth}
-        \centering \includegraphics[width=\linewidth]{gfx/graphthing.jpg}
-        \caption{Generated graph \nyi{remake}}
+        \centering \includegraphics[width=\linewidth]{gfx/figures/graphthing.jpg}
+        \caption{Generated graph}
         \label{fig:examplegraph}
     \end{subfigure}
     \caption{Graph generation from the footprint}
@@ -227,7 +234,7 @@ This is the aforementioned log noise.
 If left as is, the noise will create invalid extraneous arcs in the graph.
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/noise.png}
+    \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/noise.png}
     \caption{Observed noise in production data (logarithmic scale)}
     \label{fig:examplenoise}
 \end{figure}
@@ -275,11 +282,11 @@ After the graph is generated, I can store the chosen key statistics (TP50, TP75,
 The result of this method is a directed graph with nodes and edges.
 Each node corresponds to an activity in the process model.
 Each edge corresponds to a possible transition (pair of two consecutive events) in the trace.
-The model can be verified by ''re-playing'' a trace. \nyi{elaborate?}
+The model can be verified by ''re-playing'' a trace as described in section \ref{sec:processmodelsdsc}.
 Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
 The graph describes the process model that was discovered from the event log.
 
-\nyi{figure for trace replay}
+\nyi{Implementing the option of reading the graph shape from a JSON definition file}
 
 \subsubsection{Paging}
 \label{sec:paging}
@@ -298,17 +305,13 @@ After five submission IDs has been retrieved, they are used to query all events 
 
 This is implemented with two SQL queries.
 The first query that retrieves the five submissions can be paged with a standard page selector user interface component.
-This means that the user can choose to see the next ''page'' of submissions containing submissions 6-10 and onwards. \nyi{format}
+This means that the user can choose to see the next ''page'' of submissions containing submissions 6-10 and onwards.
 The first query uses a GROUP BY clause to group the events by submission ID and to choose the maximum timestamp.
 This result is then sorted and teh top five IDs are selected.
 This selection can be paged with a SQL OFFSET clause based on the user's page selection.
 The query runs in only a couple seconds on a cloud-hosted SQL Server instance.
 The second query retrieves all events that belong to the retrieved five submissions.
 These events are then passed to the graph generation algorithm.
-
-\subsubsection{Alternative methods}
-\nyi{Maybe: Talk about implementing the alternative graph? not much to say..}\\
-\nyi{Implementing the option of reading the graph shape from a JSON definition file}
 
 \subsubsection{Storing the graphs}
 \label{storinggraphs}
@@ -384,7 +387,7 @@ This can be repeated until we reach the end of the trace.
 The result is a ''colored'' graph where all the activities that have been finished have a status and a time.
 The nodes for the activities yet to come remain uncolored.
 
-\nyi{graph coloring figure}
+\nyi{Does this need an illustration?}
 
 This graph can now be shown to the user.
 The nodes are drawn on the screen as circles or rectangles, and the directed edges as arrows between them.
@@ -396,7 +399,7 @@ The colors help the user to get an immediate understanding of what the state of 
 An example can be seen in figure \ref{fig:coloredgraph}.
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.9\linewidth]{gfx/graphcolor.png}
+    \centering \includegraphics[width=0.9\linewidth]{gfx/screenshots/graphcolor.png}
     \caption{Colored graph view}
     \label{fig:coloredgraph}
 \end{figure}
@@ -409,7 +412,7 @@ When this happens, the trace is split in two and the re-publish will be shown as
 
 \subsection{Estimating the future}
 
-One of the requirements discovered \nyi{where?} was to be able to provide estimations for the submission workflow completion times (labelled \emph{estimated time of arrival} or ETA). 
+One of the requirements discovered (see table \ref{tab:userneeds}) was to be able to provide estimations for the submission workflow completion times (labelled \emph{estimated time of arrival} or ETA). 
 To provide such estimates I developed a method to traverse the graph forward after it has been colored.
 
 % Estimating future on incomplete logs
@@ -471,7 +474,7 @@ These estimations can be shown to the user when the graph is visualized.
 \subsubsection{Timeline view}
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/basictimeline.png}
+    \centering \includegraphics[width=0.6\linewidth]{gfx/screenshots/basictimeline.png}
     \caption{A basic example of a ''timeline'' \nyi{make a better one}}
     \label{fig:basictimeline}
 \end{figure}
@@ -564,7 +567,7 @@ The average error and the mean square error values were to be used to evaluate m
 Lastly, if multiple accurate models was to be found, the model training and regression performance would be used to evaluate them.
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/resubmissions.png}
+    \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/resubmissions.png}
     \caption{Latency distribution for resubmissions \nyi{remake}}
     \label{fig:resubmissions}
 \end{figure}
@@ -598,7 +601,7 @@ This was used similarly to add the manual review boolean feature into the datase
 I performed more tests with these additional features to test whether they improved model accuracy.
 
 \begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/manualreview.png}
+    \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/manualreview.png}
     \caption{Latency distribution for manualreview \nyi{remake}}
     \label{fig:manualreview}
 \end{figure}
