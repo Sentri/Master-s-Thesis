@@ -286,7 +286,19 @@ The model can be verified by ''re-playing'' a trace as described in section \ref
 Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
 The graph describes the process model that was discovered from the event log.
 
-\nyi{Implementing the option of reading the graph shape from a JSON definition file}
+\subsubsection{Loading graphs from a file}
+\label{sec:jsonfile}
+
+As a secondary option, I developed a method to bypass the graph generation algorithm completely, and instead load the shape of the model from a JSON definition file.
+By using a definition file, the engineers can ''force'' a template to have a specific exact shape.
+This is useful in a few applications.
+In some cases it is useful to have a ''stable'' graph with a pre-defined shape.
+Since the algorithm is unsupervised and train itself constantly with a multiple day time window (e.g. the last 7 days), any changes made into the process may take the same time to become visible in the graph.
+Additionally, small datasets can be too noisy for the algorithm to correctly identify the shape.
+In such cases, the engineer can supply a JSON file.
+This only affects the graph shape discovery. 
+All the other parts of the systems work identically for both cases.
+This feature can be toggled on a template by template basis, so both JSON-defined and automatically generated templates can be used side by side.
 
 \subsubsection{Paging}
 \label{sec:paging}
@@ -530,11 +542,11 @@ Had the model accuracy been proven to be more accurate than the statistics, the 
 
 % Explain training dataset generation
 The training dataset was generated from a time slice of the event logs. 
-By using both a predetermined (JSON) process model \nyi{should be introduced somewhere before} and the automatically discovered process model, two datasets were created. The dataset contained the observed values for the latencies, labelled by the activity transition and the application it belongs to.
+By using both a predetermined (JSON) process model (see section \ref{sec:jsonfile}) and the automatically discovered process model, two datasets were created. The dataset contained the observed values for the latencies, labelled by the activity transition and the application it belongs to.
 These rows were then joined with a dataset of known applications and their characteristics to create the final training data.
 The resulting dataset consisted of 16 columns of features such as the package size and the current transition (activity being observed), and a label column corresponding to the measured latency in seconds. \nyi{does this need a concrete listing?}
 The data was filtered to only contain measurements from valid traces with the requirement of having no errors and conforming to the process model.
-The datasets used contained \nyi{XX~XXX} rows for the JSON template, and \nyi{XX~XXX} rows for the automatically discovered template.
+The datasets used contained \nyi{XX~XXX} rows for the JSON generated template, and \nyi{XX~XXX} rows for the automatically discovered template.
 
 \nyi{Explain features and their formats and how they are mapped into inputs}
 

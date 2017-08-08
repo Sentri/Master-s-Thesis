@@ -7,9 +7,9 @@
 
 \subsection{Motivation}
 %       Importance of accurate real time data
-Having diagnostics and real-time data is important in the modern software operations.
+Having diagnostics and real-time data is important in modern software operations.
 Dashboards, visualizations, and interactive logging is becoming more and more important
-in the fast-changing digital world. Often these solutions are labeled Business Intelligence.
+in the quickly changing digital world. Often these solutions are labeled Business Intelligence.
 Having an accurate sense of current system status and low response time to faults can provide an advantage
 in business against competitors.
 
@@ -18,40 +18,37 @@ in business against competitors.
 
 In software operations, many stakeholders are interested in this information. 
 These stakeholders come from different backgrounds with different kinds of expertise.
-The stakeholders can include for example developers, system administrators, project managers, and partner representatives.
-This means that not all people interested in the information have the same level of technical ability to 
-interpret for example raw system logs. Additionally, there may be issues of confidentiality and
-controlling who can see which data is often necessary.
+and can include, among others, developers, system administrators, project managers, and partner representatives.
+This means that not all people interested in the information have the same level of technical ability to interpret, for example, raw system logs. 
+Additionally, there may be issues of confidentiality, and it is often important to control who can see what data.
 
 Furthermore, different people are interested in different granularities of information.
-The engineers have different needs for what they need to see compared to higher level managers
-or partner representatives.
+The engineers might want to see fine detail whereas higher level managers want aggregation and averages.
 Thus, having customizable views for this data can be crucial,
-since the users want to see the information that helps them in their jobs, nothing less and nothing more.
-
+since the users want to only see the information that helps them in their jobs.
 %       Predicting future events to give information and schedule tasks
-In addition to views to the present, a peek to the future can provide a major advantage.
+In addition to views of the present, a peek into the future can provide a major advantage.
 Being able to predict what happens soon in the future helps with scheduling tasks and lets people react 
-to events before they even happen. With technologies like machine learning we can learn patterns in data and 
+to events before they happen. With technologies like machine learning we can learn patterns in data and 
 start estimating information beyond the present time.
 
 %       Loosely coupling diagnostics from systems
 %       Adapting to change in agile and quickly changing environment
-Another aspect of software operations is that they are ever-changing. 
-Today's bleeding edge is tomorrow's obsolete. A tightly coupled diagnostics system
-becomes useless when the system or a workflow changes significantly. Any analytics or visualization solution should
-be agnostic to what the system does in reality and what specific technologies it uses. 
-This keeps the solution relevant for a long lifetime, 
-and enables it to be useful for different systems in different environments. 
-To save costs and time, the solution should adapt to change seamlessly without constant maintenance from the users or the system administrators. However, unintended changes should be detected and notified about.
+Another aspect of software operations is that they are ever-changing: today's bleeding edge is tomorrow's obsolete. 
+A tightly coupled diagnostics system becomes useless when the system or workflow changes significantly. 
+Any analytics or visualization solution should be agnostic to what the system does in reality and what specific technologies it uses. 
+This keeps the solution relevant for a long lifetime and enables it to be useful for different systems in different environments. 
+To save costs and time the solution should adapt to change seamlessly without constant maintenance from the users or the system administrators. However, unintended changes should be detected and notified about.
 
 %   not as easy as it seems
-However, all these goals together form a challenge in modern software operations.
-Complex, distributed, and interconnected systems may make this kind of monitoring difficult.
+All these goals come together to form a challenge in modern software operations.
+The systems being monitored are complex, distributed, and interconnected.
+Providing business intelligence in real-time, showing different information to different people, and dynamically adapting to change are all difficult tasks on their own and trying to succeed in all of them is an even bigger challenge to solve.
+The solution to this is a system that is able to succeed in these three aspects without human involvement.
 
 \subsection{Microsoft}
 %        store with tons of products and parallel workflows ongoing continuously
-At a multinational company as large as Microsoft, the scale of information is staggering.
+At a multinational company as large as Microsoft the scale of information is staggering.
 Distributed systems process data and generate log entries concurrently in the numbers of terabytes.
 No single person can monitor all the logs from even a single system without the help of automated
 graphs, alerts, and notifications.  
@@ -59,11 +56,11 @@ graphs, alerts, and notifications.
 % relate this into the store
 One of these systems is the Microsoft Windows store. The store contains hundreds of thousands of products
 such as apps and games. Publishers such as software companies and individual developers submit thousands of 
-products in the store each day. Before the products reach the public retail store, they need to be processed
-through a pipeline of multiple steps. These steps can include collecting data, validating the package integrity, and
-other automated and manual checks to make sure the product should be allowed in the store, 
+products to the store each day. Before the products reach the public retail store, however, they need to be processed
+through a pipeline of multiple steps. These steps can data collection, validating the package integrity, and
+other automated and manual checks to make sure the product should be allowed in the store,
 and that the store systems have all the information they need to function.
-Each product submission produces log entries to record what has happened in the past and what is happening right now.
+Each product submission produces log entries that document these steps.
 
 %        many different users need different kinds of information
 %        third party developers and customers want to know what is going on
@@ -71,28 +68,16 @@ These system log entries are collected and stored as they happen.
 Different stakeholders from software developers and engineers to third-party publishers and retail users 
 may benefit from this data. However, the needs for each of them are
 different with regards to detail and types of information.
-The engineers often need very detailed information from all the processes and parts of the system to debug an issue real-time,
-while a third party submitting a product may only be concerned on the big picture of whether their 
+The engineers often need very detailed information from all the processes and parts of the system to debug an issue in real-time,
+while a third party submitting a product may only be concerned with the big picture of whether their 
 product is available in the retail store or not.
 
-Furthermore, issues of privacy and confidentiality further complicate this issue.
+Furthermore, concerns of privacy and confidentiality further complicate this issue.
 For example, the detailed information the engineers need is often confidential to Microsoft or its partners.
-Similarly, the high-level information shown to third party publishers is still private to them 
-and can only be shown for the products that they own.
-This information is business-critical when Microsoft is dealing with high profile publishers such as big game companies.
+The product publishers need access to the statistics of their own products, but should not see data that belongs to other publishers.
+This information is business-critical when Microsoft is dealing with high profile publishers such as high-profile game companies.
 
 %            we need to be able to answer and provide a good service
-Like any complex and ever-changing system, at any time some part of the system may end up in a fault
-which causes the system to function against the expected and correct flow.
-When such an issue arises, engineers and managers need to have tools to investigate what is happening. 
-
-The store pipeline consists of multiple separate systems and workflows processing the incoming products.
-If such a workflow does not have detailed monitoring functionality, 
-finding the details to investigate an issue proves to be challenging.
-This kind of workflow is, in essence, a black box system, since for an outside observer there is no information
-about the internal state, only whether the workflow is running or has been completed.
-In addition, the duration of these workflows can vary greatly from seconds to hours to days. 
-
 %        detecting failures is essential to keep up SLAs and good experience
 %            automation, prioritization, customization
 When running the store, Microsoft is providing a service to retail customers and product publishers.
@@ -100,20 +85,31 @@ To provide good service, the goal is to be transparent enough that the maintenan
 Providing accurate information and time estimations to the publishers
 not only helps Microsoft internally, but also helps the publishers' business.
 In addition, Microsoft must adhere to contracts such as
-service level agreements (SLA). These contracts determine, among other metrics, 
+service level agreements (SLA) which determine, among other metrics, 
 maximum response times and lengths for various processes.
 For example, there is an SLA for how long a product submission can take from the beginning to when it is available in the store.
-Prioritizing tasks and notifying about faults as early as possible allows Microsoft to provide a good service. 
-Furthermore, these notifications should be highly customizable so they go to the right people at the right time.
+
+Like in any complex system, sometimes things go wrong.
+When an issue arises, engineers and managers need to have tools to investigate what is happening. 
+The store pipeline consists of multiple separate systems and workflows processing the incoming products.
+Detecting faults as they happen is crucial for the people responsible for maintaining the system.
+If such a workflow does not have detailed monitoring functionality, 
+finding the details to investigate an issue proves to be challenging.
+This kind of workflow is, in essence, a black box system, since there is no information for an outside observer
+about the internal state;
+they are only able to see whether the workflow is running or has been completed.
+In addition, the duration of these workflows can vary greatly from seconds to hours to days.
 
 This is where an intelligent logging, visualization, and notification tool is needed. 
 A solution that provides both the big picture and the details will help investigate issues faster and
 provide good service to third party publishers and customers.
+When the people responsible have all the right information they are able to assess the severity of anomalies and prioritize their time.
+This allows Microsoft to provide a good service.
 
 \subsection{Research goals}
 %		Questions and elaboration
 %       Scope and main concepts of research
-In this thesis I investigated methods of monitoring and visualizing the product submission workflows in the Microsoft Windows store.
+In this thesis I investigated methods for monitoring and visualizing the product submission workflows in the Microsoft Windows store.
 These workflows are triggered based on real world events, often by developers submitting applications and games to the store.
 I investigated ways of analyzing these workflows in real time and providing useful information to different users with different needs. 
 
@@ -129,17 +125,16 @@ For the first question (RQ1), the goal was to have an unsupervised monitoring sy
 that uses the current and past logs to automatically determine all the actors, 
 workflows, and steps related to the product submissions.
 The store pipeline is constantly being developed further to be faster and to include more functionality.
-The system should require as little maintenance as possible, retraining itself automatically and often to adapt to change.
+The system should require as little maintenance as possible, instead retraining itself automatically and often to adapt to change.
 In addition, the project should include as little hardcoded configuration as possible.
 
-The second goal for the project was the capability to estimate future events (RQ2). 
+The second goal for the project was the capability to estimate future events within the system (RQ2). 
 Many stakeholders are interested in the pipeline completion times, so they can schedule their tasks accordingly.
-Thirdly, comparisons between the estimations and the realized event times should be used to notify 
-about any anomalies, faults, or delays in the pipeline (RQ3).
+Comparisons between the estimations and the realized event times should be used to notify people about any anomalies, faults, or delays in the pipeline that are relevant to them (RQ3).
 
 A further goal for the project developed in this thesis was that it should not be tightly coupled to the 
 specific submission workflows in the store. The solution should not depend on the specific activities so
-it requires less maintenance and could be reused in other systems.
+it requires less maintenance and can be reused in other systems.
 
 \subsection{Structure of the Thesis}
 %   d. Structure of thesis
