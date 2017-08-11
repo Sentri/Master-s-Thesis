@@ -181,25 +181,16 @@ For example, if $a \rightarrow b$, $b \rightarrow c$, and $a \rightarrow c$, thi
 
 \subsection{Machine learning}
 
-Machine learning means the study and development of algorithms that give computers the ability to learn from data without being explicitly programmed for that data. 
+The term \textit{machine learning} means the study and development of algorithms that give computers the ability to learn from data without being explicitly programmed for that data. 
 The traditional approach in programming is to explicitly define the steps the computer should take to solve a problem.
 However, sometimes you know the input to a problem and what the solution should be, but not how to get to the solution.
 Figure \ref{fig:traditionalvsml} illustrates this fundamental difference.
-For example, we could have a thousand photos of birds and a thousand photos of animals other than birds.
-For these photos we know exactly which ones are the birds, but we don't know exactly what rules in the pixels of an image makes it a bird photo.
-This situation is what machine learning algorithms are meant for.
-
-Machine learning is data driven and the focus is less on traditional programming instructions.
-The machine learning algorithms focus on finding patterns and models in data.
-The patterns can then be used to process new data or make predictions.
-
-Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of \textit{training data} with predefined labels. 
-This training data is the ''known'' data points of the ''seen'' data.
-For example in the case of email spam detection, the training data could be a set of emails and labels.
-The emails would have been labelled ''spam'' or ''not spam'' when constructing the training data. 
-Usually these labels come from real world measurements or manual (human) labeling.
-The supervised machine learning algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new (unseen) data.
-A separate set of data points called the \emph{test set} is used to evaluate the model performace.
+For example, we can look at the problem of computer vision.
+As an input we could have a thousand photos of birds and a thousand photos of without birds.
+For us humans it is easy to recognize a bird and decide which of these two groups an arbitrary photo belongs to.
+What we don't know are the exact rules that make a photo a "bird photo".
+It would be very difficult to program an algorithm that examines the pixels of a new photo and decides whether there is a bird in the image.
+This situation is a good example of what machine learning algorithms excel in.
 
 \begin{figure}[htb]
 \centering \includegraphics[width=0.9\linewidth]{gfx/figures/traditionalvsml.png}
@@ -207,33 +198,46 @@ A separate set of data points called the \emph{test set} is used to evaluate the
 \label{fig:traditionalvsml}
 \end{figure}
 
+Machine learning is data driven and the focus is less on traditional programming instructions.
+The machine learning algorithms focus on finding patterns and models in data.
+The patterns can then be used to process new data or make predictions.
+
+Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of \textit{training data} with predefined labels. 
+This training data is the ''known'' data points of the ''seen'' data.
+Usually these labels come from real world measurements or manual (human) labeling.
+For example in the computer vision problem described before, the training photos could be manually labeled by humans as ''bird'' and ''no bird''.
+The supervised machine learning algorithm uses this labeled data to learn patterns in the \emph{training phase}. After the training, computer can then use the information learned to label new (previously unseen) data.
+A separate set of data points called the \emph{test set} is used to evaluate the model performance.
+The assumption is that the performance over the test set is an estimate of the performance over new data.
+
 In classification tasks the models try to predict a \emph{class} for an unknown datapoint. The classes are discrete and the number of classes is finite. In binary classification there are two possible classes, often labelled 1 and 0, or true and false, as seen in the email example above. In regression tasks the predictions result in a real number instead of discrete values, such as when predicting a length of time.
 Different models are used for these different tasks.
 The model best suited for an application depends on the distrubution of the possible values and other characteristics of the phenomenom being modeled.
 
 In conclusion, Machine Learning is a set of algorithms and models that leverage a large dataset to estimate some feature of new datapoints.
-In classification tasks, this feature is chosen from a finite set of possible classes, whereas in regression tasks the value estimated is a real number.
+In \textit{classification} tasks, this feature is chosen from a finite set of possible classes, whereas in \textit{regression} tasks the value estimated is a real number.
 
 \subsubsection{Regression}
 
 Regression algorithms use a set of training data to learn a model.
 The training data consists of a large set of labelled data points.
-The data set is often large, consisting of thousands of data points.
+The data set needed is often large, consisting of thousands of data points.
 Each data point consists of a set of \emph{features} (the inputs) and a \emph{label} (the output).
 The features are some aspects of the data point that are always available or can be measured.
 The label is the feature that is unknown and we want to estimate for new data.
+In regression problems the label being estimated is a continuous value (a real number).
 
 For example, regression could be used to estimate wine quality.
-The features could be some measurable aspects of the wine such as the pH-value, the amount of sugar, or the year bottled.
+The features could be some measurable aspects of the wine such as the pH-value, the amount of sugar, or the year the wine was bottled.
 The label would be a number ranging from 1 to 10 corresponding to the quality of the wine.
-A data set could be generated by measuring the features of many wines and then having human wine tasters manually label them with their understanding of the wine quality.
+A training dataset could be generated by measuring the features of many wines and then having (human) wine tasters manually label them with their understanding of the wine quality.
 This set of features and labels could then be used to train a regression model.
-The model could then be used to estimate the quality of a previously unseen wine by measuring the same features and inputting them to the model.
+The model could then be used to estimate the quality of a previously unseen wine by measuring the same features and providing them as an input for the model.
 The model would then output a number from 1 to 10 as the estimate for the wine quality.
 
 Expressed mathematically, regression estimates an output value $r \in \mathbb{R}$, which is a real number \cite{alpaydin}.
 The training set consists of $N \in \mathbb{N}$ feature vectors (inputs) $\mathbf{x}^t \in \mathbb{R}^d$ and $N$ output values $r^t$.
-Here $d \in \mathbb{N}$ is the number of features used as inputs.
+Here $d \in \mathbb{N}$ is the dimensionality of the data, that is, the number of features being used as inputs. Thus the training data $\mathcal{D}$ can be expressed as follows:
 $$\mathcal{D} = \{(\mathbf{x}^t, r^t)\}_{t=1}^N, \mathbf{x}^t \in \mathbb{R}^d, r^t \in \mathbb{R}$$
 The regression algorithm (the learner) processes the training data and outputs a model $g(\mathbf{x})$ which estimates the output parameter $r$ for a new unseen feature vector $\mathbf{x} \in \mathbb{R}^d$.
 $$g(\mathbf{x}) = r$$
@@ -248,7 +252,7 @@ However, sometimes the underlying model is not known.
 In these cases multiple models can be used and compared based on the dataset and any information is available.
 
 The model is evaluated over a separate test set.
-Commonly, the test set is created by separating the training set into two distict sets before the training phase.
+Commonly, the test set is created by separating the training set into two distinct sets before the training phase.
 $$\mathcal{D}_{test} = \{ (\mathbf{x}_*^t , r_*^t) \}_{t=1}^{N_{test}}$$
 A metric such as the \emph{mean square error} (MSE) can be used as a score to evaluate the model. \cite{alpaydin}
 $$E(g | \mathcal{D}_{test}) = \frac{1}{N_{test}} \sum_{t=1}^{N_{test}} (r_*^t - g(\mathbf{x}_*^t))^2$$
