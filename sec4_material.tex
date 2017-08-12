@@ -22,7 +22,7 @@ This is needed to preserve confidentiality of private information.
 Jury includes a textual query language to filter and search the database.
 The query language allows the users to query for the information that they are interested in.
 The queries can be saved for later use. 
-The saved queries can be used as shortcuts or ''dashboards'' for the users.
+The saved queries can be used as shortcuts or ``dashboards'' for the users.
 For example, a user can save a query that searches for new products published within the last 24 hours.
 This query can then be used by the user to periodically check the new products.
 
@@ -36,10 +36,10 @@ When retrieving the events, the user's permissions need to be taken into account
 Azure ML (publicly available at \cite{azuremlpub}) is a cloud service that offers machine learning capabilities on demand. 
 They offer ready-made machine learning models in the cloud for anyone to use.
 They also allow the user to provide their own code or models.
-One of the major features it offers is a visual interface for machine learning called the ''Machine Learning Studio'' \cite{azureml}.
+One of the major features it offers is a visual interface for machine learning called the ``Machine Learning Studio'' \cite{azureml}.
 The interface allows the user to set up the data flow of their machine learning solution visually with a ''drag and drop'' model and then execute it in the cloud.
 
-I chose Azure ML for my solution because of the accessibility, quick setup, and the multitude of ''off the shelf'' models offered.
+I chose Azure ML for my solution because of the accessibility, quick setup, and the multitude of ``off the shelf'' models offered.
 With Azure ML I was able to take the data I had and start training models quickly without setting up anything on my local machine.
 
 \subsection{Data}
@@ -82,15 +82,15 @@ Status : string\\
 \label{tab:event}
 \end{table}
 
-The Source field identifies the event source system, such as ''Ingestion'', whereas the Subsource identifies the exact processor step withing that system. 
+The Source field identifies the event source system, such as ``Ingestion'', whereas the Subsource identifies the exact processor step withing that system. 
 Thus, the Source--Subsource pair is enough to identify the exact step of the workflow which generated the event. 
-The Status field contains a string describing the status of the step, such as ''Completed'', ''In progress'' or ''Failed''. 
+The Status field contains a string describing the status of the step, such as ``Completed'', ``In progress'' or ``Failed''. 
 This field can be used to reason about the duration of the events and to determine whether the event is \emph{final}. 
 A final-status event means that the processor has completed the activity and will not be sending further events for the activity in question.
-For example, events marked with ''Completed'' or ''Failed'' status are final.
-In contrast, events with an ''In progress'' status are \emph{non-final}.
+For example, events marked with ``Completed'' or ``Failed'' status are final.
+In contrast, events with an ``In progress'' status are \emph{non-final}.
 These events are fired to show that a long-running activity has been started, is still running, and hasn't failed.
-An ''In progress'' will eventually be followed by a final event such as ''Completed'' or ''Failed'' with the same Source and Subsource.
+An ``In progress'' will eventually be followed by a final event such as ``Completed'' or ``Failed'' with the same Source and Subsource.
 The common statuses are listed in table \ref{tab:statuses}.
 
 % methods explaining splitting and grouping of traces
@@ -150,7 +150,7 @@ This means that ordering the events by timestamp includes random noise, which ne
 \end{figure}
 
 % Incomplete traces in the chosen ''slice'' (events missing from beginning/end)
-Another aspect to note is that when the event log data is used, the data being analyzed is always a ''slice'' of the full event log.
+Another aspect to note is that when the event log data is used, the data being analyzed is always a ``slice'' of the full event log.
 This means that it contains events from a time slice starting at some time instance $t_s$ and ending at some later time $t_e$. 
 All events between these times are considered. 
 A common use case would be to inspect the past 24 hours of events. 
@@ -185,7 +185,7 @@ The system should be flexible and should adapt to any changes in the underlying 
 Furthermore, the production data will include also traces that have failures or phases that are in progress.
 A trace with failed or erroneous steps should be considered anomalous, since a workflow is not guaranteed to progress normally after an error. 
 Similarly, the traces include events that do not describe a final state, but only broadcast status. 
-The most common type of event like this events with an ''In progress'' status.
+The most common type of event like this events with an ``In progress'' status.
 If an event is non-final, it means that the same process is still expected to fire a final event afterwards.
 These events should be handled differently in the modeling phase.
 
@@ -213,10 +213,11 @@ The complete timeline of the project can be seen in figure \ref{fig:projecttimel
 % - first iteration: supporting work, backend, graphing, initial UI
 %   - explorative prototypes
 %   - two UI proposals, graph and timeline
-I started the first iteration by building a prototype using a small test dataset of events exported from the database. The purpose of the prototype was to explore the graph generation algorithms and to build a proof of concept. After the prototype was validate with the team I integrated it to the Jury system. I built two user interface proposals based on different types of presentation. The first one showed a directed graph describing the workflow model. The second interface showed the events on a scrollable timeline.
+I started the first iteration by building a prototype using a small test dataset of events exported from the database. The purpose of the prototype was to explore the graph generation algorithms and to build a proof of concept. After the prototype was validate with the team I integrated it with the Jury system. I built two user interface proposals based on different types of presentation. The first one showed a directed graph describing the workflow model. The second interface showed the events on a scrollable timeline.
+See section \nyi{add ref} for the detailed descriptions of these views.
 
 % - user meetings (brownbag, 3pp)
-After the first iteration I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a ''brown bag'' type of open meeting with other team members who interact with the Jury system.
+After the first iteration I held three presentations, two of which included a feedback session with exploration for use cases. The first presentation was an open one to the higher management and the other teams. The second presentation was with the release managers to get feedback from them and to find more requirements. The third was a ``brown bag'' type of open meeting with other team members who interact with the Jury system.
 In these meetings I validated my prototype designs and collected more requirements.
 In the meetings the timeline view was seen more useful for most user groups.
 The only exception was the engineers who saw the graph view more useful for debugging.

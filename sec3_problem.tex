@@ -75,7 +75,7 @@ The workflows are processed in the distributed system as a pipeline of steps.
 Multiple concurrent submissions are in progress at any moment of time.
 Furthermore, many steps of the workflow are independent of each other.
 Thus, a single submission can have multiple steps in progress at the same time.
-These steps are then handled by an ''aggregator'' step which waits for 
+These steps are then handled by an ``aggregator'' step which waits for 
 all the parallel steps to finish before continuing to the next step of the workflow.
 Figure \ref{fig:workflowexample} illustrates this.
 The different steps of the workflow have different lengths that depend on, among others,
@@ -92,7 +92,7 @@ The order which the parallel finish is unknown, as described in section \ref{sec
 When each step completes, an event is generated.
 These events are collected from the different processors into a single database.
 Each step is associated with a timestamp and all the available metadata.
-The system works by a ''best effort'' delivery. 
+The system works by a ``best effort'' delivery. 
 This means the delivery of the events to the database can fail and thus be delayed.
 Furthermore, the distributed system involves multiple machines in multiple locations. 
 This results in variance of seconds to minutes in the clocks of the systems.
@@ -113,18 +113,18 @@ In the beginning of my work the project requirements were not clear.
 To understand the needs of the users, I conducted requirements engineering work.
 In my research I discovered five user groups \nyi{cite} relevant to the project:
 
-\nyi{make sure these are proper ''user groups''}
+\nyi{make sure these are proper ``user groups''}
 
 \begin{description}
 \item[Developers] are the Microsoft software engineers working on the ingestion and publishing system.
 \item[Managers] are the Microsoft developer leads and program managers who coordinate the developer time and what they are working on.
 \item[Publishers] are the independent developers, companies, and other third parties submitting the product packages to the store.
-\item[Release managers] are the contacts on Microsoft's side who communicate with the large publishing companies who develop the high-profile ''triple-A'' games and applications.
+\item[Release managers] are the contacts on Microsoft's side who communicate with the large publishing companies who develop the high-profile ``triple-A'' games and applications.
 \item[Manual reviewers] are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes, for example, checking a submission for fraud or inappropriate graphics or language.
 \end{description}
 
 The needs for each user group are covered in table \ref{tab:userneeds}.
-I used the ''user story'' format for documenting the needs \cite{cohn2004user}.
+I used the ``user story'' format for documenting the needs \cite{cohn2004user}.
 
 %% description that user needs were not fully known so they need engineering
 It should be noted that the user needs were not fully understood in the beginning. The project was done in two cycles, with requirements engineering work done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 

@@ -27,7 +27,7 @@ I will also introduce the technology choices and explain how they were used to i
 The decision about which technologies I would use for my project was straightforward.
 Since the project was to integrate with the existing Jury system, I chose to use shared technologies and libraries.
 Jury was built with C\#, running as an ASP.NET MVC application with .NET Framework.
-The database was running on SQL Server, and the query engine was set up with a object-relational mapping tool called Entity Framework. \nyi{Need versions?} The approach used was a ''data first'' model, where the system automatically generates models (classes in code) based on the database schema. \nyi{links, citations}
+The database was running on SQL Server, and the query engine was set up with a object-relational mapping tool called Entity Framework. \nyi{Need versions?} The approach used was a ``data first'' model, where the system automatically generates models (classes in code) based on the database schema. \nyi{links, citations}
 The user provided text queries were translated to database queries with LINQ. \nyi{elaborate?}
 I used these same technologies in my project.
 
@@ -43,7 +43,7 @@ The only check the system needs to do is to check the events against the current
 The Jury system already had functionality to retrieve the events from the database based on a \emph{query}.
 A query is a string containing user-provided criteria for which events to show, based on the fields of the event entry (see table \ref{tab:event}).
 This could for example be querying for a specific product or a specific submission ID.
-For example, the query ''\texttt{submissionid is 100100}'' would return all events from the specified submission.
+For example, the query ``\texttt{submissionid is 100100}'' would return all events from the specified submission.
 Multiple conditions can be combined to form a more complex query.
 
 The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
@@ -56,7 +56,7 @@ The pre-processing method chosen takes a set of events as the input. The pre-pro
     \item Group all events by \textbf{submission ID}.
     \item Create a trace corresponding to a submission for each group.
     \item Order all events in each trace by ascending timestamp, then by event ID.
-    \item Drop all traces with an erroneous event such as ''Failed''.
+    \item Drop all traces with an erroneous event such as ``Failed''.
     \item Drop all non-final events from each trace.
 \end{enumerate}
 After these steps the result is a set of valid traces, each corresponding to a unique submission ID with only final events.
@@ -186,7 +186,7 @@ This shape can be seen in the example figure \ref{tab:examplefootprint}.
 
 This footprint maps directly to a corresponding directed graph.
 Every activity in the vocabulary corresponds to a graph node.
-Every ''directly follows'' relation corresponds to a directed edge in the graph. A parallel relation corresponds to arcs in both directions.
+Every ``directly follows'' relation corresponds to a directed edge in the graph. A parallel relation corresponds to arcs in both directions.
 Figure \ref{fig:examplegraph} shows the directed graph corresponding to the footprint from figure \ref{tab:examplefootprint}.
 
 \begin{figure}
@@ -260,9 +260,9 @@ I call this time difference between events the \emph{latency}.
 The latency describes how much time is expected to pass until an event is followed by another event.
 The latency can be seen as the length of an edge in the directed graph.
 
-The statistics the users were interested in were the ''top percentiles'' (TP).
+The statistics the users were interested in were the ``top percentiles'' (TP).
 A $n$-top percentile means the value that is higher or equal than $n\%$ of all the values in the set.
-This can be expressed as the ''TPn'' value.
+This can be expressed as the ``TPn'' value.
 For example, the TP75 is the value that is higher or equal than 75~\% of all the values in the set.
 TP50 corresponds to 50~\% and is equal to the median value of the set.
 The top percentiles have proven to be more useful than for example averages, since the latencies 
@@ -282,7 +282,7 @@ After the graph is generated, I can store the chosen key statistics (TP50, TP75,
 The result of this method is a directed graph with nodes and edges.
 Each node corresponds to an activity in the process model.
 Each edge corresponds to a possible transition (pair of two consecutive events) in the trace.
-The model can be verified by ''re-playing'' a trace as described in section \ref{sec:processmodelsdsc}.
+The model can be verified by ``re-playing'' a trace as described in section \ref{sec:processmodelsdsc}.
 Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
 The graph describes the process model that was discovered from the event log.
 
@@ -290,9 +290,9 @@ The graph describes the process model that was discovered from the event log.
 \label{sec:jsonfile}
 
 As a secondary option, I developed a method to bypass the graph generation algorithm completely, and instead load the shape of the model from a JSON definition file.
-By using a definition file, the engineers can ''force'' a template to have a specific exact shape.
+By using a definition file, the engineers can ``force'' a template to have a specific exact shape.
 This is useful in a few applications.
-In some cases it is useful to have a ''stable'' graph with a pre-defined shape.
+In some cases it is useful to have a ``stable'' graph with a pre-defined shape.
 Since the algorithm is unsupervised and train itself constantly with a multiple day time window (e.g. the last 7 days), any changes made into the process may take the same time to become visible in the graph.
 Additionally, small datasets can be too noisy for the algorithm to correctly identify the shape.
 In such cases, the engineer can supply a JSON file.
@@ -311,13 +311,13 @@ Because of these reasons I developed a paged view that visualizes the events ret
 First, I run the user's query and retrieve the events, filtered by the user's permission level.
 I sort these events by descending timestamp and pick the five latest submission IDs.
 These IDs will correspond to the five latest submission traces matching the user's query.
-''Latest'' in this context means the traces with the most recent activity.
+``Latest'' in this context means the traces with the most recent activity.
 This query may also be paged, allowing the user to choose the next five traces, or any later set of five.
 After five submission IDs has been retrieved, they are used to query all events belonging to these submissions. This results in five traces that can now be processed.
 
 This is implemented with two SQL queries.
 The first query that retrieves the five submissions can be paged with a standard page selector user interface component.
-This means that the user can choose to see the next ''page'' of submissions containing submissions 6-10 and onwards.
+This means that the user can choose to see the next ``page'' of submissions containing submissions 6-10 and onwards.
 The first query uses a GROUP BY clause to group the events by submission ID and to choose the maximum timestamp.
 This result is then sorted and teh top five IDs are selected.
 This selection can be paged with a SQL OFFSET clause based on the user's page selection.
@@ -368,7 +368,7 @@ This two-level caching improved the page loads from minutes to fractions of a se
 \subsection{Real-time functionality}
 
 Until this point I have considered the case of the event log, that corresponds to a time slice of past data.
-This type of data can be seen as an ''aggregate'', since it will result in a model that describes events over a long period of time.
+This type of data can be seen as an ``aggregate'', since it will result in a model that describes events over a long period of time.
 However, a key part of the analytics for the store is the ability to analyze and debug the current state of the system.
 Without such functionality it will be difficult to analyze the state of the current submissions in the system.
 
@@ -380,23 +380,23 @@ The request from the users was a view that shows a big picture of the status of 
 % new small dataset from a query, often a single trace
 My solution was to leverage the previously discovered aggregate model for visualization.
 The model would be combined with the list of events returned by the query.
-The aggregate model would be used to visualize the process, and the real-time data from the query would be ''overlayed'' on top of the model.
+The aggregate model would be used to visualize the process, and the real-time data from the query would be ``overlayed'' on top of the model.
 
-The method was to ''color'' the model with the data from the query.
+The method was to ``color'' the model with the data from the query.
 The query results in a set of events that corresponds to the user's criteria.
 For simplicity we can assume that the result is a single trace for an ongoing submission,
 meaning that it is a set of sequential events that all belong to a single case.
 In the full implementation the result can also be events from many separate submissions,
 but the system handles it by splitting them into separate visualizations and then handling each one of them as a single trace.
 
-In the beginning we create an ''colorless'' graph by copying the process model discovered earlier.
+In the beginning we create an ``colorless'' graph by copying the process model discovered earlier.
 The colorless graph has a node for each activity and the corresponding graph edges between them.
 The nodes are tied to the specific activities by including the Source and Subsource fields but they have no status, timestamp, or other metadata.
-The visualization is ''colored'' by traversing through the trace in sorted order (ascending timestamp).
+The visualization is ``colored'' by traversing through the trace in sorted order (ascending timestamp).
 For each event in the trace, we find the corresponding node in the graph.
-The node can then be ''colored'' by copying the status, timestamp, and other metadata from the event.
+The node can then be ``colored'' by copying the status, timestamp, and other metadata from the event.
 This can be repeated until we reach the end of the trace.
-The result is a ''colored'' graph where all the activities that have been finished have a status and a time.
+The result is a ``colored'' graph where all the activities that have been finished have a status and a time.
 The nodes for the activities yet to come remain uncolored.
 
 \nyi{Does this need an illustration?}
@@ -405,7 +405,7 @@ This graph can now be shown to the user.
 The nodes are drawn on the screen as circles or rectangles, and the directed edges as arrows between them.
 This is what I call the \textbf{graph view}.
 The parallel nodes are connected by double-sided arrows or an edge that otherwise indicates the parallelism.
-In my visualization I took the ''colorization'' quite literally by having each status correspond to a color in the visuals. 
+In my visualization I took the ``colorization'' quite literally by having each status correspond to a color in the visuals. 
 Uncolored nodes remained grey, completed nodes green or blue, nodes in progress yellow, and failed nodes red.
 The colors help the user to get an immediate understanding of what the state of a submission is.
 An example can be seen in figure \ref{fig:coloredgraph}.
@@ -416,7 +416,7 @@ An example can be seen in figure \ref{fig:coloredgraph}.
     \label{fig:coloredgraph}
 \end{figure}
 
-In my implementation I had to add one hard-coded aspect for an edge case. In the store system, it is possible for a publisher or a developer to ''re-publish'' a product. 
+In my implementation I had to add one hard-coded aspect for an edge case. In the store system, it is possible for a publisher or a developer to ``re-publish'' a product. 
 When a re-publish is triggered, the publishing steps of the workflow are run again with the same submission ID. 
 This means that a trace from a single submission may contain several publishes.
 My implementation detects this when the first step of the publishing workflow is seen again in a single trace. 
@@ -436,9 +436,9 @@ and fill in the data for the uncolored nodes.
 
 % Statistical approach by using TP75
 To fill in the data for future nodes, the algorithm needs a measure to be used for the estimation. 
-This measure corresponds to the estimated ''edge length'' for each edge in the graph.
+This measure corresponds to the estimated ``edge length'' for each edge in the graph.
 A simple approach is to use the statistical values that were collected during the graph generation process (see section \ref{sec:latency}).
-The statistics are useful, since when giving time estimates we should aim for overestimating or giving the ''worst case'' guess \nyi{why?}.
+The statistics are useful, since when giving time estimates we should aim for overestimating or giving the ``worst case'' guess \nyi{why?}.
 For example, using the TP90 value should lead to an estimation that estimates the latencies in a way that overestimates 90~\% of the submissions.
 However, choosing the right statistic should be considered since it is a trade-off between accuracy and overestimation \nyi{rephrase, citation needed}.
 The plan was to use machine learning to improve the estimations (see section \ref{sec:ml-estimation}).
@@ -487,13 +487,13 @@ These estimations can be shown to the user when the graph is visualized.
 
 \begin{figure}[htb]
     \centering \includegraphics[width=0.6\linewidth]{gfx/screenshots/basictimeline.png}
-    \caption{A basic example of a ''timeline'' \nyi{make a better one}}
+    \caption{A basic example of a ``timeline'' \nyi{make a better one}}
     \label{fig:basictimeline}
 \end{figure}
 
 During the protyping phase I discovered that the directed graphs were not intuitive to read for the users.
 Trying to manipulate the graph shape and selecting each node to see the details turned out to be cumbersome.
-Two users wished for a ''sorted'' view in the initial tests.
+Two users wished for a ``sorted'' view in the initial tests.
 The sorted view should show the events arranged horizontally across the screen by time.
 This resulted in the second prototype which I labelled the \textbf{timeline view}.
 A basic example of what a timeline is can be seen in figure \ref{fig:basictimeline}.
@@ -628,7 +628,7 @@ The resulting numbers can be seen in section \nyi{ref}.
 \label{sec:notifications}
 
 One of the main functionalities of Jury is user-defined notifications.
-The users can run queries and ''subscribe'' to them.
+The users can run queries and ``subscribe'' to them.
 Whenever an event arrives to Jury which matches a subscribed query, a notification such as an email is sent to the user.
 This allows users to get notified for example when a product they are interested in receives an update or when an error happens.
 Because the notifications use the same queries as the other parts of Jury, they allow the same high level of customization.
@@ -641,29 +641,29 @@ Receiving notifications for delayed submissions was a common requirement discove
 Furthermore, notifying about a workflow activity before it happens was seen to be useful for scheduling purposes.
 This functionality or the data required for these functions were not possible in the old Jury system.
 However, with the process models and statistics being stored in the database (as described in section \ref{storinggraphs}) this data is now available in the same database as the events.
-This allows for SQL queries to be created to detect when an event is ''late'' before it even arrives.
+This allows for SQL queries to be created to detect when an event is ``late'' before it even arrives.
 
 For detecting late events, the system needs to examine the current ongoing submissions and the events that have been received already.
 We can find the submissions and their latest events with a GROUP BY query as described in section \ref{sec:paging}.
 In addition, each transition (graph edge) in a process model is associated with its statistics. 
 This means that when the edge is stored in the database it also contains numeric values for the statistics such as the TP50, TP75, and TP90 \nyi{refer}.
 We can use the latest event and the process model to find the next expected transition for each event by joining the latest events with the process model graph edge that corresponds to that event.
-By adding the statistic (such as the TP75) to the event's timestamp we get an ''estimated time of arrival'' (ETA) for the next expected event.
+By adding the statistic (such as the TP75) to the event's timestamp we get an ``estimated time of arrival'' (ETA) for the next expected event.
 If the current system time is past this ETA, we know that the next event is currently late and should have been received based on the statistic chosen.
 
 % tolerance, absolute and statx2
 Because of the natural randomness and varying small delays in the system, choosing a good statistics is crucial. 
 For example, if we used the TP75 as the statistic for late event notifications, even in the ideal case the user would be notified 75~\% of the time.
-Furthermore, the users generally are not interested in event being very slightly late (such as a couple minutes) but only after the event is ''considerably'' late.
-What ''considerably late'' means should be chosen by the user who is the domain expert, not the developer.
+Furthermore, the users generally are not interested in event being very slightly late (such as a couple minutes) but only after the event is ``considerably'' late.
+What ``considerably late'' means should be chosen by the user who is the domain expert, not the developer.
 In addition, some activites may involve absolute contractual SLA times that are critical and should not be based on statistics but rather the absolute value.
 Similarly, some activities are very short in length so even a one minute delay caused by the clock skew can seem like a percentually large delay.
 The user is the expert knowing the activities and their characteristics.
-For this purpose the choice of what is considered ''late'' is left to the user.
+For this purpose the choice of what is considered ``late'' is left to the user.
 
-After my process models were available in Jury, a colleague implemented the ''lateness'' syntax into the Jury query language. 
+After my process models were available in Jury, a colleague implemented the ``lateness'' syntax into the Jury query language. 
 This allows the user to add a keyword \emph{latest} to the query to run the previously described GROUP BY MAX(timestamp) query.
-Furthermore, the user can add filters for ''lateness'' such as to only show events that are delayed for more than two times the TP75 value.
+Furthermore, the user can add filters for ``lateness'' such as to only show events that are delayed for more than two times the TP75 value.
 The user can also supply an absolute value, or a combination of these two.
 For example, the user may want to be notified for events that are later than two times the TP75 value, but only with a minimum value of five minutes of delay.
 Because all this was added to the query language, no new notification system was needed since Jury could already notify based on queries.
@@ -671,7 +671,7 @@ Because all this was added to the query language, no new notification system was
 \subsection{User interface}
 
 The main purpose of this project was to help users understand the event data in Jury.
-Visualizations played a key role in giving the users the ''big picture'' of the submissions and the state of the products.
+Visualizations played a key role in giving the users the ``big picture'' of the submissions and the state of the products.
 Since the users were mostly not developers, the visualizations needed to be easily accessible.
 This required a graphical user interface integrated directly to Jury.
 Furthermore, the visualizations should be intuitive and easily readable by possibly non-technical users.
@@ -689,7 +689,7 @@ As explained before, the process models can be generated from any user-supplied 
 However, the team decided to not allow any user generate a model from any query, since processing hundreds of thousands of events to generate a new model is very resource-intensive.
 Only users with admin privileges in Jury were to be able to save queries as process models.
 The admin user can then choose to publish the model to be used by everybody.
-We chose to call these published models ''templates'', since they affect the visual shape of the graph in the visualizations.
+We chose to call these published models ``templates'', since they affect the visual shape of the graph in the visualizations.
 The real-time data is then overlayed on the template.
 
 I also implemented a fallback option for using templates not generated from log data. The store engineers who have developer access to Jury can supply a JSON configuration file containing the shape of the process model. The format of the file was chosen to be the same than what was used in other store backend systems. 
@@ -708,12 +708,12 @@ The main header with the search bar on top of the page remains the same across a
 Furthermore, all the event pages share a header that enables switching between the detailed log view and the visualizations. 
 It allows the user to select the template (the process model) used for the visualizations, since the model is shared between all the search results.
 In addition, each visualization (both in graph view and timeline view) includes its own header showing the basic details about the submission, such as the product name and submission ID. The header also includes shortcuts specific to the submission shown, such as links to queries that only return events belonging to the same submission.
-A small ''hamburger menu'' on each submission includes links to other parts of Jury, such as links to the publisher information, the product information, and to other systems that may have related information.
+A small ``hamburger menu'' button on each submission includes links to other parts of Jury, such as links to the publisher information, the product information, and to other systems that may have related information.
 
 Using vis.js for the visualizations was straightforward after my algorithms had already generated the graphs on the server side. 
 On the client side (in the user's browser) I only needed to supply vis.js with a JavaScript object containing a list of nodes and a list of edges. When supplied with a list of additional options, vis.js builds a graph and fits it in the view automatically. The user can even manipulate the graph with the mouse to rotate the graph. The graph has simple two dimensional physics where the edges act as springs.
 
-However, the users did not like this visualization. The moving nodes and springs were seen as ''chaotic'' and ''annoying'' rather than useful. 
+However, the users did not like this visualization. The moving nodes and springs were seen as ``chaotic'' and ``annoying'' rather than useful. 
 The users requested some kind of sorting or ordering in the view, such as aligning the nodes on a horizontal axis. 
 This is why the timeline view was implemented. 
 Similarly as the graph view, vis.js draws and arranges the timeline automatically when supplied a list of nodes with start and end times.
