@@ -126,7 +126,7 @@ For any element $x \in S \cup T$ its \emph{pre-set} ${}^\bullet x$ is all the el
 $x^\bullet = \{y \in S \cup T | (x,y) \in F\}$.
 A Petri net can be mapped to a directed graph by creating equivalent nodes for each place and directed edges for each transition.
 
-Van der Aalst et al. \cite{van2013discovering} use a subclass of Petri nets called a \emph{workflow net} to describe processes. A workflow net (WF-net) is a Petri net with some further restrictions, to make it more suited for process discovery. In their description, a WF-net needs a single starting point (an input place) and a single ending point (an output place). Furthermore they define that a WF-net needs to be \emph{strongly connected}, meaning every node is on a path from the start to the end.
+Van der Aalst et al. \cite{van2013discovering} defines a subclass of Petri nets called a \emph{workflow net} to describe processes. A workflow net (WF-net) is a Petri net with some further restrictions to make it more suited for process discovery. In their description, a WF-net needs a single starting point (an input place) and a single ending point (an output place). Furthermore they define that a WF-net needs to be \emph{strongly connected}, meaning every node is on a path from the start to the end.
 
 \begin{definition}
 Let $N = (S, T, F)$ be a Petri net. $N$ is a workflow net \emph{iff}:
@@ -142,9 +142,8 @@ With the definitions for event logs, traces and WF-nets, we can describe \textbf
 \subsubsection{\textalpha-algorithm}
 \label{sec:alphaalgorithm}
 Constructing concurrent process models from an ordered event log is a challenging task.
-The event log is a linear and ordered list of events.
-The log does not directly express the dependencies between the events.
-To find the dependencies and thus the shape of the process model, it needs to be extracted with an algorithm.
+The event log is a linear and ordered list of events and does not directly express the dependencies between these events.
+To find the dependencies, and thus the shape of the process model, it needs to be extracted with an algorithm.
 
 The \textalpha-algorithm is a process discovery algorithm that reads ordered event logs.
 The algorithm discovers parallelism by comparing the order of events in different traces.
@@ -189,7 +188,7 @@ Figure \ref{fig:traditionalvsml} illustrates this fundamental difference.
 For example, we can look at the problem of computer vision.
 As an input we could have a thousand photos of birds and a thousand photos of without birds.
 For us humans it is easy to recognize a bird and decide which of these two groups an arbitrary photo belongs to.
-What we don't know are the exact rules that make a photo a "bird photo".
+What we don't know are the exact rules that make a photo a ``bird photo''.
 It would be very difficult to program an algorithm that examines the pixels of a new photo and decides whether there is a bird in the image.
 This situation is a good example of what machine learning algorithms excel in.
 
@@ -199,11 +198,12 @@ This situation is a good example of what machine learning algorithms excel in.
 \label{fig:traditionalvsml}
 \end{figure}
 
-Machine learning is data driven and the focus is less on traditional programming instructions.
-The machine learning algorithms focus on finding patterns and models in data.
-The patterns can then be used to process new data or make predictions.
 
-Supervised learning is a subset of machine learning. In supervised learning, the input for the computer is a set of \textit{training data} with predefined labels. 
+Machine learning is data driven and the focus is less on traditional programming instructions.
+Machine learning algorithms focus on finding patterns and models in data,
+which can then be used to process new data or make predictions.
+Supervised learning is a subset of machine learning. 
+In supervised learning the input for the computer is a set of \textit{training data} with predefined labels. 
 This training data is the ``known'' data points of the ``seen'' data.
 Usually these labels come from real world measurements or manual (human) labeling.
 For example in the computer vision problem described before, the training photos could be manually labeled by humans as ``bird'' and ``no bird''.
@@ -211,9 +211,9 @@ The supervised machine learning algorithm uses this labeled data to learn patter
 A separate set of data points called the \emph{test set} is used to evaluate the model performance.
 The assumption is that the performance over the test set is an estimate of the performance over new data.
 
-In classification tasks the models try to predict a \emph{class} for an unknown datapoint. The classes are discrete and the number of classes is finite. In binary classification there are two possible classes, often labelled 1 and 0, or true and false, as seen in the email example above. In regression tasks the predictions result in a real number instead of discrete values, such as when predicting a length of time.
+In classification tasks the models try to predict a \emph{class} for an unknown datapoint. The classes are discrete and the number of classes is finite. In binary classification there are two possible classes, often labelled 1 and 0, or true and false, as seen in the bird photo example above. In regression tasks the predictions result in a real number instead of discrete values, such as when predicting a length of time.
 Different models are used for these different tasks.
-The model best suited for an application depends on the distrubution of the possible values and other characteristics of the phenomenom being modeled.
+The model best suited for an application depends on the distribution of the possible values and other characteristics of the phenomenon being modeled.
 
 In conclusion, Machine Learning is a set of algorithms and models that leverage a large dataset to estimate some feature of new datapoints.
 In \textit{classification} tasks, this feature is chosen from a finite set of possible classes, whereas in \textit{regression} tasks the value estimated is a real number.
@@ -221,10 +221,10 @@ In \textit{classification} tasks, this feature is chosen from a finite set of po
 \subsubsection{Regression}
 
 Regression algorithms use a set of training data to learn a model.
-The training data consists of a large set of labelled data points.
-The data set needed is often large, consisting of thousands of data points.
+The training data is set of labelled data points.
+The data set needed is often large and consists of thousands of points.
 Each data point consists of a set of \emph{features} (the inputs) and a \emph{label} (the output).
-The features are some aspects of the data point that are always available or can be measured.
+The features are properties that are available for all the data points.
 The label is the feature that is unknown and we want to estimate for new data.
 In regression problems the label being estimated is a continuous value (a real number).
 
@@ -250,7 +250,7 @@ as long as a learning algorithm for the model exists.
 In the case of features that are not real numbers, a mapping function is used that takes a different type of feature (such as a string or a boolean) and converts it into a real number.
 In the ideal case the model should fit the phenomenon (physical or other) being modeled in the machine learning application.
 However, sometimes the underlying model is not known. 
-In these cases multiple models can be used and compared based on the dataset and any information is available.
+In these cases multiple models can be used and compared based on the dataset in order to find the best performing one.
 
 The model is evaluated over a separate test set.
 Commonly, the test set is created by separating the training set into two distinct sets before the training phase.
@@ -270,7 +270,7 @@ There are many different regression learners that are based on different theorie
 
 \subsubsection{Poisson regression}
 
-Poisson regression models data with labels that fall into a poisson distribution.
+A poisson regression model describes data with labels that fall into a poisson distribution.
 Poisson distribution often describes count data, such as the count or probablility of events happening during a fixed time interval. \cite{osgood2000poisson}
 When graphed, the distribution has a peak in the beginning and long tail, as seen from figure \ref{fig:poissongraphs}.
 
@@ -289,8 +289,7 @@ In other types of data the poisson regression model will not give good results.
 \subsubsection{Boosted decision trees}
 
 The second model used in this thesis is boosted decision trees (BDT).
-A \textit{decision tree} is a model for supervised learning that is based on a sequence of splits \cite{alpaydin}.
-The splits form a hierarchical tree.
+A \textit{decision tree} is a model for supervised learning that is based on a sequence of splits which form a hierarchical tree \cite{alpaydin}.
 The tree consists of internal decision nodes and the terminal leaves containing values.
 To find the result of the regression model, the algorithm steps through the decision nodes starting from the root.
 At each node a component of the feature vector is compared against a predetermined threshold value.
@@ -301,7 +300,7 @@ The value in the leaf reached by the iterative algorithm is the result of the re
 
 The boosted decision tree learner in Azure ML is based on LambdaMART \cite{azurebdt}.
 LambdaMART is a set of algorithms that implement a \textit{forest} of regression trees \cite{lambdamart2010}.
-Gradient boosting \cite{friedman2001greedy} is used to build a model combining several weaker models to form a stronger model.
+Gradient boosting \cite{friedman2001greedy} is used to combine several weaker models to form a stronger model.
 The forest consists of multiple decision trees.
 The result of the regression given by the LambdaMART forest is a linear combination of the outputs of the trees.
 The learner trains the thresholds at the decision nodes and the values at the terminal leaves of each tree, as well as the weights for the linear combination to minimize error over the training set.
@@ -312,7 +311,7 @@ The learner trains the thresholds at the decision nodes and the values at the te
 One strength of the boosted decision tree model is that it is highly interpretable and can be used for rule extraction \cite{alpaydin}. Each tree can be converted into a set of IF-THEN rules, and the weights of the linear combination correspond to the importance of each tree. 
 Because of these reasons, the domain expert can analyze the model to see which features are being used and whether the model seems to make sense.
 Furthermore, the model can even provide information about the real world ruleset for the measured phenomenon.
-In general, boosted decision trees work well when the components of the feature vectors are related. In the case of completely independent vectors, a BDT model will not be as good \cite{azurebdt}.
+In general, boosted decision trees work well when the components of the feature vectors are related. In the case of completely independent vectors, a BDT model will not be as effective \cite{azurebdt}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Related work
@@ -323,7 +322,7 @@ In general, boosted decision trees work well when the components of the feature 
 \label{sec:relatedwork}
 
 Process mining has gained interest in the recent years, since it offers possibilities of streamlining business processes and gaining business intelligence (BI) by finding bottlenecks and inefficiencies in the processes.
-Process mining has many uses, such as process discovery \cite{van2016discovery, van2013discovering}, trace clustering \cite{de2016general}, and conformance checking \cite{chomyat2016process}. Furthermore, there's some research done in the area of automatically detecting process anomalies automatically \cite{bezerra2009anomaly}.
+Process mining has many uses, such as process discovery \cite{van2016discovery, van2013discovering}, trace clustering \cite{de2016general}, and conformance checking \cite{chomyat2016process}. Furthermore, there's some research done in the area of detecting process anomalies automatically \cite{bezerra2009anomaly}.
 
 Process discovery is in the heart of process mining, since most process mining methods rely on modeling the process and taking advantage of the model in some manner.
 Because of this, process discovery is talked about in many papers related to process mining \cite{chomyat2016process, de2016general, van2013discovering, van2015extracting, van2016process,bezerra2009anomaly}.
@@ -333,13 +332,13 @@ Conformance checking can be especially useful in sectors where conforming to reg
 Examples of such sectors are the financial sector, medical business, and government institutions.
 Process mining can be used to ensure the regulations are being followed.
 
-The main purpose of my thesis is to help visualize the processes and to show anomalies to the users or even notify about them automatically.
+The main purpose of my thesis is to help visualize the processes and to show anomalies to the users or even send notifications about the anomalies automatically.
 The definition of \textit{anomaly} is not consistent across research \cite{bezerra2009anomaly}. 
 An anomaly can be anything exceptional or abnormal in the behaviour of a system. 
 It can also describe an error, noise, or fraudulent behaviour.
-Usual definitions include that an anomaly needs to be infrequent, unexpected, and something that deviates with the normal behaviour.
-Precise definition is difficult to formally define, since the definition of what is considered ``normal'' differs between cases. 
-Bezerra et al. \cite{bezerra2009anomaly} present how an established process mining tool ProM can be used to discover models and check their conformance.
+Usual definitions include that an anomaly needs to be infrequent, unexpected, and something that deviates from the normal behaviour.
+Precise definition is difficult, since the definition of what is considered ``normal'' differs between cases. 
+Bezerra et al. \cite{bezerra2009anomaly} presents how an established process mining tool ProM can be used to discover models and check their conformance.
 Each trace gets assigned a conformance value (fitness) describing how well it fits the previously discovered model.
 With this method, a threshold value for required model fitness can be assigned to find the anomalous traces.
 However, there is little focus on detecting anomalies real-time.

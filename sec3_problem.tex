@@ -8,7 +8,7 @@
 
 %% intro
 In this section I will describe the store backend system examined in this thesis (later: \textit{system}) 
-and elaborate on the problems that I was solving in this thesis project (later: \textit{project}). 
+and elaborate on the problems that I was solving in this project (later: \textit{project}). 
 I will also describe the users of the project and what the needs for
 each of them were, as discovered by the requirements engineering work I did.
 
@@ -75,8 +75,8 @@ The workflows are processed in the distributed system as a pipeline of steps.
 Multiple concurrent submissions are in progress at any moment of time.
 Furthermore, many steps of the workflow are independent of each other.
 Thus, a single submission can have multiple steps in progress at the same time.
-These steps are then handled by an ``aggregator'' step which waits for 
-all the parallel steps to finish before continuing to the next step of the workflow.
+However, to continue the workflow all the parallel steps need to complete.
+An ``aggregator'' step waits for the parallel steps to finish and only then proceeds to the next step. 
 Figure \ref{fig:workflowexample} illustrates this.
 The different steps of the workflow have different lengths that depend on, among others,
 the processing needed, the characteristics of the package, and the current workload of the system.
@@ -117,9 +117,9 @@ In my research I discovered five user groups \nyi{cite} relevant to the project:
 
 \begin{description}
 \item[Developers] are the Microsoft software engineers working on the ingestion and publishing system.
-\item[Managers] are the Microsoft developer leads and program managers who coordinate the developer time and what they are working on.
-\item[Publishers] are the independent developers, companies, and other third parties submitting the product packages to the store.
-\item[Release managers] are the contacts on Microsoft's side who communicate with the large publishing companies who develop the high-profile ``triple-A'' games and applications.
+\item[Managers] are the Microsoft developer leads and program managers who coordinate the developers' time and what they are working on.
+\item[Publishers] are the independent creators, companies, and other third parties submitting the product packages to the store.
+\item[Release managers] are Microsoft employees who have been assigned to be a contact for the largest publishing companies who develop the high-profile ``triple-A'' games and applications. 
 \item[Manual reviewers] are the people working for Microsoft that do the manual steps of the product validation when necessary. This includes, for example, checking a submission for fraud or inappropriate graphics or language.
 \end{description}
 
@@ -127,7 +127,7 @@ The needs for each user group are covered in table \ref{tab:userneeds}.
 I used the ``user story'' format for documenting the needs \cite{cohn2004user}.
 
 %% description that user needs were not fully known so they need engineering
-It should be noted that the user needs were not fully understood in the beginning. The project was done in two cycles, with requirements engineering work done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 
+The project was done in two cycles, with requirements engineering work done in the beginning of both cycles. See section \ref{sec:timeline} for the project timeline. 
 The user needs found at the start of the second section were related mostly on the presentation and the user interface, so they did not affect the main structure of the project significantly.
 
 %% description of initial user needs
@@ -160,7 +160,7 @@ The user needs found at the start of the second section were related mostly on t
 \hline
 
 \textbf{As a release manager I want...} \newline
-- to see the detailed status of a single product or submission so that I can report it onwards. \newline
+- to see the detailed status of a single product or submission so that I track it and report any issues to my superiors. \newline
 - to see the big picture status for all submissions related to a single product or publisher quickly so that I can save time. \newline
 - to be notified about completion of crucial steps of the workflow or any issues so that I can schedule and prioritize my work. \newline
 - to be able to customize what I see so that I do not see information about products that I do not own.
@@ -168,7 +168,7 @@ The user needs found at the start of the second section were related mostly on t
 \hline
 
 \textbf{As a manual reviewer I want...} \newline
-- to be notified in advance when a product is heading towards a manual review so that I can schedulemy work day.
+- to be notified in advance when a product is heading towards a manual review so that I can schedule my work day.
 \\
 \hline
 
@@ -205,13 +205,13 @@ Any PII-classified information should be considered private and should not be vi
 
 There were several challenges discovered in the beginning of the project.
 The system implemented in the project should be unsupervised.
-This means that the system should use past data to build an understanding of the workflow, without the need for a user such as an engineer to supply any knowledge beforehand.
+This means that the system should use past data to build an understanding of the workflow without the need for a user such as an engineer to supply any knowledge beforehand.
 The system should adapt to any changes in the workflow automatically.
 The distributed workflows contain unknown parallelism that must be detected automatically.
 Furthermore, the distributed system contains noise in the timestamps which further complicate the parallelism detection.
 
 In addition, the system should be able to provide two different kinds of information. 
-The workflow models and statistics should be build based on a long term aggregate discovered from several days worth of data,
+The workflow models and statistics should be built based on a long term aggregate discovered from several days worth of data,
 while the system should also show the real time data for the current ongoing submissions.
 These two sides of information should both be utilized in the visualization.
 Lastly, requirements engineering was necessary to discover the user needs. 
@@ -222,7 +222,6 @@ Section \ref{sec:timeline} contains a detailed description of this process.
 
 %% conclusion, key goals
 To recap, the key goals for the solution developed in this thesis are the ability to dynamically adapt to changes in the workflow,
-the ability for the user to customize the information they need, an decoupling the solution from the specific 
-workflow steps of the store. 
+the ability for the user to customize the information they need, and decoupling the solution from the specific workflow steps of the store. 
 The project needs to use \emph{unsupervised learning} to build workflow models, show \emph{real-time event data} to the user based on the model, 
 and use the models and the real-time data to show predictions of future events.
