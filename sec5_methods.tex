@@ -54,31 +54,30 @@ For example, the user could be querying for a specific product or a specific sub
 A query ``\texttt{submissionid is 100100}'' would return all events from the specified submission.
 Boolean operators familiar from search engines such as ``\texttt{and}'', ``\texttt{not}'', and ``\texttt{or}'' can be used to combine multiple conditions to form a more complex query.
 
-% ujasdahsjldhalkjsdh a;wuhdakjuawfahw falfh ajsf h
+After the query has been executed by Jury, the result is a set of events.
+Jury displayed the set to the user as a plain timestamp-ordered list of events as seen in figure \ref{fig:plaineventlog}.
+Because of the challenges outlined in section \ref{sec:datachallenges} a pre-processing step is necessary.
+The plain set of events needs to be filtered and grouped into valid traces.
 
-The result of the query was a plain timestamp-ordered list of events, as seen in figure \ref{fig:plaineventlog}.
-After the query has been executed, the result is a set of events.
-Because of the challenges outlined in section \ref{sec:datachallenges}, a pre-processing step is needed.
-
-The pre-processing method chosen takes a set of events as the input. The pre-processing works as follows:
+The pre-processing step takes a set of events as the input and works as follows:
 \begin{enumerate}
     \item Drop events based on the user's permission level.
     \item Group all events by \textbf{submission ID}.
-    \item Create a trace corresponding to a submission for each group.
+    \item Create a trace corresponding to a submission for each of these groups.
     \item Order all events in each trace by ascending timestamp, then by event ID.
-    \item Drop all traces with an erroneous event such as ``Failed''.
+    \item Drop all traces containing an event describing an error such as ones with a status ``Failed''.
     \item Drop all non-final events from each trace.
 \end{enumerate}
-After these steps the result is a set of valid traces, each corresponding to a unique submission ID with only final events.
+After these steps the result is a set of \textit{valid traces} with only final events, each corresponding to a \textit{unique submission ID}.
 
 By using different time slices or different filters on which events to include, we can generate models for different purposes. 
-For example, we can try to generate a more accurate process model by filtering.
+For example, we can try to generate a more accurate process model by filtering the events.
 If we filter the events in the pre-processing step to only include events related to certain products
 or product types, we can assume that the process model and the statistics will better describe those products.
 
 However, filtering reduces the number of events used for the model, which can lead to overfitting.
-For example, if the model is generated for only submissions that contain large file sizes, it may affect the parallelism detection. 
-Since in theory some of the activity durations can depend on the file size, a query only containing large files may result in these activities always appear to complete later in the log.
+For example, if the model is generated for only submissions that contain large file sizes, it may affect the results of the process discovery. 
+In theory, some of the activity lengths could depend on the file size, a query only containing large files may result in these activities always appear to complete later in the log.
 This would result in inaccurate process models.
 Because of this, care should be taken when creating models from small datasets.
 
@@ -88,33 +87,36 @@ Because of this, care should be taken when creating models from small datasets.
     \label{fig:plaineventlog}
 \end{figure}
 
-In my implementation I use the existing queries in Jury to retrieve events from the database. The queries can be written by users and saved in the system.
+In my implementation I use the existing queries in Jury to retrieve events from the database. 
+The queries can be written by users and saved in the system.
 These saved queries are then used to discover the process models.
-Each model corresponds to the query.
-For example, if the query searches for events belonging to only game products, then the discovered process model will reflect the underlying process for games.
-This allows for a highly flexible system where the users can create models for any subset of products or events they desire. 
+Each model has a corresponding saved query.
+For example, if the query searches for events belonging to only game products, 
+then the discovered process model should reflect the underlying process for games.
+This allows for a highly flexible system where the users can create models for any subset of products or events that are relevant to them. 
 
 \subsubsection{Creating directed graphs}
 
 The model chosen to represent the process models is the directed graph. 
 In this model, every pair of directly subsequent events $(a,b)$ appearing in a trace corresponds to a 
 graph edge from node $a$ to node $b$.
-The directed graph was chosen since it was seen to be easily understandable by non-technical users since it resembles a traditional flowchart.
-The parallelism is generated by observing the direct follow-relations as in the \textalpha-algorithm.
+The directed graph was chosen because of its familiarity to non-technical users since it resembles a traditional flowchart.
+The parallelism is generated by observing the direct follow-relations similarly to the \textalpha-algorithm described in section \ref{sec:alphaalgorithm}.
 
 To generate a graph from a set of traces, I started by generating an event log \emph{footprint matrix}.
-The footprint matrix describes the relation of all the events in the event log regarding to each other.
-This means that the matrix describes which events immediately follow another events in the set of traces.
-The columns and rows of the matrix correspond to all the distinct activities (the vocabulary).
-The matrix is square and should have a zero diagonal.
+The footprint matrix describes the relation of all the events in the log regarding to each other.
+This means that the matrix describes which events immediately follow other events in the set of traces.
+The columns and rows of the matrix correspond to all the distinct events (the event vocabulary).
+The matrix is square and should have a zero diagonal, since each final event should only appear once in a trace.
 The row describes the first event, and the column the event directly following.
-The number in the cell describes the frequency that this follow relation was observed in the logs (follow-frequency matrix).
-This matrix can be generated by linearly traversing each trace once, and for each pair of events incrementing the number in the corresponding cell.
+The number in the matrix cell describes the frequency that this follow relation was observed in the logs.
+This matrix is labeled the \textit{follow-frequency matrix}.
+It can be generated by linearly traversing each trace once, and for each pair of subsequent events incrementing the number in the corresponding cell.
 
 I will illustrate this with an example. Consider an event log with four activities $a,b,c,d,$ and $e$.
 Figure \ref{fig:exampletraces} illustrates the six traces in the event log. There are two unique kinds of traces, $abcde$ and $acbde$, both of which have been observed three times. Figure \ref{fig:examplematrix} shows the footprint matrix generated from these traces.
 The diagonal is zeroes, since no event follows itself.
-From the upper triangle the matrix shows for example that $b$ has followed $a$ three times and $c$ has followed $b$ three times. From the lower triangle we see for example that $a$ has never followed $b$, but $b$ has followed $c$ three times.
+Looking at the upper triangle the matrix we can see that $b$ has followed $a$ three times and $c$ has followed $b$ three times. From the lower triangle we see for example that $a$ has never followed $b$, but $b$ has followed $c$ three times.
 By comparing the frequencies in the upper triangle to the lower triangle we can discover dependencies suggested by the event log, and from a lack of dependency we can suggest parallelism.
 
 \begin{figure}
@@ -154,7 +156,7 @@ By comparing the frequencies in the upper triangle to the lower triangle we can 
 \end{figure}
 
 % turning the matrix into a graph
-The generated footprint matrix corresponds directly to the log-based ordering relations described by van der Aalst and van Dongen \cite{van2013discovering,van2016process}.
+The generated footprint matrix corresponds directly to the event log based ordering relations described by van der Aalst and van Dongen \cite{van2013discovering,van2016process}.
 There are four possible relations between any two events in an event log $L$:
 \begin{itemize}
     \item $a \rightarrow_L b$: $b$ \emph{directly follows} $a$.
@@ -163,8 +165,8 @@ There are four possible relations between any two events in an event log $L$:
     \item $a \#_L b$: $a$ and $b$ are not directly related, they are $unrelated$.
 \end{itemize}
 
-Note that it always applies that $a \rightarrow_L b \Leftrightarrow b \leftarrow_L a$.
-We can find these relations from the footprint matrix by comparing each cell $m_{ij}$ the upper triangle with the corresponding cell $m_{ji}$ lower triangle by using the following algorithm:
+Note that $a \rightarrow_L b \Leftrightarrow b \leftarrow_L a$ is always true.
+We can find these relations from the footprint matrix $M$ by comparing each cell $m_{ij}$ the upper triangle with the corresponding cell $m_{ji}$ lower triangle by using the algorithm described in definition \ref{def:logrelations}.
 
 \begin{definition}
 Let $A = \{ a_i | 0 < i \le n \}$ be a set of $n$ activities (the \emph{vocabulary}).
@@ -185,8 +187,8 @@ Furthermore, it should be noted that these relations are symmetrical:
 \label{def:logrelations}
 \end{definition}
 
-In the example, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ we get $a \rightarrow b$.
-However, by comparing $M[b,c] = 3$ to $M[c,b] = 3$ we see that $b || c$. 
+In the example described before, comparing the cell $M[a,b] = 3$ to cell $M[b,a] = 0$ results in $a \rightarrow b$.
+However, by comparing $M[b,c] = 3$ to $M[c,b] = 3$ the algorithm results in $b || c$. 
 Figure \ref{tab:examplefootprint} shows the generated footprint for the matrix shown in figure \ref{fig:examplematrix}.
 Note that it is enough to only examine the upper triangle of the matrix, since the generated footprint is always symmetrical across the diagonal.
 If the rows and columns are ordered by dependency, the dependencies follow the diagonal of the footprint.
@@ -196,7 +198,7 @@ This shape can be seen in the example figure \ref{tab:examplefootprint}.
 
 This footprint maps directly to a corresponding directed graph.
 Every activity in the vocabulary corresponds to a graph node.
-Every ``directly follows'' relation corresponds to a directed edge in the graph. A parallel relation corresponds to arcs in both directions.
+Every ``directly follows'' relation corresponds to a directed arc (edge) in the graph. A parallel relation corresponds to arcs in both directions.
 Figure \ref{fig:examplegraph} shows the directed graph corresponding to the footprint from figure \ref{tab:examplefootprint}.
 
 \begin{figure}
@@ -230,18 +232,18 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
 
 % Dealing with noise
 Noise in the event log data creates problems if it is not appropriately handled. 
-Network delays, bugs, and outages cause events to get lost or erroneously arranged. 
+Network delays, bugs, and other errors cause events to get lost or erroneously arranged in the traces. 
 This noise manifests in the footprint follow-frequency matrix.
 
 Figure \ref{fig:examplenoise} shows an example footprint matrix from a slice of production logs.
-The frequencies shown in the figure are logarithmic for improved coloration.
+The frequencies shown in the figure are logarithmic for improved visibility.
 As can be seen from the figure, two parallel regions of activities can be seen clearly in the data.
 The first region contains three parallel activities, and the second one seven activities.
 Within the regions, the frequencies observed are fairly constant.
 However, outside the regions most cells still have non-zero values, even though the real process model
 does not have parallelism between the leftmost and the rightmost activities.
 This is the aforementioned log noise.
-If left as is, the noise will create invalid extraneous arcs in the graph.
+If left as is, the noise will create invalid arcs in the graph.
 
 \begin{figure}[htb]
     \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/noise.png}
@@ -260,6 +262,8 @@ Initial tests on the production data showed that relatively small ($t_n \le 0.01
 I used $t_n = 0.01$ and $t_p = 0.005$ to remove 1~\% of noise.
 
 \nyi{Add figure for observed relations from excel}
+
+% asjdhljasdhlkasdjlkasdlasdh
 
 \subsubsection{Latency}
 \label{sec:latency}
@@ -299,7 +303,7 @@ The graph describes the process model that was discovered from the event log.
 \subsubsection{Loading graphs from a file}
 \label{sec:jsonfile}
 
-As a secondary option, I developed a method to bypass the graph generation algorithm completely, and instead load the shape of the model from a JSON definition file.
+As a secondary option, I developed a method to bypass the graph generation algorithm completely, and instead load the shape of the model from a JSON (JavaScript Object Notation) definition file.
 By using a definition file, the engineers can ``force'' a template to have a specific exact shape.
 This is useful in a few applications.
 In some cases it is useful to have a ``stable'' graph with a pre-defined shape.

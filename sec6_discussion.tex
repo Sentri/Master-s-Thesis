@@ -9,7 +9,6 @@
 In this section I will describe the results of my research and development.
 I will first describe the final product of my development.
 Then I will list the numerical data from the machine learning experiments.
-\nyi{User satisfaction}
 Lastly I will examine the answers for the research questions and
 evaluate the value of the thesis. 
 \nyi{rewrite this crap}
@@ -36,11 +35,10 @@ evaluate the value of the thesis.
 \end{figure}
 
 Figure \ref{fig:timeline} shows the final product developed in this thesis.
-The topmost bar is the main navigation of the website.
-On the navigation bar the user can query the events.
+The topmost bar is the main navigation of the website in which the user can write a query to search for events.
 The page below can display any number of traces corresponding to the events that match the user's query.
 If a large number of traces would be returned, the view is paged.
-The second bar under the navigation is the event navigation bar I developed, which includes all the functionality that affects all the content on the vents page.
+The second bar under the navigation is the event navigation bar I developed, which includes all the functionality that affects all the content on the event-related pages.
 It allows the user to switch between the log view (See figure \ref{fig:plaineventlog}) and the visualizations.
 It also includes functionality for sorting the visualizations and choosing which process model to build the visualization from.
 
@@ -53,22 +51,22 @@ In the timeline view (figure \ref{fig:timeline}) the visualization is set on top
 Parallel activities are stacked on top of each other.
 Figure \ref{fig:estimates} shows the estimations for an incomplete submission.
 The activities yet to happen are drawn with a faint blue color and their estimated start and end times are visualized similarly as the logged activities.
-The red line describes the current time.
+The red line displays the current time.
 The user can visually see the status of the submission and the activities that are predicted to have happened already.
 
 Figure \ref{fig:graph} shows the alternate directed graph view. In the graph view the directed graph is drawn for the user. The graph nodes are interactive and the edges act as two-dimensional springs.
-The user can thus manipulate the nodes and move them. Panning and zooming actions are also enabled.
+The user can thus manipulate and move the nodes. Panning and zooming actions are also enabled.
 
-In the user meetings in between the two iterations the timeline view was unanimously agreed to be the more useful visualization. The graph view was seen as ``unnecessarily complex'' and the physics animation was perceived as ``annoying'' and ``fidgety''. 
+In the user meetings in between the two iterations the timeline view was unanimously agreed to be the more useful visualization. 
+The graph view was seen as ``unnecessarily complex'' and the physics animation was perceived as ``annoying'' and ``fidgety''. 
 In other words, the graph view didn't offer a clear ``big picture'' since it required the user to manipulate the view before it showed the information clearly. 
 The users wanted the graph view to have more organization, and several users asked for automated sorting or positioning of the graph nodes.
 
 Conversely, the static and clear positioning of the timeline view was seen as useful.
 Since the view was pregenerated and organized on a static timeline, most graphs would end up looking exactly the same without any manipulation.
-This helped the users to immediately notice when a graph is significantly different and thus notify about a possible anomaly.
-The users commented that they did not even need to pay attention to the specific nodes and they could only visually scan over the graph to see the status.
-
-\nyi{Talk about user satisfaction here?}
+A user would be able to visually scan the list of graphs and notice anything significantly different.
+The user could then investigate the distinct graph to find out whether the difference is a result of a failure.
+The users commented that they did not even need to pay attention to the specific nodes but only focus on the overall shape of the graph.
 
 \begin{table}[htb]
 \begin{center}
@@ -152,16 +150,17 @@ The goal of this thesis was to find out whether past event logs could be used to
 The first research question asked how event log data can be used to generate a model that describes the process.
 In this thesis I explored the options of using WF-nets and directed graphs to model processes.
 The directed graphs were chosen to be satisfactory for modeling the workflows in the Microsoft Store.
-The models were visualized as both directed graphs and on a visual horizontal timeline.
+The models were visualized as both directed graphs and on a horizontal timeline.
 The users found the static and pre-arranged timeline view to be useful. 
 However, the graph view was deemed to be useful for debugging the process, since it shows the relationships and dependencies between the activities.
+For this reason I kept both views as options for the user to choose from.
 
 %\nyi{Finding bugs in system (race conditions!) based on graphs}\\
-The validity of the models were evaluated by comparing them to the official workflow descriptions that were used by engineers to maintain the models. 
+The models were evaluated by comparing them to the official workflow descriptions that were used by engineers to maintain the models. 
 With a short time span of events the models were noisy and lacked some of the parallelism that the real processes had.
-However with event logs longer than three days the models captured all the activities an their dependencies.
+However, with event logs longer than three days the models captured all the activities and their dependencies.
 In one instance the graph showed incorrect dependencies which proved to be a race condition bug in the actual system that caused the process workflow to execute in an invalid order.
-The results from the discovered model was used to fix the race condition in the store system.
+The results from the discovered model were used to fix the race condition in the store system.
 
 %\nyi{Changes in the system reflected real time (also a strength?)}\\
 The model was always generated from the past three days or seven days of data, based on the query. Because of this, any changes to the workflows started to appear in the models within this time window. 
@@ -176,35 +175,35 @@ In addition, an overestimation is always a better result in this use case.
 For example, if an event is estimated to arrive in five minutes and it arrives in four, the user is happy.
 Since the system has a lot of variation in activity durations even when the system is functioning normally, detecting small anomalies is not useful to the user and can even be seen as noise.
 
-Machine Learning was considered an option to improve the predictions. The idea was that the variation in delay would depend on the characteristics of the submission such as the file size.
+Machine learning was considered an option to improve the predictions. The idea was that the variation in delay would depend on the characteristics of the submission such as the file size.
 However, the machine learning models did not significantly improve the results of the predictions.
 When comparing the results for the simple statistical model using the median and the TP75 values (figure \ref{tab:statresults}) and the results from the machine learning models (figure \ref{tab:mlresults}) there is no significant difference.
-With the first (JSON template) data set the machine learning models did not even reach the error values of the statistical approach.
+With the first data set (JSON template) the machine learning models did not even reach the error values of the statistical approach.
 With the second data set the machine learning model showed a slight improvement over the statistical model.
 However, since most of the activities have lengths of less than five minutes, an average prediction error of more than 10 minutes is still not a good prediction.
 Since slightly overestimating an ETA was seen as acceptable by the users, the complexity and engineering work required to implement the machine learning models in production was not seen as necessary.
-A simple statistical implementation with simpler code was seen as more important than as a possible slight increase in prediction accuracy.
+A simple statistical implementation with simpler code was seen as more worthwhile than a possible slight increase in prediction accuracy.
 
 %\nyi{Talk about negatives with machine learning models}\\
 %\nyi{Reason why they didn't end up working}
 
 The reasons why the machine learning models did not provide useful results can be explored.
-Since both models (Poisson regression and Boosted Decision Trees) reached similar results even though they function very differently, it suggests that the data sets were too noisy or the results did not depend enough of the used features.
+Since both models (Poisson regression and Boosted Decision Trees) reached similar results even though they function very differently, it suggests that the data sets were too noisy or the results did not depend enough on the used features.
 Even after I identified the two possible features that could be added to the data sets (the manual review feature and the resubmission feature), it did not significantly improve the results.
 The result from my exploration was that other features such as time of day, system congestion and network status was affecting the times more than the characteristics of the application package itself.
 
 In conclusion, the users agreed that the statistical estimations were useful in the visualizations, since they allow the user to visually see what part of the workflow the submission is in.
-Furthermore, the predictions give the user a simple estimation of what ballpark the estimated completion would be. 
-For many users, the exact time is not important, but knowing whether the estimation is in the order of minutes or two hours was seen as significant.
+Furthermore, the predictions give the user a simple estimate for the completion time. 
+For many users, the exact time is not important, but knowing whether the estimation is in the order of minutes or hours was seen as significant.
 
 %\item How can the predictions be used to detect anomalies in new events (or lack thereof)?
 
 The third and final research question asked if the predictions could be used to automatically notify the users about anomalies without the need for the user to look at the visualizations.
 The main use case was to detect submissions that are ``stuck''.
 The expression ``stuck'' meant a submission that has stayed in a particular activity for an abnormally long period of time, usually because of an error in the submission data or in the activity processor.
-This means that a significant anomaly should be notified quickly, whereas small anomalies are not important.
+This means that the system should send a notification to a relevant user about any significant anomalies, whereas small anomalies are not important.
 The notification system described in section \ref{sec:notifications} was proven to function correctly after the initial testing. 
-However, since the number of stuck submissions is very small compared to the massive amount of submissions in the store, accurate evaluation is difficult to make.
+However, since the number of stuck submissions is very small compared to the massive amount of submissions in the store, accurate evaluation was difficult to make during my short evaluation period.
 
 The project was released into the production systems and has been in use in Jury.
 At the time of this writing (July 2017) in the past 90 days 232 unique users have used the events-section of Jury, and of those users 157 have used the workflow visualizations.
@@ -215,25 +214,26 @@ Only seven users currently use the automatic email notification features.
 \subsection{Conclusions} 
 \label{sec:conclusions}
 
-The thesis research achieved its main goal, which was to create visualizations for the internal Microsoft users to help maintain and monitor the store systems and submissions.
+This thesis research achieved its main goal, which was to create visualizations for the internal Microsoft users to help maintain and monitor the store systems and submissions.
 The system was released into production immediately and all the users using Jury are now able to use the events, visualizations, and the notification system.
 
-More than 150 users have used the notifications withing the past three months which I consider significant, since the users of Jury are all internal and most of them are users from a few specific teams within the company.
+More than 150 users have used the notifications within the past three months which I consider significant, 
+since the users of Jury are all internal and most of them are users from a few specific teams within the company.
 The notification system needs to be publicized within the company more, since it seems that most users are not aware it exists.
 
 The accuracy of the models and the real-time overlay functionality was praised by the users and is seen as a success.
 Most studies I referenced in this thesis focus on analyzing past logs to find useful information.
-My thesis work had a big focus on the real-time functionality and dynamically adapting to the events as they arrive.
-I was able to successfully use the events as they arrive and leverage the process models in a real-time scenario.
+My thesis work had a significant focus on the real-time functionality and the ability to dynamically adapt to the events as they arrive.
+I was able to successfully use the events and leverage the process models in a real-time scenario.
 
-\subsubsection{Limitations and Future work} 
+\subsubsection{Limitations and Future work}
 
 Further research should be made into the process discovery algorithm options.
 This study only focused on the \textalpha-algorithm and its applications. 
 Different graph generation algorithms such as transition systems \cite{van2013discovering} should be explored and tested in this particular application.
 
 The current system's prediction accuracy is acceptable but not particularly accurate.
-For accurate predictions and better machine learning possibilities more research is needed on which aspects of the store affect the activity processing times.
+For accurate predictions and better machine learning possibilities more research is needed on the aspects of the store which affect the activity processing times.
 
 Furthermore, the real-time aspect of process mining is something that needs further examination. In this thesis I adapted existing methods designed for analyzing past event logs to be used in a real-time scenario.
 Further research should be made to specifically examine the challenges and possibilities of real-time events.
