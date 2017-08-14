@@ -270,6 +270,8 @@ There are many different regression learners that are based on different theorie
 
 \subsubsection{Poisson regression}
 
+\nyi{This section needs to be rewritten}
+
 A poisson regression model describes data with labels that fall into a poisson distribution.
 Poisson distribution often describes count data, such as the count or probablility of events happening during a fixed time interval. \cite{osgood2000poisson}
 When graphed, the distribution has a peak in the beginning and long tail, as seen from figure \ref{fig:poissongraphs}.
@@ -279,8 +281,6 @@ When graphed, the distribution has a peak in the beginning and long tail, as see
 \caption{Poisson distributions with different expected values of $k$}
 \label{fig:poissongraphs}
 \end{figure}
-
-\nyi{Explain more theory? (mathematics)}
 
 % Talk about practical usage (strengths, limitations)
 A poisson regression model works well in data involving counts and times that are distibuted along a poisson distribution. 
@@ -305,7 +305,7 @@ The forest consists of multiple decision trees.
 The result of the regression given by the LambdaMART forest is a linear combination of the outputs of the trees.
 The learner trains the thresholds at the decision nodes and the values at the terminal leaves of each tree, as well as the weights for the linear combination to minimize error over the training set.
 
-\nyi{Write above paragraph with mathy expressions?}
+\nyi{Write above paragraph with math expressions?}
 
 % Talk about practical usage (strengths, limitations)
 One strength of the boosted decision tree model is that it is highly interpretable and can be used for rule extraction \cite{alpaydin}. Each tree can be converted into a set of IF-THEN rules, and the weights of the linear combination correspond to the importance of each tree. 
