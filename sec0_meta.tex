@@ -102,28 +102,40 @@ Espoo, y.y.2017
 
 \mysection{Symbols and Abbreviations}
 
-\nyi{This needs to be filled}
-
 \subsection*{Symbols}
 
-\begin{tabular}{ll}
-$\mathbb{B}(X)$  & a set of multi-sets over $X$ \\
-$\emptyset$      & empty set \\
-$a \in A$    & $a$ is a member of set $A$ \\
-$A \cap B$   & intersection of sets $A$ and $B$ \\
-$A^*$         & \nyi{explain kleene star}
-\end{tabular}
+\begin{tabularx}{\linewidth}{l X}
+$\mathbb{B}(X)$             & a set of multi-sets over $X$ \\
+$A^*$                       & Kleene star, the set of all strings over symbols in $A$ \\
+$\langle a,b,c \rangle$     & ordered trace containing events $a$, $b$, and $c$ \\
+${}^\bullet x$              & \emph{pre-set}, the set of all nodes having a directed arc to $x$ \\
+$x^\bullet$                 & \emph{post-set}, the set of all nodes having directed arc from $x$ \\
+$a \rightarrow_L b$         & $b$ directly follows $a$ in event log $L$ \\
+$a \leftarrow_L b$          & $b$ directly precedes $a$ in event log $L$ \\
+$a \#_L b$                  & $a$ and $b$ are unrelated in event log $L$ \\
+$a_i ||_L a_j$              & $a$ and $b$ are parallel in event log $L$ \\
+$m_{ij} \in M$              & matrix cell value, row $i$ column $j$ of matrix $M$ \\
+\end{tabularx}
 
 \subsection*{Abbreviations}
 
 \begin{tabular}{ll}
 BDT         & boosted decision tree \\
+BFGS        & Broyden–Fletcher–Goldfarb–Shanno algorithm \\
 BI          & business intelligence \\
+ETA         & estimated time of arrival \\
+HTTP        & hypertext transfer protocol \\
+ID          & identifier \\
+JSON        & JavaScript object notation \\
+L-BFGS      & limited-memory BFGS \\
 MBI         & medium business intelligence \\
 ML          & machine learning \\
 MSE         & mean square error \\
 PII         & personally identifiable information \\
+RMSE        & root (of) mean square error \\
+RQ          & research question \\
 SLA         & service level agreement \\
 SQL         & structured query language \\
 TP          & top percentile \\
+WF          & workflow \\
 \end{tabular}

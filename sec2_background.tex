@@ -61,12 +61,42 @@ These different traces could be found in the event log a number of times, some m
 In process discovery the task is to construct a model with sequential and parallel steps 
 that describes a process that can generate these traces \cite{van2013discovering}.
 The frequency of a trace matters in process discovery, and this is why the event log is a multi-set.
-Figure \ref{fig:tracevslog} illustrates the difference of the mathematical abstraction of a multi-set of traces in a) and a real-life event log with interleaved traces in a physical log file.
+Figure \ref{tab:multisettrace} illustrates the difference of the mathematical abstraction of a multi-set of traces and figure \ref{tab:interleaved} a real-life event log with interleaved traces in a physical log file.
 
 \begin{figure}[htb]
-\centering \includegraphics[width=0.7\linewidth]{gfx/figures/traceeventlog.png}
-\caption{Event logs illustrated \nyi{id-trace, trace ID-event} \nyi{fix n.2}}
-\label{fig:tracevslog}
+    \centering
+    % footprint table example
+    \begin{subfigure}[h]{0.4\linewidth}
+        \begin{center}
+        \begin{tabular}{r | l}
+        ID & trace\\
+        \hline
+        1 & $\langle a,b,c,d,e \rangle$ \\
+        2 & $\langle a,c,d,b,e \rangle$ \\
+        3 & $\langle a,b,c,d,e \rangle$ \\
+        \end{tabular}
+        \end{center}
+        \caption{Event log as multi-set of traces}
+        \label{tab:multisettrace}
+    \end{subfigure}
+    % directed graph example
+    \begin{subfigure}[h]{0.4\linewidth}
+        \begin{center}
+        \begin{tabular}{r | l}
+        ID & event\\
+        \hline
+        1 & a \\
+        2 & a \\
+        1 & b \\
+        1 & c \\
+        2 & c \\
+        3 & a \\
+        \end{tabular}
+        \end{center}
+        \caption{Interleaved event log (truncated)}
+        \label{tab:interleaved}
+    \end{subfigure}
+    \caption{Event log illustrated}
 \end{figure}
 
 When dealing with discovering processes from event logs, there are two clear challenges: \emph{incompleteness} and \emph{noise}. 
@@ -105,7 +135,7 @@ By following the directed arcs and visiting each node exactly once, the graph sh
 \nyi{cite a formal definition}
 
 \begin{figure}[htb]
-\centering \includegraphics[width=0.7\linewidth]{gfx/figures/directedgraph.png}
+\centering \includegraphics[width=0.7\linewidth]{gfx/figures/directedgraph.pdf}
 \caption{An example of a directed graph}
 \label{fig:directedgraph}
 \end{figure}
@@ -184,7 +214,7 @@ For example, if $a \rightarrow b$, $b \rightarrow c$, and $a \rightarrow c$, thi
 The term \textit{machine learning} means the study and development of algorithms that give computers the ability to learn from data without being explicitly programmed for that data. 
 The traditional approach in programming is to explicitly define the steps the computer should take to solve a problem.
 However, sometimes you know the input to a problem and what the solution should be, but not how to get to the solution.
-Figure \ref{fig:traditionalvsml} illustrates this fundamental difference.
+Figures \ref{fig:traditionalvs} and \ref{fig:mlvs} illustrate this fundamental difference.
 For example, we can look at the problem of computer vision.
 As an input we could have a thousand photos of birds and a thousand photos of without birds.
 For us humans it is easy to recognize a bird and decide which of these two groups an arbitrary photo belongs to.
@@ -192,12 +222,20 @@ What we don't know are the exact rules that make a photo a ``bird photo''.
 It would be very difficult to program an algorithm that examines the pixels of a new photo and decides whether there is a bird in the image.
 This situation is a good example of what machine learning algorithms excel in.
 
-\begin{figure}[htb]
-\centering \includegraphics[width=0.9\linewidth]{gfx/figures/traditionalvsml.png}
-\caption{``Traditional'' programming and machine learning}
-\label{fig:traditionalvsml}
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[h]{0.4\linewidth}
+        \centering \includegraphics[width=\linewidth]{gfx/figures/traditionalvs.pdf}
+        \caption{Traditional programming}
+        \label{fig:traditionalvs}
+    \end{subfigure}
+    \begin{subfigure}[h]{0.4\linewidth}
+        \centering \includegraphics[width=\linewidth]{gfx/figures/machinevs.pdf}
+        \caption{Machine learning}
+        \label{fig:mlvs}
+    \end{subfigure}
+    \caption{Illustration of machine learning}
 \end{figure}
-
 
 Machine learning is data driven and the focus is less on traditional programming instructions.
 Machine learning algorithms focus on finding patterns and models in data,

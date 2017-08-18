@@ -223,7 +223,7 @@ Figure \ref{fig:examplegraph} shows the directed graph corresponding to the foot
     \end{subfigure}
     % directed graph example
     \begin{subfigure}[h]{0.4\linewidth}
-        \centering \includegraphics[width=\linewidth]{gfx/figures/graphthing.jpg}
+        \centering \includegraphics[width=\linewidth]{gfx/figures/graphthing.pdf}
         \caption{Generated graph}
         \label{fig:examplegraph}
     \end{subfigure}
@@ -666,7 +666,7 @@ However, after I cached the process models and their statistics in the database 
 This allowed for SQL queries to be created to detect when an event is ``late'' before it even arrives.
 
 For detecting late events, the system needs to examine the current ongoing submissions and the events that have been received already.
-The submissions and their latest events can be found with a GROUP BY query as described in section \ref{sec:paging}.
+The submissions and their latest events can be found with a \texttt{GROUP BY} query as described in section \ref{sec:paging}.
 In addition, each transition (graph edge) in a process model is associated with its statistics. 
 This means that when the edge is stored in the database it also contains numeric values for the statistics such as the TP50, TP75, and TP90 (see section \ref{sec:latency}).
 The latest event and the process model can be used to find the next expected transition for each event.
@@ -694,28 +694,26 @@ Because all this was added to the query language, no new notification system was
 \subsection{User interface}
 
 The main purpose of this project was to help users understand the event data in Jury.
-Visualizations played a key role in giving the users the ``big picture'' of the submissions and the state of the products.
+Visualizations played a key role in giving the users the ``big picture'' of the submissions and the real-time status of the products.
 Since the users were mostly not developers, the visualizations needed to be easily accessible.
-This required a graphical user interface integrated directly to Jury.
-Furthermore, the visualizations should be intuitive and easily readable by possibly non-technical users.
+The visualizations should be intuitive and easily readable by possibly non-technical users.
+This needed a graphical user interface integrated directly to Jury.
 
-For the visualizations I used a javascript library called \emph{vis.js} \nyi{citation needed} that was already being used elsewhere in Jury.
+For the visualizations I used a JavaScript library called \emph{vis.js} \cite{visjs} that was already being used elsewhere in Jury.
 The library supports drawing and manipulating graphs with nodes and edges in the client browser.
 Furthermore, the library supports drawing activities on a timeline out of the box.
-
-\nyi{add figures for all the views}
 
 The events section of Jury was to have easy access to the three different views outlined before: the log view, the graph view, and the timeline view. Furthermore, the user should be able to select the process model that they want to use for the visualizations.
 For example, an user examining a game submission may want to use the aggregated process model from several days of only game submissions.
 
 As explained before, the process models can be generated from any user-supplied queries.
 However, the team decided to not allow any user generate a model from any query, since processing hundreds of thousands of events to generate a new model is very resource-intensive.
-Only users with admin privileges in Jury were to be able to save queries as process models.
+Only users with admin privileges in Jury were to be able to save queries as new process models.
 The admin user can then choose to publish the model to be used by everybody.
-We chose to call these published models ``templates'', since they affect the visual shape of the graph in the visualizations.
-The real-time data is then overlayed on the template.
+We chose to call these published models ``templates'', since they affect the visual shape of the graph in the visualizations and the word was easily understood by non-technical users.
+The real-time data is then overlaid on the template.
 
-I also implemented a fallback option for using templates not generated from log data. The store engineers who have developer access to Jury can supply a JSON configuration file containing the shape of the process model. The format of the file was chosen to be the same than what was used in other store backend systems. 
+I also implemented a fallback option for using templates not generated from log data. As described in section \ref{sec:jsonfile} the store engineers who have developer access to Jury can supply a JSON configuration file containing the shape of the process model. The format of the file was chosen to be the same than what was used in other store backend systems. 
 When using the supplied template file, the system skips the step where past events are fed through the algorithm, and instead reads the shape of the model from the file.  
 This enables the option of having a template in the system that never changes without developer action, for example for debugging purposes.
 
@@ -728,22 +726,22 @@ The user interface was designed with these three goals:
 
 To accomplish the goals the views were set up with a shared header and toolbars.
 The main header with the search bar on top of the page remains the same across all the pages of Jury.
-Furthermore, all the event pages share a header that enables switching between the detailed log view and the visualizations. 
-It allows the user to select the template (the process model) used for the visualizations, since the model is shared between all the search results.
+Furthermore, all the event pages share a secondary header that enables switching between the detailed log view and the visualizations. 
+It allows the user to select the template (the process model) used for the visualizations, which will be shared between all the search results.
 In addition, each visualization (both in graph view and timeline view) includes its own header showing the basic details about the submission, such as the product name and submission ID. The header also includes shortcuts specific to the submission shown, such as links to queries that only return events belonging to the same submission.
 A small ``hamburger menu'' button on each submission includes links to other parts of Jury, such as links to the publisher information, the product information, and to other systems that may have related information.
 
 Using vis.js for the visualizations was straightforward after my algorithms had already generated the graphs on the server side. 
-On the client side (in the user's browser) I only needed to supply vis.js with a JavaScript object containing a list of nodes and a list of edges. When supplied with a list of additional options, vis.js builds a graph and fits it in the view automatically. The user can even manipulate the graph with the mouse to rotate the graph. The graph has simple two dimensional physics where the edges act as springs.
+On the client side (in the user's browser) I only needed to supply vis.js with a JavaScript object containing a list of nodes and a list of edges. When supplied with additional options about the desired layout, vis.js builds a graph and fits it in the view automatically. The user can even manipulate the graph with the mouse to rotate the graph. The graph has simple two dimensional physics where the edges act as springs.
 
 However, the users did not like this visualization. The moving nodes and springs were seen as ``chaotic'' and ``annoying'' rather than useful. 
-The users requested some kind of sorting or ordering in the view, such as aligning the nodes on a horizontal axis. 
+The users requested sorting or ordering functions for the view, such as aligning the nodes on a horizontal axis. 
 This is why the timeline view was implemented. 
 Similarly as the graph view, vis.js draws and arranges the timeline automatically when supplied a list of nodes with start and end times.
 My algorithm already generated this information, so implementing it was only about formatting it to the right kind of JavaScript object.
 
-The user interface was constructed in an iterative manner, rather than all at once. The link targets, positions, and sizes were adjusted based on what the users wanted. Most of this was done during the second half of my project timeline.
-After adjusting to the users' feedback, the user interface and the event system was released to production to Jury to be used by any Microsoft employee.
+The user interface was constructed in an iterative manner, rather than all at once. The link targets, positions, and sizes were adjusted based on what the users wanted. Most of this was done during the second half of my project.
+After adjusting to the users' feedback, the user interface and the event system was released to production to Jury to be used by any Microsoft Store employee.
 
 \nyi{Make sure the difficulties are all mentioned somewhere}\\
 \nyi{(you'll want these for the presentation)}\\

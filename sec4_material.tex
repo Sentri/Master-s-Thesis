@@ -147,24 +147,23 @@ This means that even the timestamps may include an unknown error for up to sever
 Furthermore, some events may be lost because of bugs, unhandled exceptions, or outages in the system.
 This means that ordering the events by timestamp includes random noise, which needs to be considered.
 
-\begin{figure}[htb]
-\centering \includegraphics[width=0.5\linewidth]{gfx/figures/slice.png}
-\caption{Time slice and incomplete logs \nyi{redo}}
-\label{fig:timeslice}
-\end{figure}
-
 % Incomplete traces in the chosen ''slice'' (events missing from beginning/end)
 Another aspect to note is that when the event log data is used, the data being analyzed is always a ``slice'' of the full event log.
-This means that it contains events from a time slice starting at some time instance $t_s$ and ending at some later time $t_e$. 
+This means that it contains events from a time slice starting at some time instance $t_s$ and ending at some later time $t_e$, as illustrated in figure \ref{fig:timeslice}. 
 All events between these times are considered. 
 A common use case would be to inspect the past 24 hours of events. 
 In this case $t_e$ is the current time, and $t_s$ is 24 hours earlier than the current time. 
-This results in the time slice containing a large amount of events that belong to a trace that started before $t_s$.
-The result also contains traces that have yet to be completed.
-These traces should be removed, since the beginning or the end of the trace is missing. 
-This is illustrated in figure \ref{fig:timeslice}. 
+This results in the time slice containing a large amount of events that belong to a trace that started before $t_s$ (case \textit{b} in figure \ref{fig:timeslice}).
+The result also contains traces that have yet to be completed (cases \textit{c} and \textit{d} in figure \ref{fig:timeslice}).
+These traces should be removed, since the beginning or the end of the trace is missing.
 Classifying a trace as anomalous like this requires an \emph{appropriate model} \cite{bezerra2009anomaly},
 meaning some prior understanding is needed on how to discover whether a trace is invalid.
+
+\begin{figure}[htb]
+\centering \includegraphics[width=0.8\linewidth]{gfx/figures/timeslice.pdf}
+\caption{Time slice and validity of traces}
+\label{fig:timeslice}
+\end{figure}
 
 % resubmissions
 When talking about the process mining theory (see section \ref{sec:eventtheory}) it was assumed that each trace can be uniquely identified.
@@ -200,7 +199,7 @@ All these characteristics require that the system uses some kind of pre-processi
 % description of research timeline
 % weekly meetings with manager, PM
 I started preparing for the project in late 2016.
-The project started in Redmond, WA, USA in early January 2017.
+The project started in Redmond, Washington, USA in early January 2017.
 While the main goal of the project was established early, the details needed some research. 
 For this reason, an iterative process was set up.
 I held weekly meetings with my manager, as well as weekly project meetings together with my advisors and the team program manager. 
@@ -209,7 +208,7 @@ The weekly meetings were carried out through both iterations.
 The complete timeline of the project can be seen in figure \ref{fig:projecttimeline}.
 
 \begin{figure}[htb]
-\centering \includegraphics[width=0.9\linewidth]{gfx/figures/projecttimeline.png}
+\centering \includegraphics[width=0.7\linewidth]{gfx/figures/projecttimeline.pdf}
 \caption{Project timeline}
 \label{fig:projecttimeline}
 \end{figure}
