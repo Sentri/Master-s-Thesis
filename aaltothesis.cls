@@ -200,6 +200,7 @@
 \newcommand*{\degprogramname}{}%
 \newcommand*{\professorshipname}{}%
 \newcommand*{\codename}{}%
+\newcommand*{\departmentname}{}%
 %%
 \newcommand*{\absheadname}{}%
 \newcommand*{\tocabslang}{}%
@@ -303,6 +304,7 @@
    \renewcommand*{\authorname}{Author}%
    \renewcommand*{\thesisname}{Title}%
    \renewcommand*{\keywordsname}{Keywords}%
+   \renewcommand*{\departmentname}{Department}%
    \renewcommand*{\datename}{Date}%
    \renewcommand*{\langname}{Language}%
    \renewcommand*{\nofpgsname}{Number of pages}%
@@ -315,8 +317,8 @@
          \ifthenelse{\value{advisors}>1}{Advisors}{%
      }}}%%%
    }%
-   \renewcommand*{\degprogramname}{Degree programme}%
-   \renewcommand*{\professorshipname}{Professorship}%
+   \renewcommand*{\degprogramname}{Master's programme}%
+   \renewcommand*{\professorshipname}{Major}%
    \renewcommand*{\codename}{Code}%
    %
    \ifthenelse{\boolean{BSc}}{%
@@ -324,8 +326,8 @@
      \settowidth{\absheadlen}{BACHELOR'S THESIS}%
    }{}%
    \ifthenelse{\boolean{MSc}}{%
-     \renewcommand*{\absheadname}{abstract of the master's thesis}%
-     \settowidth{\absheadlen}{MASTER'S THESIS}%
+     \renewcommand*{\absheadname}{Abstract of the master's thesis}%
+     \settowidth{\absheadlen}{Abstract of the MASTER'S THESIS}%
    }{}%
    \ifthenelse{\boolean{Lic}}{%
      \renewcommand*{\absheadname}{abstract of the licentiate's thesis}%
@@ -357,9 +359,10 @@
    \renewcommand*{\authorname}{Tekij\"a}%
    \renewcommand*{\thesisname}{Ty\"on nimi}%
    \renewcommand*{\keywordsname}{Avainsanat}%
-   \renewcommand*{\datename}{P\"aiv\"am\"a\"ar\"a}%
+   \renewcommand*{\datename}{P\"aiv\"ays}%
    \renewcommand*{\langname}{Kieli}%
    \renewcommand*{\nofpgsname}{Sivum\"a\"ar\"a}%
+   \renewcommand*{\departmentname}{Laitos}%
    \renewcommand*{\supervisorname}{%
      \ifthenelse{\value{advisors}=0}{%
        \ifthenelse{\boolean{BSc}}%
@@ -375,15 +378,15 @@
      }}}%%%
    }%
    \renewcommand*{\degprogramname}{Koulutusohjelma}%
-   \renewcommand*{\professorshipname}{Professuuri}%
+   \renewcommand*{\professorshipname}{P\"a\"aaine}%
    \renewcommand*{\codename}{Koodi}%
    \ifthenelse{\boolean{BSc}}{%
      \renewcommand*{\absheadname}{kandidaatinty\"on tiivistelm\"a}%
      \settowidth{\absheadlen}{KANDIDAATINTYON}%
    }{}%
    \ifthenelse{\boolean{MSc}}{%
-     \renewcommand*{\absheadname}{diplomity\"on tiivistelm\"a}{}%
-     \settowidth{\absheadlen}{DIPLOMITYON}%
+     \renewcommand*{\absheadname}{Diplomity\"on tiivistelm\"a}{}%
+     \settowidth{\absheadlen}{DIPLOMITYON TIIVISTELMA}%
    }{}%
    \ifthenelse{\boolean{Lic}}{%
      \renewcommand*{\absheadname}{lisensiaatintutkimuksen tiivistelm\"a}{}%
@@ -518,7 +521,7 @@
 \newcommand*{\pl@ce}{}% variable
 \newcommand*{\place}[1]{\renewcommand{\pl@ce}{#1}}% User command
 %
-\newcommand*{\dateandplace}{\pl@ce{} \D@te{}}% Internal macro
+\newcommand*{\dateandplace}{\pl@ce{}, \D@te{}}% Internal macro
 %
 \newcommand*{\university}[1]{\renewcommand*{\univ@rsity}{#1}}% User command
 %
@@ -700,8 +703,8 @@
 \newcommand{\@bsbox}[2]{\parbox[t][#1]{\abstractwidth}{#2}\@bsbre@k}%
 %
 \newcommand{\@bsfield}[3][]{%
- \settowidth{\auxwidth}{#2: }%
- \parbox[t][#1]{\auxwidth}{#2: }%
+ \settowidth{\auxwidth}{\textbf{#2}   }%
+ \parbox[t][#1]{\auxwidth}{\textbf{#2} }%
  \parbox[t][#1]{\abstractwidth-\auxwidth-\columnsep}{#3}%
 }%
 %
@@ -732,43 +735,72 @@
  \noindent%
  \begin{tabular}{@{}p{\abstractwidth-\absheadlen}p{\absheadlen}@{}}%
   \parbox[t]{\abstractwidth-\absheadlen}{%
-    \textsc{\MakeLowercase{\univ@rsity}\\\MakeLowercase{\sch@@l}}}%
-  & \parbox[t]{\absheadlen}{\raggedleft\textsc{\absheadname}}\\%
+    
+    \AaltoLogoSmall{0.8}{?}{aaltoBlue}
+    
+    %%%%%%%% \textsc{\MakeLowercase{\univ@rsity}\\\MakeLowercase{\sch@@l}}
+      
+  }%
+  & \parbox[t]{\absheadlen}{\raggedleft\textbf{\absheadname}}\\%
+  %%%%%%%%%%%% & \parbox[t]{\absheadlen}{\raggedleft\textsc{\absheadname}}\\%
   &\\[-2mm]%
  \end{tabular}%
  \par%
  \noindent%
- \begin{tabular}{|l|}%
+ \begin{tabular}{l}%
    \hline\\[\rowsep]%
-   \@bsbox{26mm}{\@bs@uthor{\@uth@r}\@bstitlen@me{\th@sistitl@{}}%
-     \datename: \D@te{} \hfill \langname: \L@ng{#1} \hfill \nofpgsname: %
-     \arabic{NInitPages}+\arabic{NMainPages}}%
-   \ifthenelse{\boolean{BSc}}{%
-     \@bsbox{5mm}{\degprogramname: \d@gpr@g{}\par\vfill}%
-     \ifthenelse{\value{advisors}=0}{%
-       \@bsbox{5mm}{\supervisorname: \sup@rvis@r{}%
-       }%
-     }{%
-       \@bsbox{12mm}{\supervisorname: \sup@rvis@r{}\par\vfill%
-         \advisorname: \Advis@r{1}%
-         \ifthenelse{\value{advisors}>1}{, \Advis@r{2}}{}}%
-     }%
-   }{%
-     \@bsbox{12mm}{%
-       \dep@rtment{}\par\vfill%
-%       \professorshipname: \pr@fshp{}}\hfill\codename: \Cod@}%
-       \professorshipname: \pr@fshp{}}%
-     \ifthenelse{\value{advisors}=0}{%
-       \@bsbox{5mm}{\supervisorname: \sup@rvis@r{}%
-       }%
-     }{%
-       \@bsbox{12mm}{\supervisorname: \sup@rvis@r{}\par\vfill%
-         \advisorname: \Advis@r{1}%
-         \ifthenelse{\value{advisors}>1}{, \Advis@r{2}}{}%
-       }%
-     }%
-   }%
-   \begin{minipage}[t][133mm]{\abstractwidth}%
+   \@bsbox{5mm}{
+        \@bs@uthor{\@uth@r}% author
+    }\@bsbox{8mm}{   
+        \@bstitlen@me{\th@sistitl@{}}% title
+    }\@bsbox{4mm}{   
+        \textbf{\degprogramname} \d@gpr@g{} % programme
+    }\@bsbox{5mm}{   
+        \textbf{\supervisorname} \sup@rvis@r{}% supervisor
+    }\@bsbox{5mm}{   
+        \textbf{\professorshipname} \pr@fshp{}% major
+    }\@bsbox{5mm}{   
+        \textbf{\departmentname} \dep@rtment{} % department
+    }\@bsbox{5mm}{   
+        \textbf{\advisorname} \Advis@r{1}% advisors
+         \ifthenelse{\value{advisors}>1}{; \Advis@r{2}}{}%
+    }
+    \@bsbox{5mm}{
+        \textbf{\datename} \D@te{} \hfill \textbf{\nofpgsname} % date page lang
+        \arabic{NInitPages}+\arabic{NMainPages} \hfill \textbf{\langname} \L@ng{#1}
+     }
+    
+%   \ifthenelse{\boolean{BSc}}{% IGNORE THIS %%%%%%%%%%%%%%%%%%%%
+%      \@bsbox{5mm}{\degprogramname: \d@gpr@g{}\par\vfill}%
+%      \ifthenelse{\value{advisors}=0}{%
+%       \@bsbox{5mm}{\supervisorname: \sup@rvis@r{}%
+%       }%
+%      }{%
+%       \@bsbox{12mm}{\supervisorname: \sup@rvis@r{}\par\vfill%
+%          \advisorname: \Advis@r{1}%
+%          \ifthenelse{\value{advisors}>1}{, \Advis@r{2}}{}}%
+%      }%
+%   }{% END IGNORE %%%%%%%%%%%%%%%%%%%%%%%%
+%      \@bsbox{12mm}{%
+%       \dep@rtment{}\par\vfill%
+% %       \professorshipname: \pr@fshp{}}\hfill\codename: \Cod@}%
+%       \professorshipname: \pr@fshp{}}%
+%      \ifthenelse{\value{advisors}=0}{%
+%       \@bsbox{5mm}{\supervisorname: \sup@rvis@r{}%
+%       }%
+%      }{%
+%       \@bsbox{12mm}{\supervisorname: \sup@rvis@r{}\par\vfill%
+%          \advisorname: \Advis@r{1}%
+%          \ifthenelse{\value{advisors}>1}{, \Advis@r{2}}{}%
+%       }%
+%      }%
+%      \@bsbox{5mm}{
+%         \datename: \D@te{} \hfill \langname: \L@ng{#1} \hfill \nofpgsname: %
+%         \arabic{NInitPages}+\arabic{NMainPages}
+%      }
+%   }%
+   
+   \begin{minipage}[t][120mm]{\abstractwidth}%
    \ifthenelse{\equal{\MainLang}{\AbstractLang}}{}{\begin{otherlanguage*}{#1}}%
 }{%
    \ifthenelse{\equal{\MainLang}{\AbstractLang}}{}{\end{otherlanguage*}}%

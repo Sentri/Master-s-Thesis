@@ -12,22 +12,24 @@
 \usepackage{amsmath}
 \usepackage{subcaption}
 \usepackage{multirow}
+\usepackage{aaltologo}
 
 \addbibresource{bibliography.bib}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \usepackage{hyperref}
-\PackageWarning{NYI}{Remember to edit this}
 \hypersetup{pdfpagemode=UseNone, pdfstartview=FitH,
-  colorlinks=true,urlcolor=red,linkcolor=blue,citecolor=black,
-  pdftitle={Default Title, Modify},pdfauthor={Teemu Vartiainen},
-  pdfkeywords={Modify keywords}}
+  colorlinks=true,urlcolor=blue,linkcolor=black,citecolor=black,
+  pdftitle={Analyzing event logs to discover process models and to detect anomalies in real-time},pdfauthor={Teemu Vartiainen},
+  pdfkeywords={Process discovery, Machine learning, Event logs}}
 
 % custom command for edit comments
 \definecolor{nyitext}{rgb}{0.2, 0.2, 0.2}
 \definecolor{nyibg}{rgb}{1.0, 1.0, 0.6}
-\newcommand{\nyi}[1]{\noindent\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}}
+
+%\newcommand{\nyi}[1]{\noindent\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}}
+\newcommand{\nyi}[1]{\noindent\colorbox{nyibg}{\textcolor{nyitext}{\emph{#1}}}\PackageWarning{NYI}{#1}}
 
 %\PackageWarning{NYI}{#1}
 %\setlength{\parskip}{0.5ex}
@@ -35,7 +37,8 @@
 
 \begin{document}
 \department{Department of Computer Science}
-\professorship{x}
+\degreeprogram{Computer, Communication and Information Sciences}
+\professorship{Computer Science}
 \univdegree{MSc}
 \author{Teemu Vartiainen}
 
@@ -48,8 +51,8 @@
 
 \place{Espoo}
 
-\date{x.x.2017}
-\supervisor{Prof.\ Petri Vuorimaa}
+\date{Aug 18, 2017}
+\supervisor{Professor\ Petri Vuorimaa}
 \advisor{M.Sc.\ Tao Zhu}
 \advisor{M.Sc.\ Rafael Forsbach Valle}
 
