@@ -326,8 +326,8 @@
      \settowidth{\absheadlen}{BACHELOR'S THESIS}%
    }{}%
    \ifthenelse{\boolean{MSc}}{%
-     \renewcommand*{\absheadname}{Abstract of the master's thesis}%
-     \settowidth{\absheadlen}{Abstract of the MASTER'S THESIS}%
+     \renewcommand*{\absheadname}{Abstract of master's thesis}%
+     \settowidth{\absheadlen}{Abstract of MASTER'S THESIS}%
    }{}%
    \ifthenelse{\boolean{Lic}}{%
      \renewcommand*{\absheadname}{abstract of the licentiate's thesis}%
