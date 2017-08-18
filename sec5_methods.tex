@@ -77,7 +77,7 @@ or product types, we can assume that the process model and the statistics will b
 
 However, filtering reduces the number of events used for the model, which can lead to overfitting.
 For example, if the model is generated for only submissions that contain large file sizes, it may affect the results of the process discovery. 
-In theory, some of the activity lengths could depend on the file size, a query only containing large files may result in these activities always appear to complete later in the log.
+In theory, some of the activity lengths could depend on the file size, meaning a query only containing large files may result in these activities always appear to complete later in the log.
 This would result in inaccurate process models.
 Because of this, care should be taken when creating models from small datasets.
 
@@ -87,12 +87,12 @@ Because of this, care should be taken when creating models from small datasets.
     \label{fig:plaineventlog}
 \end{figure}
 
-In my implementation I use the existing queries in Jury to retrieve events from the database. 
+I use the existing queries in Jury in my implementation to retrieve events from the database. 
 The queries can be written by users and saved in the system.
 These saved queries are then used to discover the process models.
 Each model has a corresponding saved query.
 For example, if the query searches for events belonging to only game products, 
-then the discovered process model should reflect the underlying process for games.
+then the discovered process model should reflect the underlying process specifically for games.
 This allows for a highly flexible system where the users can create models for any subset of products or events that are relevant to them. 
 
 \subsubsection{Creating directed graphs}
@@ -263,7 +263,13 @@ I used $t_n = 0.01$ and $t_p = 0.005$ to remove 1~\% of noise.
 
 \nyi{Add figure for observed relations from excel}
 
-% asjdhljasdhlkasdjlkasdlasdh
+% directed graph tldr
+The result of this method is a directed graph with nodes and edges.
+The graph describes the process model that was discovered from the event log.
+Each node corresponds to an activity in the process model.
+Each edge corresponds to a possible transition (pair of two consecutive events) in the trace.
+The model can be verified by ``re-playing'' a trace as described in section \ref{sec:processmodelsdsc}.
+Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
 
 \subsubsection{Latency}
 \label{sec:latency}
@@ -275,30 +281,22 @@ The latency describes how much time is expected to pass until an event is follow
 The latency can be seen as the length of an edge in the directed graph.
 
 The statistics the users were interested in were the ``top percentiles'' (TP).
-A $n$-top percentile means the value that is higher or equal than $n\%$ of all the values in the set.
+A top percentile is a value that corresponds to a set of numbers, such as all the observed durations of activities.
+A $n$-top percentile means the value that is higher or equal than $n\%$ of all the values in such a set.
 This can be expressed as the ``TPn'' value.
 For example, the TP75 is the value that is higher or equal than 75~\% of all the values in the set.
 TP50 corresponds to 50~\% and is equal to the median value of the set.
-The top percentiles have proven to be more useful than for example averages, since the latencies 
-in the store systems often had a very small amount of outliers with very high latencies, that skew the 
-averages up.
+When looking at statistics about the store, the top percentiles have proven to be useful.
+Looking at average values is often misleading, since the store systems often contain a very small amount of outliers with very high latencies, that skew the averages up.
 The interesting statistics that were chosen are the TP50, TP75, and TP90. 
-These correspond to the values used in other telemetry systems so they can be compared against each other for verification.
+These correspond to the values used in other telemetry systems so they can be compared against for verification purposes.
 
-Programmatically the TP values can be found by ordering the values in the set in an ascending order as an array, and then picking the index that corresponds to the percentile. For example, is the ordered array has the length of 1000 elements, the TP90 value can be found at the 900th index.
+In practice the TP values can be found by ordering the values in the set in an ascending order as an array, and then picking the index that corresponds to the percentile. For example, is the ordered array has the length of 1000 elements, the TP90 value can be found at the 900th index of the array.
 
-When generating the graphs my method was to collect the statistics at the same time.
+My method was to collect the statistics at the same time as generating the graphs.
 Since each cell in the footprint corresponds to an edge in the graph, I construct an array of latencies for each cell as I traverse through the traces.
 When a number in the follow-frequency matrix is incremented, I also store the latency between the two events in the corresponding array. 
 After the graph is generated, I can store the chosen key statistics (TP50, TP75, TP90) for each graph edge and discard the matrix and the arrays.
-
-% directed graph tldr
-The result of this method is a directed graph with nodes and edges.
-Each node corresponds to an activity in the process model.
-Each edge corresponds to a possible transition (pair of two consecutive events) in the trace.
-The model can be verified by ``re-playing'' a trace as described in section \ref{sec:processmodelsdsc}.
-Each event in the trace should correspond to a valid directed edge, with the first event of the trace being at the input node of the graph.
-The graph describes the process model that was discovered from the event log.
 
 \subsubsection{Loading graphs from a file}
 \label{sec:jsonfile}
@@ -326,15 +324,16 @@ First, I run the user's query and retrieve the events, filtered by the user's pe
 I sort these events by descending timestamp and pick the five latest submission IDs.
 These IDs will correspond to the five latest submission traces matching the user's query.
 ``Latest'' in this context means the traces with the most recent activity.
+Optionally, the user may select to see the traces ordered by the latest start time.
 This query may also be paged, allowing the user to choose the next five traces, or any later set of five.
 After five submission IDs has been retrieved, they are used to query all events belonging to these submissions. This results in five traces that can now be processed.
 
 This is implemented with two SQL queries.
 The first query that retrieves the five submissions can be paged with a standard page selector user interface component.
 This means that the user can choose to see the next ``page'' of submissions containing submissions 6-10 and onwards.
-The first query uses a GROUP BY clause to group the events by submission ID and to choose the maximum timestamp.
-This result is then sorted and teh top five IDs are selected.
-This selection can be paged with a SQL OFFSET clause based on the user's page selection.
+The first query uses a \texttt{GROUP BY} clause to group the events by submission ID and to choose the maximum timestamp.
+This result is then sorted and the top five IDs are selected.
+This selection can be paged with a SQL \texttt{OFFSET} clause based on the user's page selection.
 The query runs in only a couple seconds on a cloud-hosted SQL Server instance.
 The second query retrieves all events that belong to the retrieved five submissions.
 These events are then passed to the graph generation algorithm.
@@ -344,44 +343,48 @@ These events are then passed to the graph generation algorithm.
 
 As described before, the project allows the users to generate new graphs from any query supplied by the user.
 Reading hundreds of thousands of events from the database, sorting them and generating the graph takes a lot of time, in the order of several minutes.
-Since generating new graphs is resource-intensive, this functionality is restricted to the system administrators in Jury. 
-Since Jury is an online tool the service response times need to be fast, preferably in the hundreds of milliseconds to preserve a smooth user experience \nyi{cite?}.
+Creating new graphs from a previously unseen query is resource-intensive, so the functionality is restricted to the system administrators in Jury. 
+Since Jury is an online tool the service response times need to be fast, preferably in the order of a fraction of a second, to preserve a smooth user experience \nyi{cite?}.
 Generating the graph from a set of events for each web request from any user would be inefficient and the page load times would be in the order of minutes.
 Because of this, I implemented two levels of caching in the system.
 
 The Jury web server is distributed onto multiple server instances to provide high availability. The database server is shared between the instances.
-Each generated graph is cached both in memory and in the database.
+Each generated graph is cached both in the database and locally in memory at a server instance.
 The in-memory cache is local to each instance and the database cache is shared.
 
 Each cached graph is associated with a timestamp corresponding to the time when it was generated. 
 This timestamp is used by the servers to determine when the cache is too old and should be refreshed.
 For the in-memory cache this maximum age was chosen to be 15 minutes.
 For the database cache the maximum age was set to 12 hours.
-The long time was chosen since while the process model of the store system changes when improvements are made it will be in the order of days so a day old cached model will be accurate in most cases.
+The long time was chosen to be sufficient for the store backend system.
+While the process model of the store system changes constantly when improvements are made, the changes happen over several days rather than hours. A day old cached model will be accurate in most cases.
 
-The cache system works as follows (in the perspective of a server instance):
+The cache system works as follows (from the perspective of a single server instance):
 \begin{enumerate}
     \item The server receives a HTTP request requiring a specific graph.
-    \item The server reads the in-memory cache. \\
-    \textbf{Less than 15 minutes old}: Return graph from memory to the user and stop. \\
-    \textbf{Older than 15 minutes}: Return graph from memory to the user and continue to the next step in the background.\\
+    \item The server reads the timestamp (age) of the in-memory cache. \\
     \textbf{Graph not in memory}: Continue to the next step.
-    \item The server reads the timestamp (age) from the graph stored in database.\\
+    \textbf{Less than 15 minutes old}: Return the graph from memory to the user and stop. \\
+    \textbf{Older than 15 minutes}: Return the graph from memory to the user and continue to the next step in the background.\\
+    \item The server reads the timestamp (age) from the graph stored in the database.\\
     \textbf{Less than 12 hours old}: Load graph from the database, store it in memory. Return to user if needed.\\
     \textbf{Older than 12 hours or not in database}: Move the graph timestamp in the database 15 minutes forward and generate a new graph. Once the task is finished, save it in the database, and in memory.
 \end{enumerate}
 
-This means that if the requested graph is in memory, it will be returned to the user immediately. If the version in memory is too old, a background task to retrieve or generate a new graph is started. This means that the user almost never has to wait for the page to load while the graph is being generated.
+If the requested graph is in memory, it will be returned to the user immediately. 
+If the version in memory is too old, a background task to retrieve or generate a new graph is started. 
+The graph in memory is returned to the user regardless. 
+This means that the user almost never has to wait for the page to load while the graph is being generated.
 The only case when the user has to wait for the graph generation is if the instance has no graph in memory and the version in the database is also too old.
 In practice this will only happen after a server restart when all the in-memory caches are purged.
 
 The graph timestamp is moved 15 minutes forward at the start of graph generation to prevent a situation where two different server instances are generating the same graph separately.
 
-This two-level caching improved the page loads from minutes to fractions of a second. Furthermore, since the graphs are now stored also in the same database as the events, they can be used in SQL queries. This proved useful, since SQL queries can be constructed to improve the notification functionality. See section \ref{sec:notifications} for more details about notifications.
+This two-level caching improved the page loads from minutes to fractions of a second. Furthermore, since the graphs are now stored also in the same database as the events, they can be used in SQL queries. This proved to be useful, since SQL queries can be constructed to improve the notification functionality. See section \ref{sec:notifications} for more details about notifications.
 
 \subsection{Real-time functionality}
 
-Until this point I have considered the case of the event log, that corresponds to a time slice of past data.
+Until this point I have considered the case of the event log that corresponds to a time slice of past data.
 This type of data can be seen as an ``aggregate'', since it will result in a model that describes events over a long period of time.
 However, a key part of the analytics for the store is the ability to analyze and debug the current state of the system.
 Without such functionality it will be difficult to analyze the state of the current submissions in the system.
@@ -389,26 +392,27 @@ Without such functionality it will be difficult to analyze the state of the curr
 As outlined before, the system already had a view to list events based on the user's query, as seen in figure \ref{fig:plaineventlog}.
 I call this the \textbf{log view}.
 The users of the system reported that this view was useful for debugging a specific issue for e.g. with a specific activity, but it does not provide a good overall view.
-The request from the users was a view that shows a big picture of the status of a submission with the option to also drill down to the details.
+The request from the users was a view that would show a big picture of the status of a submission with the option to drill down to the details.
 
 % new small dataset from a query, often a single trace
 My solution was to leverage the previously discovered aggregate model for visualization.
 The model would be combined with the list of events returned by the query.
 The aggregate model would be used to visualize the process, and the real-time data from the query would be ``overlayed'' on top of the model.
+In other words, the idea was to ``color'' the model with the real-time data from the query.
 
-The method was to ``color'' the model with the data from the query.
-The query results in a set of events that corresponds to the user's criteria.
+The query returns a set of events that corresponds to the user's criteria.
 For simplicity we can assume that the result is a single trace for an ongoing submission,
-meaning that it is a set of sequential events that all belong to a single case.
-In the full implementation the result can also be events from many separate submissions,
-but the system handles it by splitting them into separate visualizations and then handling each one of them as a single trace.
+a set of sequential events that all belong to a single case.
+In the final implementation the result can also be events from many separate submissions.
+The system handles it by splitting them into separate visualizations and then handling each one of them as a separate case.
 
 In the beginning we create an ``colorless'' graph by copying the process model discovered earlier.
 The colorless graph has a node for each activity and the corresponding graph edges between them.
-The nodes are tied to the specific activities by including the Source and Subsource fields but they have no status, timestamp, or other metadata.
+The nodes are tied to the specific activities by including the Source and Subsource fields. 
+These colorless nodes have no status, timestamp, or other metadata.
 The visualization is ``colored'' by traversing through the trace in sorted order (ascending timestamp).
-For each event in the trace, we find the corresponding node in the graph.
-The node can then be ``colored'' by copying the status, timestamp, and other metadata from the event.
+For each event in the trace, I find the corresponding node in the graph.
+It is then ``colored'' by copying the status, timestamp, and other metadata from the event to the node.
 This can be repeated until we reach the end of the trace.
 The result is a ``colored'' graph where all the activities that have been finished have a status and a time.
 The nodes for the activities yet to come remain uncolored.
@@ -419,10 +423,10 @@ This graph can now be shown to the user.
 The nodes are drawn on the screen as circles or rectangles, and the directed edges as arrows between them.
 This is what I call the \textbf{graph view}.
 The parallel nodes are connected by double-sided arrows or an edge that otherwise indicates the parallelism.
-In my visualization I took the ``colorization'' quite literally by having each status correspond to a color in the visuals. 
+In my visualization I took the ``colorization'' quite literally by having each status correspond to a real color shown to the user.
 Uncolored nodes remained grey, completed nodes green or blue, nodes in progress yellow, and failed nodes red.
 The colors help the user to get an immediate understanding of what the state of a submission is.
-An example can be seen in figure \ref{fig:coloredgraph}.
+An example of a colored graph can be seen in figure \ref{fig:coloredgraph}.
 
 \begin{figure}[htb]
     \centering \includegraphics[width=0.9\linewidth]{gfx/screenshots/graphcolor.png}
@@ -430,11 +434,12 @@ An example can be seen in figure \ref{fig:coloredgraph}.
     \label{fig:coloredgraph}
 \end{figure}
 
-In my implementation I had to add one hard-coded aspect for an edge case. In the store system, it is possible for a publisher or a developer to ``re-publish'' a product. 
+In my implementation I had to add one hard-coded aspect to cover an edge case. 
+In the store system, it is possible for a publisher or a developer to ``re-publish'' a product. 
 When a re-publish is triggered, the publishing steps of the workflow are run again with the same submission ID. 
 This means that a trace from a single submission may contain several publishes.
-My implementation detects this when the first step of the publishing workflow is seen again in a single trace. 
-When this happens, the trace is split in two and the re-publish will be shown as a separate trace and a separate visualization.
+My implementation detects when the first step of the publishing workflow is seen a second time in a single trace. 
+When this happens, the trace is split into two and the re-publish will be shown as a separate trace in a separate visualization.
 
 \subsection{Estimating the future}
 
@@ -452,37 +457,40 @@ and fill in the data for the uncolored nodes.
 To fill in the data for future nodes, the algorithm needs a measure to be used for the estimation. 
 This measure corresponds to the estimated ``edge length'' for each edge in the graph.
 A simple approach is to use the statistical values that were collected during the graph generation process (see section \ref{sec:latency}).
-The statistics are useful, since when giving time estimates we should aim for overestimating or giving the ``worst case'' guess \nyi{why?}.
+The statistics are useful since the users prefer a ``worst case'' estimation rather than a ``best case'' one.
+If a workflow finishes earlier than estimated, it is seen as a positive surprise by users.
 For example, using the TP90 value should lead to an estimation that estimates the latencies in a way that overestimates 90~\% of the submissions.
-However, choosing the right statistic should be considered since it is a trade-off between accuracy and overestimation \nyi{rephrase, citation needed}.
+However, choosing the right statistic is challenging.
+The choice is a trade-off between avoiding underestimation and making an accurate prediction.
 The plan was to use machine learning to improve the estimations (see section \ref{sec:ml-estimation}).
 
 \nyi{pseudocode?}
 
+\subsubsection{Estimation algorithm}
 % algorithm description
-In theory, since all the graphs are workflow graphs, there should not be any loops \nyi{citation?}. 
-In practice noise, errors, and changes in the system can lead to loops.
-An empty list is initialized to keep track which nodes of the graph have already been visited.
-The purpose of the list is to prevent a loop in the graph resulting in infinite execution.
 First the algorithm finds the node which has the earliest timestamp.
 This is treated as the graph start.
 An empty stack is initialized and the start node is pushed into the stack.
 After this initialization a recursive step is executed in a loop until the stack is empty.
+In theory, since all the graphs are workflow graphs no loops should appear in the graphs (see ``connectedness'' in section \ref{sec:processmodelsdsc}). 
+In practice, aspects like noise, errors, and changes in the system can lead to invalid graphs containing loops.
+An empty list is initialized to keep track which nodes of the graph have already been visited.
+The purpose of the list is to prevent a loop in the graph causing infinite execution or a stack overflow.
 
 The recursive step starts by popping a node (called the \emph{current node}) from the stack and checking if the node is valid.
-This means checking that the node has not been visited already, that the node is not an error state, and that the node has a timestamp.
-If the node has been visited already, it is ignored.
-Error states are seen as anomalous, and since they often lead to the workflow being aborted, they should not be used for estimations.
-The node needs to have a timestamp, otherwise there is no starting point for the estimation.
+Validity means checking that the node has not been visited already, that the node is not an error state, and that the node has a timestamp.
+If the node has been visited already it is ignored.
+Error states are seen as anomalous and since they often lead to the workflow being aborted they should not be used for estimations.
+The node needs to have a timestamp, otherwise there is no reference point for calculating an estimation.
 After the node has been deemed valid, it is marked as visited.
 
 After the initial check all children for the node are retrieved.
 This means finding all the edges that have the current node as the source, and collecting the nodes that the edges point towards.
 For each of these nodes, the estimation is performed.
 If the child node already has a timestamp from the coloration phase, it is ignored.
-Otherwise, if the node is uncolored, the previously chosen edge length measure is used for the estimation. 
-The length of an edge is a timespan, corresponding to an estimate for how much time will pass between the two events.
-By adding the timespan to the timestamp of the current node, we get the estimation for the timestamp of the child node.
+Otherwise, if the node is uncolored, the previously chosen edge length measure (such as the TP75) is used for the estimation. 
+The length of an edge is a length of time (a time span), corresponding to an estimate for how much time will pass between the two events.
+By adding the time span to the timestamp of the current node, we get the estimation for the timestamp of the child node.
 
 For parallel nodes (the nodes with a directed edge both to and from the current node) the step differs slightly. 
 Since the activity corresponding to the node is known to be parallel to the current one, the edge length is seen as zero.
@@ -491,13 +499,20 @@ For this reason, the estimation step does not add anything to the timestamp but 
 After the timestamps of the child nodes have been estimated the child nodes are added to the stack and the step is performed again.
 This continues until the stack is empty.
 The stack will be empty when all the nodes connected to the starting node have been visited.
-This means that barring error states every node will now either be colored or have a timestamp estimation.
+This means that, barring error states, every node will now either be colored or have a timestamp estimation.
 These estimations can be shown to the user when the graph is visualized.
 
-\nyi{implementation details for estimation}\\
-\nyi{What is different when using a predetermined JSON shape}
-
 \subsubsection{Timeline view}
+
+During the protyping phase I discovered that the directed graphs were not intuitive to read for the users.
+Trying to manipulate the graph shape and selecting each node to see the details turned out to be cumbersome to the users.
+Two users wished for a ``sorted'' view in the initial tests.
+The sorted view should show the events arranged by time horizontally across the screen.
+This resulted in the second prototype which I labelled the \textbf{timeline view}.
+A basic example of what a timeline is can be seen in figure \ref{fig:basictimeline}.
+The timeline has items set on a horizontal axis.
+The horizontal axis corresponds to time, with past being on the left and the future on the right.
+The vertical axis has no meaning other than to separate the parallel items visually to help the user see which activities happen in parallel.
 
 \begin{figure}[htb]
     \centering \includegraphics[width=0.6\linewidth]{gfx/screenshots/basictimeline.png}
@@ -505,42 +520,29 @@ These estimations can be shown to the user when the graph is visualized.
     \label{fig:basictimeline}
 \end{figure}
 
-During the protyping phase I discovered that the directed graphs were not intuitive to read for the users.
-Trying to manipulate the graph shape and selecting each node to see the details turned out to be cumbersome.
-Two users wished for a ``sorted'' view in the initial tests.
-The sorted view should show the events arranged horizontally across the screen by time.
-This resulted in the second prototype which I labelled the \textbf{timeline view}.
-A basic example of what a timeline is can be seen in figure \ref{fig:basictimeline}.
-The timeline has items set on a horizontal axis.
-The horizontal axis corresponds to time, with past being on the left and the future on the right.
-The vertical axis has no meaning other than to separate the parallel items visually to help the user see which activities happen in parallel.
-
 % Generating a timeline view with start and end times from the overlay
-As can be seen from the figure, each item in the timeline has a width.
+As can be seen from figure \ref{fig:basictimeline}, each item in the timeline has a width.
 This means that the items have a both a \textit{starting time} and an \textit{ending time}.
-However, in the event log each event only has a single timestamp.
-The event timestamp corresponds to the ending time of an activity.
-For the purposes of the timeline, it does not matter whether the timestamp comes from the log or whether it is an estimation.
-To find the starting times, we can leverage the process model graph again.
+However, in the event log each event only has a single timestamp corresponding to the ending time of an activity.
+Since the event logs do not have any information about the starting times, the only option is to make an estimation.
+To find the estimated starting times, I leveraged the process model graph again.
 
 % Methods of finding the start times and dealing with parallelism
-In my project I made the assumption that switching tasks takes a negligible time.
+In my project I made the assumption that switching tasks takes a negligible (zero-length) time.
 This means that when a task ends, the next task begins immediately.
-With this assumption we can discover the starting time by looking at the end time of a previous task.
-We can find the previous task by following the graph edges backwards and finding its dependencies.
-Choosing the latest ending time of these dependencies results in the starting time of the activity.
+With this assumption I can discover the starting time by looking at the end time of a previous task.
+I can find the previous task by following the graph edges backwards and finding its dependencies.
+The estimated starting time of the activity is the latest ending time of these dependencies.
 In this method, all parallel tasks are treated equal, so each activity also must take into account all dependencies of its parallel tasks.
 In the case where there are no dependencies (such as the first activity of the graph) a predetermined length will be used as a fallback.
 
-In other words, before this step the timeline has all events as zero-width with only the end times. The algorithm sets the start time to be the earliest possible time without breaking the restrictions given by the process model dependencies.
-After this step, all items in the timeline correspond to an activity in the workflow. Furthermore, all items have a start time and an end time.
-When the timeline is visualized, the items where the timestamp is an estimation can be separated by color or other means.
+In other words, before estimating the start times the timeline has all events as zero-width having only the activity end times. The algorithm sets the start time to be the earliest possible time without breaking the restrictions given by the process model dependencies.
+After this step, all items in the timeline correspond to an activity and have a start time and an end time.
+When the timeline is visualized the items can be separated by color (or other means) to distinguish between real-time information and estimations.
 Furthermore, since the horizontal axis corresponds to time, the current time of the user can be shown as a vertical line.
 This helps to highlight the current time to the user and to separate future estimations from observed events.
 
 \nyi{add picture of a finished timeline}
-
-\nyi{timeline implementation details any?}
 
 \subsection{Machine learning}
 \label{sec:ml-estimation}
@@ -549,39 +551,23 @@ This helps to highlight the current time to the user and to separate future esti
 After I had implemented the statistical estimation, the next step was to research whether it could be improved by using machine learning. 
 The idea was that for each graph edge, instead of using a statistical value to estimate the length, a machine learning model could be used.
 The model could take into account the current time and transition, in addition to other characteristics of the submission such as details about the application package.
-The hypothesis was that characteristics such as the application package size have a predictable effect on the latencies.
-
+The hypothesis was that characteristics such as the package size have a predictable effect on the latencies.
 To test this hypothesis I collected a set of training data from the production environment and used it to train and test machine learning models.
 Had the model accuracy been proven to be more accurate than the statistics, the model could have been deployed to the production system.
-
-% Explain training dataset generation
-The training dataset was generated from a time slice of the event logs. 
-By using both a predetermined (JSON) process model (see section \ref{sec:jsonfile}) and the automatically discovered process model, two datasets were created. The dataset contained the observed values for the latencies, labelled by the activity transition and the application it belongs to.
-These rows were then joined with a dataset of known applications and their characteristics to create the final training data.
-The resulting dataset consisted of 16 columns of features such as the package size and the current transition (activity being observed), and a label column corresponding to the measured latency in seconds. \nyi{does this need a concrete listing?}
-The data was filtered to only contain measurements from valid traces with the requirement of having no errors and conforming to the process model.
-The datasets used contained \nyi{XX~XXX} rows for the JSON generated template, and \nyi{XX~XXX} rows for the automatically discovered template.
-
-\nyi{Explain features and their formats and how they are mapped into inputs}
-
-\nyi{Add example rows as attachment?}
 
 % Explain models used (poisson \cite{azurepoisson}, bdt \cite{azurebdt} \cite{lambdamart2010})
 % data suitability
 % result interpretation
 The machine learning models used in training were Poisson Regression \cite{azurepoisson} and Boosted Decision Trees \cite{azurebdt}.
-\nyi{add: compared/contest, not together}
-The performance of these models was to be tested, and the better performing model was to be used in production.
-These were chosen based on a few factors.
+These two were used as alternatives and they were compared against each other.
+The better performing model was to be used in the final product.
+These two models were chosen for testing based on a few factors.
 The first factor was that the model needs to suit the data.
 Since the latencies are based on the probability of an event happening, they fall on a Poisson distribution. 
 This is why a Poisson Regression model was selected.
-The Boosted Decision Trees model had been used before in the store for application classification with good results, so it was believed to work well with 
-the feature set that I had available for the applications.
+The Boosted Decision Trees model had been used before in the store for application classification with good results, so it was believed to work well with the feature set that I had available for the applications.
 
-\nyi{add graph for poisson distribution of a label}
-
-Second factor for choosing the models was the interpretability of the results.
+Second factor for choosing the models was the ability to interpret the results.
 Since this project was experimental and there was no baseline, I wanted to be able to inspect the models and reason about their characteristics.
 Since both the Poisson Regression model and the Boosted Decision Trees output the per-feature weights for the model, they can be inspected and reasoned about.
 Compared to something like a neural network, which is highly challenging for humans to interpret \nyi{citation needed} this is a clear advantage.
@@ -589,29 +575,40 @@ The best model based on prediction accuracy was to be chosen for an in-productio
 
 % accuracy
 % training / regression speed
-The average error and the mean square error values were to be used to evaluate model accuracy \nyi{maybe elaborate}.
+Mean absolute error and the mean square error values were to be used to evaluate model accuracy.
 Lastly, if multiple accurate models was to be found, the model training and regression performance would be used to evaluate them.
-
-\begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/resubmissions.png}
-    \caption{Latency distribution for resubmissions \nyi{remake}}
-    \label{fig:resubmissions}
-\end{figure}
 
 \subsection{Feature set}
 \label{sec:featureset}
 
+% Explain training dataset generation
+The training dataset was generated from a time slice of the event logs. 
+By using both a predetermined process model by using a JSON file (see section \ref{sec:jsonfile}) and the automatically discovered process model, two datasets were created. 
+The datasets will be referred to as the ``JSON template'' dataset and the ``Automatically generated template'' from now on.
+The datasets contain the observed values for the latencies, labelled by the activity transition and the application it belongs to.
+These rows were then joined with a dataset of known applications and their characteristics to create the final training data.
+The resulting dataset consisted of 16 columns of features such as the package size and the current transition (activity being observed), and a label column corresponding to the measured latency in seconds. 
+See table \nyi{ref} for an example.
+The data was filtered to only contain measurements from valid traces with the requirement of having no errors and conforming to the process model.
+The datasets and their headers were anonymized before they were used to train the models.
+Any information identifying a specific product was removed.
+Furthermore, the column headers were replaces with generic ones, since the name of a column does not affect the result of the training.
+The datasets used contain 36~982 rows for the JSON generated template, and 18~860 rows for the automatically discovered template.
+The data reflect three days of event log data.
+
+\nyi{Add table with example rows}
+
 % Explain initial testing
 % Testing with noisy features removed (textual fields)
 The features used in the data were chosen based on experimental testing and domain knowledge.
-Initially, 12 features read from the application package characteristics where used. The features were numeric and boolean describing the package size, the capabilities required, and other features that would be available immediately at the start of the submission.
-Furthermore, two features read from the event logs were added.
-These were an enumerator for the current transition (activity being measured) and the time passed since the beginning of the trace.
-The label column was the measured latency.
-Initially, data also included other fields such as the application description, keywords, and other developer-supplied (mostly textual) information. 
-However, these were deemed noisy and resulted in overfitting.
-They also drastically increased the training time because of n-gram generation.
-The domain experts (the system engineers) knew to inform that those fields are not used in the ingestion pipeline so they were removed resulting in the 12 features.
+Initially, data included fields such as the application description, keywords, and other developer-supplied textual information. 
+However, these were deemed noisy and they drastically increased the training time because they required n-gram generation.
+The domain experts (the system engineers) knew to inform that those fields are not used in the ingestion pipeline so they were removed from the datasets.
+After the removal 12 features read from the application package characteristics where used. 
+The data included numeric features such as the package size in bytes and some count data from the store related to how many previous submissions the application has.
+There were also binary (true or false) features describing characteristics of the package, such as what kind of hardware permissions the application needs to have.
+The two features read from the event logs were the current time in seconds since the submission start, and an enumerator for the current transition (the activity in question).
+The label column was the latency (the duration of the activity) measured from the event log.
 
 % Explain additional features
 % identical resubmission
@@ -619,68 +616,77 @@ After the initial testing, two additional features were added to the dataset.
 The first additional feature was a boolean value describing whether the application package is identical to the previous submission.
 This was because the domain experts knew that this would lead to some of the activities skipping execution internally, drastically reducing the execution time for a couple specific activities. 
 This was also clearly seen in the data when the latency distribution for an activity were plotted. 
-This can be seen in figure \ref{fig:resubmissions}. 
+Figure \ref{fig:resubmissions} shows that there is a clear divide between two sets of latencies.
+The lower set of latencies are caused by the system detecting an identical submission and skipping the activity.
 With this graph the training data could be split into two sets labelled by whether the submission is an identical resubmission.
 %  posting that needed human interventiondcxfkkkkkkkkkkkkkkkkkkm
 %                                       a cat did this ^ 
 The second additional feature was whether the application ingestion triggered a manual review (human curation). 
 Since orchestrating human manual reviewers contains overhead, a manual review is known to delay the ingestion time considerably.
-This can also seen from a latency distribution graph as a clear difference for some other steps (see figure \ref{fig:manualreview}).
-This was used similarly to add the manual review boolean feature into the dataset.
-I performed more tests with these additional features to test whether they improved model accuracy.
+This can seen from a latency distribution graph as a clear difference for the steps related to curation. 
+Figure \ref{fig:manualreview} shows this effect in the distribution of the curation latency.
+This knowledge was used to add the manual review boolean feature into the dataset.
+I performed more tests with these two additional features to test whether they improved model accuracy.
 
-\begin{figure}[htb]
-    \centering \includegraphics[width=0.6\linewidth]{gfx/graphs/manualreview.png}
-    \caption{Latency distribution for manualreview \nyi{remake}}
-    \label{fig:manualreview}
+The best performing models within a model class (such as the BDT) were found by running multiple models with different parameters in parallel and choosing the model with the best performance.
+Initially the models had random (or default) parameters.
+After the parallel tests the best performing model was selected as the baseline for the next iteration and the next set of models.
+The iteration was repeated until better performed models could not be found anymore.
+The resulting parameters and their error values from the tests can be found in section \ref{sec:results}.
+
+\begin{figure}[htbp]
+    \centering \includegraphics[width=0.9\linewidth]{gfx/graphs/resubmissions.png}
+    \caption{Latency distribution divide caused by re-submissions}
+    \label{fig:resubmissions}
 \end{figure}
 
-The best models were found by random model generation.
-This meant that the model parameters were randomized and several models were trained and tested in parallel.
-In my experiment 20 models were trained at the same time, and the best model was chosen.
-This testing was run on a machine with 32 processor cores to ensure quick parallel execution. 
-The resulting numbers can be seen in section \nyi{ref}.
+\begin{figure}[htbp]
+    \centering \includegraphics[width=0.9\linewidth]{gfx/graphs/manualreview.png}
+    \caption{Latency distribution divide caused by entering manual review}
+    \label{fig:manualreview}
+\end{figure}
 
 \subsection{Notifications}
 \label{sec:notifications}
 
-One of the main functionalities of Jury is user-defined notifications.
+One of the main features of Jury is the ability for the user to request notifications for any events that are relevant to them.
 The users can run queries and ``subscribe'' to them.
 Whenever an event arrives to Jury which matches a subscribed query, a notification such as an email is sent to the user.
-This allows users to get notified for example when a product they are interested in receives an update or when an error happens.
+This allows Jury to notify the user for example when a product they are interested in receives an update or when an error happens.
 Because the notifications use the same queries as the other parts of Jury, they allow the same high level of customization.
 
-However, notifications are only triggered as a response to an incoming event.
-This means that if an event is missing or delayed no notification can be sent.
-Similarly, no notification can be sent about a workflow activity until after it has been completed.
+However, notifications were only triggered as a response to an incoming event.
+This means that if an event was missing or delayed no notification could be sent.
+Similarly, no notification could be sent about a workflow activity when it started, only when it was completed.
 
-Receiving notifications for delayed submissions was a common requirement discovered from many users \nyi{refer to it}.
+Receiving notifications for delayed submissions was a requirement discovered from users (see table \ref{tab:userneeds}).
 Furthermore, notifying about a workflow activity before it happens was seen to be useful for scheduling purposes.
-This functionality or the data required for these functions were not possible in the old Jury system.
-However, with the process models and statistics being stored in the database (as described in section \ref{storinggraphs}) this data is now available in the same database as the events.
-This allows for SQL queries to be created to detect when an event is ``late'' before it even arrives.
+This functionality, or the data required for these functions, was not available in the old Jury system.
+However, after I cached the process models and their statistics in the database (as described in section \ref{storinggraphs}) this data was now available in the same database as the events.
+This allowed for SQL queries to be created to detect when an event is ``late'' before it even arrives.
 
 For detecting late events, the system needs to examine the current ongoing submissions and the events that have been received already.
-We can find the submissions and their latest events with a GROUP BY query as described in section \ref{sec:paging}.
+The submissions and their latest events can be found with a GROUP BY query as described in section \ref{sec:paging}.
 In addition, each transition (graph edge) in a process model is associated with its statistics. 
-This means that when the edge is stored in the database it also contains numeric values for the statistics such as the TP50, TP75, and TP90 \nyi{refer}.
-We can use the latest event and the process model to find the next expected transition for each event by joining the latest events with the process model graph edge that corresponds to that event.
-By adding the statistic (such as the TP75) to the event's timestamp we get an ``estimated time of arrival'' (ETA) for the next expected event.
-If the current system time is past this ETA, we know that the next event is currently late and should have been received based on the statistic chosen.
+This means that when the edge is stored in the database it also contains numeric values for the statistics such as the TP50, TP75, and TP90 (see section \ref{sec:latency}).
+The latest event and the process model can be used to find the next expected transition for each event.
+I did this by joining the latest events with the process model graph edge that corresponds to that event.
+By adding the time span from a chosen statistic (such as the TP75) to the timestamp of the event I form an ``estimated time of arrival'' (ETA) for the next expected event.
+If the current system time is past this ETA, we know that the next event is currently ``late'' and should have already been received based on the statistic chosen.
 
 % tolerance, absolute and statx2
-Because of the natural randomness and varying small delays in the system, choosing a good statistics is crucial. 
-For example, if we used the TP75 as the statistic for late event notifications, even in the ideal case the user would be notified 75~\% of the time.
+Because of the natural randomness and varying small delays in the system, choosing a good statistic is crucial. 
+For example, if I used the TP75 as the statistic for late event notifications, even in the ideal case the user would be notified 25~\% of the time.
 Furthermore, the users generally are not interested in event being very slightly late (such as a couple minutes) but only after the event is ``considerably'' late.
-What ``considerably late'' means should be chosen by the user who is the domain expert, not the developer.
-In addition, some activites may involve absolute contractual SLA times that are critical and should not be based on statistics but rather the absolute value.
-Similarly, some activities are very short in length so even a one minute delay caused by the clock skew can seem like a percentually large delay.
+What ``considerably late'' means should be chosen by the user, not the developer, since the user is the domain expert.
+Similarly, some activities are very short in length so even a one minute delay caused by the clock skew can seem like a large relative delay.
+In addition, some activites may involve absolute contractual SLA times that are critical and should not be based on statistics but rather an absolute value defined by the contract.
 The user is the expert knowing the activities and their characteristics.
 For this purpose the choice of what is considered ``late'' is left to the user.
 
 After my process models were available in Jury, a colleague implemented the ``lateness'' syntax into the Jury query language. 
-This allows the user to add a keyword \emph{latest} to the query to run the previously described GROUP BY MAX(timestamp) query.
-Furthermore, the user can add filters for ``lateness'' such as to only show events that are delayed for more than two times the TP75 value.
+This allows the user to add a keyword \texttt{latest} to the query to run the previously described \texttt{GROUP BY MAX(timestamp)} query.
+Tthe user can add filters for ``lateness'' such as to only show events that are delayed for more than two times the TP75 value.
 The user can also supply an absolute value, or a combination of these two.
 For example, the user may want to be notified for events that are later than two times the TP75 value, but only with a minimum value of five minutes of delay.
 Because all this was added to the query language, no new notification system was needed since Jury could already notify based on queries.
