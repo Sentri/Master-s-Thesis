@@ -42,7 +42,7 @@ Single digital application package being processed in the system.
 Independent developer or a company submitting a product that they own into the store.
 
 \item[Activity] 
-Single atomic step of the workflow where some part of the product is processed. 
+Single atomic step of the workflow, where some part of the product is processed. 
 
 \item[Processor] 
 Part of the distributed system executing a specific activity.
@@ -54,7 +54,7 @@ Abstract description of the whole pipeline consisting of a number of sequential 
 Single execution of the workflow for a single product. Equates to a single \emph{case} in the process discovery model.
 
 \item[Event] 
-Log entry documenting when a specific execution of an activity has finished or changed status. 
+Log entry documenting the time when a specific execution of an activity has finished or changed status. 
 
 \item[Trace] 
 Set of events describing a current or past submission. 
@@ -81,7 +81,7 @@ Figure \ref{fig:workflowexample} illustrates this.
 The different steps of the workflow have different lengths that depend on, among others,
 the processing needed, the characteristics of the package, and the current workload of the system.
 Because of these uncertainties, traces from two different submissions may differ from each other.
-The order which the parallel finish is unknown, as described in section \ref{sec:eventtheory}.
+The order, which the parallel finish, is unknown, as described in section \ref{sec:eventtheory}.
 
 \begin{figure}[htb]
 \centering \includegraphics[width=0.9\linewidth]{gfx/figures/workflow.pdf}
@@ -100,7 +100,7 @@ The clock variance is directly seen as noise in the timestamps of the events.
 
 Because of the described parallelism and the uncertainties mentioned, the overall state of the system is difficult to describe at any given time.
 Looking at the raw log data is also challenging because of the volume.
-At the time of writing the system produced on average 15~000 events per hour with peak times averaging in the 30~000 range.
+At the time of writing, the system produced on average 15~000 events per hour with peak times averaging in the 30~000 range.
 Event filtering and visualization is necessary to find the relevant data from the noise.
 
 \subsection{Requirements engineering}

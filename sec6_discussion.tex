@@ -2,15 +2,16 @@
 %%% Results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% \clearpage
+% \section{Discussion}
+% \label{sec:discussion}
+
+% In this section I will describe the results of my research and development.
+% I will describe the final product developed in this project and list the numerical data from the machine learning experiments.
+% Lastly, I will evaluate the results of this thesis based on the initial research questions.
+
 \clearpage
-\section{Discussion}
-\label{sec:discussion}
-
-In this section I will describe the results of my research and development.
-I will describe the final product developed in this project and list the numerical data from the machine learning experiments.
-Lastly, I will evaluate the results of this thesis based on the initial research questions.
-
-\subsection{Results}
+\section{Results}
 \label{sec:results}
 
 %T\"ass\"a osassa esitet\"a\"an tulokset ja vastataan tutkielman alussa
@@ -35,7 +36,7 @@ Under the visualization there are options to choose how the visualization is dis
 The visualization can be manipulated with the mouse or a touch screen. It allows panning and zooming actions.
 The user can select or mouseover individual events to see all the metadata related to the event.
 
-In the timeline view (figure \ref{fig:timeline}) the visualization is set on top of a horizontal axis that corresponds to time. The activities shown have start and end times which can be seen visually or in the metadata.
+In the timeline view (Figure \ref{fig:timeline}), the visualization is set on top of a horizontal axis that corresponds to time. The activities shown have start and end times which can be seen visually or in the metadata.
 Parallel activities are stacked on top of each other.
 Figure \ref{fig:estimates} shows the estimations for an incomplete submission.
 The activities yet to happen are drawn with a faint blue color and their estimated start and end times are visualized similarly as the logged activities.
@@ -55,7 +56,7 @@ The user can thus manipulate and move the nodes. Panning and zooming actions are
 \caption{Graph view \label{fig:graph}}
 \end{figure}
 
-In the user meetings in between the two iterations the timeline view was unanimously agreed to be the more useful visualization. 
+In the user meetings in between the two iterations, the timeline view was unanimously agreed to be the more useful visualization. 
 The graph view was seen as ``unnecessarily complex'' and the physics animation was perceived as ``annoying'' and ``fidgety''. 
 In other words, the graph view didn't offer a clear ``big picture'' since it required the user to manipulate the view before it showed the information clearly. 
 The users wanted the graph view to have more organization, and several users asked for automated sorting or positioning of the graph nodes.
@@ -155,8 +156,12 @@ with all extra features             & 787.8 & 5234.4 & 1038.6 & 5785.4 \\
 \label{tab:mlresults}
 \end{table}
 
-\subsection{Evaluation}
-\label{sec:evaluation}
+% \subsection{Evaluation}
+% \label{sec:evaluation}
+
+\clearpage
+\section{Conclusion}
+\label{sec:conclusion}
 
 % % Tutkimustuloksien merkityst\"a on aina syyt\"a arvioida ja tarkastella
 % % kriittisesti.  Joskus tarkastelu voi olla t\"ass\"a osassa, mutta se
@@ -231,13 +236,13 @@ The notification system described in section \ref{sec:notifications} was proven 
 However, since the number of stuck submissions is very small compared to the massive amount of submissions in the store, accurate evaluation was difficult to make during my short evaluation period.
 
 The project was released into the production systems and has been in use in Jury.
-At the time of this writing (July 2017) in the past 90 days 232 unique users have used the events-section of Jury, and of those users 157 have used the workflow visualizations.
+At the time of this writing (July 2017), in the past 90 days 232 unique users have used the events-section of Jury, and of those users 157 have used the workflow visualizations.
 Only seven users currently use the automatic email notification features.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Conclusions} 
-\label{sec:conclusions}
+\subsection{Benefits} 
+\label{sec:benefits}
 
 This thesis research achieved its main goal, which was to create visualizations for the internal Microsoft users to help maintain and monitor the store systems and submissions.
 The system was released into production immediately and all the users using Jury are now able to use the events, visualizations, and the notification system.
@@ -251,7 +256,7 @@ Most studies I referenced in this thesis focus on analyzing past logs to find us
 My thesis work had a significant focus on the real-time functionality and the ability to dynamically adapt to the events as they arrive.
 I was able to successfully use the events and leverage the process models in a real-time scenario.
 
-\subsubsection{Limitations and Future work}
+\subsection{Limitations and Future work}
 
 Further research should be made into the process discovery algorithm options.
 This study only focused on the \textalpha-algorithm and its applications. 
