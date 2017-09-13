@@ -45,6 +45,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}%
 \ProvidesClass{aaltothesis}[2015/09/24 Aalto Univ. ELEC thesis class v2.2]%
+
 \RequirePackage{ifthen}%
 %
 \newcommand*{\MainLang}{}%
@@ -87,9 +88,9 @@
 }%
 %% Font encoding support for iso-latin-1, utf-8 and ansinew (MiKTeX):
 %% LC 26.9.2013
-\DeclareOption{latin1}{\PassOptionsToPackage{latin1}{inputenc}}%
-\DeclareOption{utf8}{\PassOptionsToPackage{utf8}{inputenc}}%
-\DeclareOption{ansinew}{\PassOptionsToPackage{ansinew}{inputenc}}%
+% \DeclareOption{latin1}{\PassOptionsToPackage{latin1}{inputenc}}%
+% \DeclareOption{utf8}{\PassOptionsToPackage{utf8}{inputenc}}%
+% \DeclareOption{ansinew}{\PassOptionsToPackage{ansinew}{inputenc}}%
 %
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}%
 \ExecuteOptions{english,utf8}% Default package options
@@ -97,9 +98,12 @@
 %
 \LoadClass{article}%
 %
+
+% \RequirePackage[a-1b]{pdfx}
+
 \RequirePackage[swedish,finnish,english]{babel}%
 \RequirePackage[T1]{fontenc}%
-\RequirePackage{inputenc}% For scands in both Finnish and English input docs
+\RequirePackage[latin1,utf8]{inputenc}% For scands in both Finnish and English input docs
 \RequirePackage{lmodern}%
 %  \RequirePackage{cmlgc} % For mac users(?), uncomment this line
 \RequirePackage[kerning,spacing,babel]{microtype}%
